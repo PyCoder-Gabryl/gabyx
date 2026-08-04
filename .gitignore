@@ -1,0 +1,106 @@
+# ============================================================
+#   UNIWERSALNY .gitignore — Ada / GNAT / GPRbuild / Alire
+#   macOS / Linux / FreeBSD / Windows / JetBrains / VS Code
+# ============================================================
+
+
+# ----------------------------
+# [GNAT build artifacts](ca://s?q=gnat_build_artifacts)
+# ----------------------------
+*.ali
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+*.exe
+
+# GNAT project cache
+*.gprc
+.gnat/
+
+
+# ----------------------------
+# [GPRbuild output dirs](ca://s?q=gprbuild_output_dirs)
+# ----------------------------
+/obj/
+/bin/
+/lib/
+/build/
+/gnatcov_rts/
+/coverage_report/
+/dist/
+
+game_tests.trace
+
+
+# ----------------------------
+# [Alire artifacts](ca://s?q=alire_artifacts)
+# ----------------------------
+/alire/
+/alr.lock
+alire.lock
+.alr/
+.alire/
+
+
+# ----------------------------
+# [Makefile build dirs](ca://s?q=makefile_gitignore)
+# ----------------------------
+/release/
+/debug/
+/config/
+
+
+# ----------------------------
+# [JetBrains IDE](ca://s?q=intellij_gitignore)
+# ----------------------------
+.idea/
+*.iml
+out/
+cmake-build-*/
+
+
+# ----------------------------
+# [VS Code](ca://s?q=vscode_gitignore)
+# ----------------------------
+.vscode/
+.history/
+*.code-workspace
+
+
+# ----------------------------
+# [macOS system files](ca://s?q=macos_gitignore)
+# ----------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+
+# ----------------------------
+# [Linux / BSD system files](ca://s?q=linux_freebsd_gitignore)
+# ----------------------------
+*~
+.cache/
+.nfs*
+
+
+# ----------------------------
+# [Windows system files](ca://s?q=windows_gitignore)
+# ----------------------------
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+
+# ----------------------------
+# [Editor backups](ca://s?q=editorconfig_backup_files)
+# ----------------------------
+*.bak
+*.tmp
+*.swp
+*.swo
+*.orig
+
+
+# ----------------

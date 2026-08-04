@@ -1,0 +1,26 @@
+=== STRUKTURA PROJEKTU (Wygenerowano: 2026-08-04 16:55:29) ===
+.
+├── alire
+│   ├── alire.lock
+│   ├── build_hash_inputs
+│   ├── settings.toml
+│   └── tmp
+├── alire.toml
+├── concept.md
+├── config
+│   ├── roguelike_001_config.ads
+│   ├── roguelike_001_config.gpr
+│   └── roguelike_001_config.h
+├── context.txt
+├── Makefile
+├── README.md
+├── roguelike_001.gpr
+├── roguelike_001.iml
+├── share
+│   └── roguelike_001
+└── src
+    └── roguelike_001.adb
+
+7 directories, 14 files
+
+=== SPECIFIKACJE INTERFEJSOW (API ADY) ===

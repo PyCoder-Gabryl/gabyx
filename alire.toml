@@ -1,0 +1,12 @@
+name = "roguelike_001"
+description = ""
+version = "0.1.0-dev"
+
+authors = ["PyCoder Gabryl"]
+maintainers = ["PyCoder Gabryl <pycoder.gabryl@gmail.com>"]
+maintainers-logins = ["pycoder-gabryl"]
+licenses = "MIT OR Apache-2.0 WITH LLVM-exception"
+website = ""
+tags = []
+
+executables = ["roguelike_001"]
