@@ -1,0 +1,188 @@
+--  ============================================================================
+--  PROJECT:          Gabyx
+--  AUTHOR:           PyCoder Gabryl
+--  EMAIL:            pycoder.gabryl@gmail.com
+--  GITHUB:           https://github.com/PyCoder-Gabryl/
+--  LICENSE:          Apache License 2.0
+--  ============================================================================
+--  DESCRIPTION:      Główny plik projektu GNAT (GPRbuild). Definiuje strukturę
+--                    katalogów, flagi kompilacji dla standardu Ada 2022 oraz
+--                    konfiguruje parametry specyficzne dla systemów (macOS).
+--                    Zarządza procesem budowania, dowodzenia SPARK oraz
+--                    formatowania kodu źródłowego.
+--  ============================================================================
+--  PATH:             gabyx.gpr
+--  FILE VERSION:     0.1.0
+--  CREATED:          2026-08-04
+--  ============================================================================
+
+
+project Gabyx is
+
+   --  ============================================================================
+   --  ZMIENNE ŚRODOWISKOWE I KONFIGURACJA SYSTEMOWA
+   --  ============================================================================
+
+   --  EDUKACJA: Funkcja 'external' pozwala na pobieranie wartości z otoczenia
+   --  (zmiennych systemowych lub parametrów linii komend -X). Dzięki temu
+   --  plik projektu jest elastyczny i reaguje na system operacyjny hosta.
+   type Host_OS_Type is ("macos", "windows", "linux", "others");
+   Host_OS : Host_OS_Type := external ("ALIRE_HOST_OS", "others");
+
+   --  EDUKACJA: Tryb budowania (Build Mode) pozwala na warunkowe włączanie
+   --  optymalizacji lub narzędzi diagnostycznych (asercje, debug).
+   type Build_Mode_Type is ("debug", "release", "test");
+   Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "debug");
+
+   --  EDUKACJA: Zmienna scenariusza dla SPARK. Używamy jej do ukrycia flag
+   --  systemowych macOS przed analizatorem logicznym (gnat2why), który ich
+   --  nie wspiera. Uruchomienie: 'make prove-l1' wymusza wartość "On".
+   SPARK_Mode := external ("SPARK_MODE", "Off");
+
+   --  ============================================================================
+   --  STRUKTURA KATALOGÓW
+   --  ============================================================================
+
+   --  EDUKACJA: Separacja źródeł (src) od plików tymczasowych (obj) i binariów
+   --  (bin) to fundament czystego projektu. Zapobiega to zaśmiecaniu repozytorium
+   --  i ułatwia konfigurację systemu kontroli wersji Git.
+   for Source_Dirs use ("src/**");      --  Rekurencyjne przeszukiwanie katalogu src
+   for Object_Dir use "obj";            --  Miejsce na pliki .o oraz .ali
+   for Create_Missing_Dirs use "True";   --  Automatyczne tworzenie obj/bin
+   for Exec_Dir use "bin";              --  Miejsce na gotowy plik wykonywalny
+   for Main use ("main.adb");           --  Główny plik wejściowy programu
+
+   --  ============================================================================
+   --  KOMPILATOR (Ada Compiler)
+   --  ============================================================================
+   package Compiler is
+      --  EDUKACJA: Base_Switches definiują rygor projektu.
+      --  -gnat2022: Włącza najnowszy standard języka.
+      --  -gnatW8: Wymusza kodowanie UTF-8 (bezpieczne polskie znaki w komentarzach).
+      --  -gnatwa: Włącza wszystkie ostrzeżenia (Warn All).
+      --  -gnatyy: Rygorystyczny test stylu (wcięcia, wielkość liter).
+      Base_Switches := ("-gnat2022",
+                        "-gnatW8",
+                        "-gnatf",
+                        "-gnatwa",
+                        "-gnatyy",
+                        "-gnatybchiklmnprst",
+                        "-gnatyM120");
+
+      --  Konfiguracja specyficzna dla trybu budowania (Build Mode)
+      case Build_Mode is
+         when "debug" | "test" =>
+            Base_Switches := Base_Switches &
+              ("-g",       --  Generowanie informacji dla debuggera (GDB/LLDB)
+               "-gnata",   --  Włączenie asercji (pragma Assert) i kontraktów
+               "-gnato",   --  Włączenie sprawdzania przepełnień (Overflow checks)
+               "-gnatVa",  --  Włączenie wszystkich sprawdzeń poprawności danych
+               "-O0");     --  Brak optymalizacji (ułatwia debugowanie)
+
+         when "release" =>
+            Base_Switches := Base_Switches &
+              ("-O3",      --  Maksymalna optymalizacja wydajnościowa
+               "-gnatn");  --  Włączenie mechanizmu Inliningu
+      end case;
+
+      --  Konfiguracja specyficzna dla systemu operacyjnego (Host OS)
+      case Host_OS is
+         when "macos" =>
+            --  EDUKACJA: Używamy zagnieżdżonego 'case', aby flaga -isysroot
+            --  była podawana tylko podczas kompilacji, a nigdy podczas
+            --  dowodzenia SPARK, co zapobiega błędom narzędzia gnat2why.
+            case SPARK_Mode is
+               when "Off" =>
+                  for Default_Switches ("Ada") use Base_Switches &
+                     ("-isysroot", "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk");
+               when others =>
+                  for Default_Switches ("Ada") use Base_Switches;
+            end case;
+
+         when others =>
+            for Default_Switches ("Ada") use Base_Switches;
+      end case;
+   end Compiler;
+
+   --  ============================================================================
+   --  BUILDER (Zarządzanie procesem budowania)
+   --  ============================================================================
+   package Builder is
+      --  Ustalenie nazwy pliku wykonywalnego na 'gabyx'.
+      for Executable ("main.adb") use "gabyx";
+
+      for Switches ("Ada") use (
+         "-s",    --  Tryb Smart: kompiluj tylko zmienione pliki
+         "-j0",   --  Automatyczne wykorzystanie wszystkich rdzeni procesora
+         "-gnatQ" --  Generuj pliki biblioteczne nawet przy błędach (pomoc dla IDE)
+      );
+   end Builder;
+
+   --  ============================================================================
+   --  BINDER (Łączenie jednostek kompilacji)
+   --  ============================================================================
+   package Binder is
+      --  EDUKACJA: Flaga -Es (Symbolic traceback) sprawia, że w razie błędu
+      --  program wypisze czytelną ścieżkę (plik i linia), a nie tylko adresy.
+      for Switches ("Ada") use ("-Es");
+   end Binder;
+
+   --  ============================================================================
+   --  LINKER (Tworzenie pliku wykonywalnego)
+   --  ============================================================================
+   package Linker is
+      case Host_OS is
+         when "macos" =>
+            --  EDUKACJA: Na macOS linker wymaga jawnego wskazania ścieżki do SDK.
+            --  Flaga -Wl,-syslibroot to "ostatnia instancja" dla linkera ld.
+            for Default_Switches ("Ada") use (
+               "-isysroot", "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+               "-Wl,-syslibroot,/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+            );
+         when others =>
+            null;
+      end case;
+   end Linker;
+
+   --  ============================================================================
+   --  PRETTY PRINTER (Formatowanie kodu)
+   --  ============================================================================
+   package Pretty_Printer is
+      --  EDUKACJA: Pakiet konfigurujący narzędzie 'gnatpp', które dba o
+      --  jednolity styl kodu (wcięcia, spacje) w całym zespole.
+      for Switches ("Ada") use (
+         "-M120", --  Maksymalna szerokość linii 120 znaków
+         "-nD");  --  Zachowaj formatowanie komentarzy dokumentacyjnych
+   end Pretty_Printer;
+
+   --  ============================================================================
+   --  PROVE (Analiza statyczna SPARK)
+   --  ============================================================================
+   package Prove is
+      --  EDUKACJA: Konfiguracja silnika dowodzącego SPARK (gnatprove).
+      --  --report=all: Pokazuje każdy udowodniony warunek (pełna transparentność).
+      --  --level=1: Podstawowa analiza przepływu danych.
+      --  --steps=0: Brak limitu kroków (pozwala na rozwiązanie trudnych dowodów).
+      --  --prover=z3,cvc5: Wykorzystanie dwóch potężnych silników matematycznych.
+      for Proof_Switches ("Ada") use (
+         "--report=all",
+         "--level=1",
+         "--steps=0",
+         "--prover=z3,cvc5");
+   end Prove;
+
+   --  ============================================================================
+   --  IDE (Konfiguracja środowiska programistycznego)
+   --  ============================================================================
+   package Ide is
+      for VCS_Kind use "git"; --  Integracja z systemem kontroli wersji Git
+
+      --  Wybór odpowiedniego debuggera w zależności od systemu operacyjnego.
+      case Host_OS is
+         when "macos"   => for Debugger_Command use "lldb";
+         when "windows" => for Debugger_Command use "gdb";
+         when others    => for Debugger_Command use "gdb";
+      end case;
+   end Ide;
+
+end Gabyx;

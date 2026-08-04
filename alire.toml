@@ -1,12 +1,92 @@
-name = "roguelike_001"
-description = ""
-version = "0.1.0-dev"
+# ==============================================================================
+# PROJECT:          Gabyx
+# AUTHOR:           PyCoder Gabryl
+# EMAIL:            pycoder.gabryl@gmail.com
+# GITHUB:           https://github.com/PyCoder-Gabryl/
+# LICENSE:          Apache License 2.0
+# ------------------------------------------------------------------------------
+# DESCRIPTION:      Manifest projektu Alire. Definiuje metadane,
+#                   zależności biblioteczne oraz konfigurację
+#                   środowiska budowania dla różnych systemów.
+#                   EDUKACJA: Plik ten pełni funkcję analogiczną do 'package.json'
+#                   w Node.js lub 'Cargo.toml' w Rust. Stanowi fundament
+#                   zarządzania ekosystemem narzędziowym projektu.
+# ------------------------------------------------------------------------------
+# PATH:             alire.toml
+# FILE VERSION:     0.1.0
+# CREATED:          2026-08-04
+# ==============================================================================
+
+
+name = "gabyx"
+description = "Multi-genre Roguelike RPG / City-Builder in Ada 2022 & SPARK"
+version = "0.1.0"
 
 authors = ["PyCoder Gabryl"]
 maintainers = ["PyCoder Gabryl <pycoder.gabryl@gmail.com>"]
 maintainers-logins = ["pycoder-gabryl"]
-licenses = "MIT OR Apache-2.0 WITH LLVM-exception"
-website = ""
-tags = []
+licenses = "Apache-2.0"
+website = "https://github.com/PyCoder-Gabryl/gabyx"
+tags = ["ada", "framework", "spark", "aunit", "game", "raylib", "toml", "roguelike", "city-builder"]
 
-executables = ["roguelike_001"]
+executables = ["gabyx"]
+project-files = ["gabyx.gpr"]
+
+# ==============================================================================
+# KONFIGURACJA ŚRODOWISKA (DLA SYSTEMU macOS)
+#
+# Instrukcja sprawdzania wersji systemu:
+# 1. Otwórz terminal i wpisz polecenie: sw_vers -productVersion
+#    (Zwróci ono numer np. "15.4" lub "26.1").
+# 2. Przepisz tylko pierwszą, główną liczbę (Major Version) do zmiennej poniżej.
+#
+# Przykłady wartości:
+#   "15.0" -> dla systemu macOS Sequoia (15)
+#   "26.0" -> dla systemu macOS Tahoe (26)
+# ==============================================================================
+[environment]
+# EDUKACJA: Sekcja [environment] pozwala na wstrzykiwanie zmiennych do powłoki
+# systemowej przed uruchomieniem kompilatora. Jest to mechanizm separacji
+# konfiguracji systemowej od kodu źródłowego (Cross-Platform Portability).
+
+# Poniższe ustawienia są specyficzne dla macOS ARM (M1/M2/M3).
+# Na Windows powinny pozostać zakomentowane, aby uniknąć błędów ścieżek.
+
+ALIRE_HOST_OS.set = "macos"
+MACOSX_DEPLOYMENT_TARGET.set = "15.0"  ## UWAGA: dla 26.0 też jest ok!!!
+
+# Te dwie linie przekazują ścieżkę SDK do każdej zewnętrznej zależności w C:
+CFLAGS.set = "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+CXXFLAGS.set = "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+
+# ==============================================================================
+# NAPRAWA LINKERA (macOS)
+# ==============================================================================
+# Przekazanie ścieżki SDK bezpośrednio do linkera (rozwiązuje błąd "-lSystem")
+LDFLAGS.set = "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+
+# Globalna zmienna środowiskowa Apple, wymuszająca na wszystkich narzędziach
+# użycie odpowiedniego SDK.
+SDKROOT.set = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+
+# ==============================================================================
+# ZALEŻNOŚCI PROJEKTU (DEPENDENCIES)
+# ==============================================================================
+# EDUKACJA: Alire zarządza zależnościami w sposób deklaratywny.
+# Wersjonowanie semantyczne (np. ^16.1.0) zapewnia stabilność buildu
+# przy jednoczesnym dopuszczeniu bezpiecznych poprawek błędów.
+
+[[depends-on]]
+gnatprove = "^16.1.0" # Narzędzie do formalnej weryfikacji SPARK
+
+[[depends-on]]
+gnatcov = "^26.2.1"   # Narzędzie do analizy pokrycia kodu (Coverage)
+
+[[depends-on]]
+aunit = "^24.0.0"     # Framework do testów jednostkowych (xUnit style)
+
+[[depends-on]]
+ada_toml = "^0.5.0"   # Parser plików konfiguracyjnych TOML
+
+[[depends-on]]
+raylib = "^2.0.0"     # Silnik renderowania grafiki 2D

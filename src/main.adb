@@ -26,7 +26,7 @@ with TOML.File_IO;
 procedure Main is
 
    --  ============================================================================
-   --  SEKCJA DEFINES
+   --  SEKCJA DEFINICJI
    --  ============================================================================
    Config_Path : constant String := "configs/window.toml";
 

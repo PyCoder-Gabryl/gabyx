@@ -21,16 +21,16 @@ root = true
 
 #  Ustawienia globalne dla wszystkich plików
 [*]
-charset                  = utf-8
-end_of_line              = lf
-insert_final_newline     = true
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
 trim_trailing_whitespace = true
-indent_style             = space
-indent_size              = 4
+indent_style = space
+indent_size = 4
 
 #  Specyficzne ustawienia dla języka Ada (standard 3 spacje)
 [{*.ads,*.adb}]
-indent_size     = 3
+indent_size = 3
 max_line_length = 120
 
 #  Pliki projektu GPR i Makefile (spójność z projektem)
@@ -42,6 +42,6 @@ indent_size = 3
 indent_size = 2
 
 #  Dokumentacja
-[{*.md}]
-indent_size              = 2
+[*.md]
+indent_size = 2
 trim_trailing_whitespace = false

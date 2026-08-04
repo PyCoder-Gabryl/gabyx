@@ -60,7 +60,7 @@ KNOWN_TERMINALS := Ghostty iTerm WezTerm Alacritty kitty Warp Terminal
 # POMOC I DOKUMENTACJA
 # ==============================================================================
 
-## help: Wyswietla liste dostepnych polecen wraz z opisami
+## help: Wyświetla listę dostępnych poleceń wraz z opisami
 help:
 	@echo "$(C_BLUE)======================================================================$(C_RESET)"
 	@echo "$(C_BLUE)                   SNAKE ADA - CENTRUM AUTOMATYZACJI                  $(C_RESET)"
@@ -81,7 +81,7 @@ build:
 	alr build -- -j0
 	@echo "$(C_GREEN)==> Build zakonczony pomyslnie!$(C_RESET)"
 
-## build-prod: Budowanie produkcyjne z pelna optymalizacja (-O3)
+## build-prod: Budowanie produkcyjne z pełną optymalizacja (-O3)
 build-prod:
 	@echo "$(C_BLUE)==> Budowanie Snake Ada (Release/Optimization)...$(C_RESET)"
 	# EDUKACJA: Tryb release wylacza asercje i wlacza agresywny inlining kodu.
@@ -308,7 +308,8 @@ dump-context ctx:
 	@if command -v tree >/dev/null 2>&1; then \
 		tree -I 'build|obj|bin|.git|gnatcov_rts|coverage_report' >> $(CONTEXT_OUT); \
 	else \
-		find . -maxdepth 4 -not -path '*/.*' -not -path './obj*' -not -path './bin*' -not -path './gnatcov_rts*' -not -path './coverage_report*' >> $(CONTEXT_OUT); \
+		find . -maxdepth 4 -not -path '*/.*' -not -path './obj*' -not -path './bin*' -not -path \
+			'./gnatcov_rts*' -not -path './coverage_report*' >> $(CONTEXT_OUT); \
 	fi
 	@echo "" >> $(CONTEXT_OUT)
 
