@@ -1,5 +1,5 @@
 # ==============================================================================
-# PROJECT:          Snake Ada Game
+# PROJECT:          Gabyx
 # AUTHOR:           PyCoder Gabryl
 # EMAIL:            pycoder.gabryl@gmail.com
 # GITHUB:           https://github.com/PyCoder-Gabryl/
@@ -8,12 +8,11 @@
 # DESCRIPTION:      Główny plik automatyzacji (Workflow Engine). Integruje
 #                   kompilator GNAT, analizator SPARK oraz narzędzia GNATcov.
 #                   Zaprojektowany jako centrum dowodzenia procesem wytwórczym
-#                   oprogramowania wysokiej niezawodności w standardzie 1.0.0.
+#                   oprogramowania wysokiej niezawodności.
 # ------------------------------------------------------------------------------
 # PATH:             Makefile
-# FILE VERSION:     1.0.0
+# FILE VERSION:     0.1.1
 # CREATED:          2026-07-07
-# UPDATED:          2026-07-16
 # ==============================================================================
 
 # ==============================================================================
@@ -57,18 +56,48 @@ KNOWN_EDITORS := Cursor Zed IntelliJ\ IDEA PyCharm CLion RustRover Fleet \
 KNOWN_TERMINALS := Ghostty iTerm WezTerm Alacritty kitty Warp Terminal
 
 # ==============================================================================
-# POMOC I DOKUMENTACJA
+# POMOC, DOKUMENTACJA I PRZEWODNIKI
 # ==============================================================================
 
 ## help: Wyświetla listę dostępnych poleceń wraz z opisami
 help:
 	@echo "$(C_BLUE)======================================================================$(C_RESET)"
-	@echo "$(C_BLUE)                   SNAKE ADA - CENTRUM AUTOMATYZACJI                  $(C_RESET)"
+	@echo "$(C_BLUE)                     GABYX - CENTRUM AUTOMATYZACJI                    $(C_RESET)"
 	@echo "$(C_BLUE)======================================================================$(C_RESET)"
 	@awk 'BEGIN {FS = "## |: "} /^[#][#] / { \
 		printf "  $(C_CYAN)%-25s$(C_RESET) %s\n", $$2, $$3 \
 	}' $(MAKEFILE_LIST)
 	@echo ""
+
+## workflow: Wyświetla szczegółowy przewodnik po cyklu deweloperskim i kolejności poleceń (Alias: wf)
+workflow wf:
+	@echo "$(C_BLUE)======================================================================$(C_RESET)"
+	@echo "$(C_GREEN)                   DOKUMENTACJA CYKLU PRACY (WORKFLOW)                $(C_RESET)"
+	@echo "$(C_BLUE)======================================================================$(C_RESET)"
+	@echo "$(C_YELLOW)FAZA 1: INICJALIZACJA PROJEKTU$(C_RESET)"
+	@echo "  1. $(C_CYAN)alr index --update-all$(C_RESET) - Pobiera najnowsze definicje bibliotek z Alire."
+	@echo "  2. $(C_CYAN)make build$(C_RESET)             - Buduje szkielet w trybie deweloperskim z asercjami."
+	@echo ""
+	@echo "$(C_YELLOW)FAZA 2: ITERACYJNY CYKL WYTÓRCZY (DX)$(C_RESET)"
+	@echo "  Podczas pisania kodu regularnie wywołuj te polecenia w podanej kolejności:"
+	@echo "  1. $(C_CYAN)make format$(C_RESET)            - Automatycznie dba o poprawność stylu i wcięć (gnatpp)."
+	@echo "  2. $(C_CYAN)make check$(C_RESET)             - Błyskawicznie weryfikuje składnię bez pełnej kompilacji."
+	@echo "  3. $(C_CYAN)make prove-l1$(C_RESET)          - Uruchamia SPARK Flow Analysis (błędy przepływu i inicjalizacji)."
+	@echo "  4. $(C_CYAN)make run$(C_RESET)               - Odpala aplikację do testów manualnych."
+	@echo ""
+	@echo "$(C_YELLOW)FAZA 3: MATEMATYCZNA WERYFIKACJA I TESTOWANIE$(C_RESET)"
+	@echo "  Przed zatwierdzeniem zmian (commit) wykonaj pełną kontrolę jakości:"
+	@echo "  1. $(C_CYAN)make test-aunit$(C_RESET)        - Uruchamia całą automatyczną uprząż testów jednostkowych."
+	@echo "  2. $(C_CYAN)make coverage$(C_RESET)          - Analizuje pokrycie kodu i wskazuje nieprzetestowane ścieżki."
+	@echo "  3. $(C_CYAN)make prove-l2$(C_RESET)          - Dowodzi braku błędów wykonania w czasie rzeczywistym (np. zakresy)."
+	@echo "  4. $(C_CYAN)make prove-l3$(C_RESET)          - Weryfikuje formalne kontrakty logiczne Pre/Post."
+	@echo ""
+	@echo "$(C_YELLOW)FAZA 4: WYDANIE PRODUKCYJNE (RELEASE)$(C_RESET)"
+	@echo "  Gdy kod jest zweryfikowany i gotowy do wdrożenia:"
+	@echo "  1. $(C_CYAN)make build-prod$(C_RESET)        - Kompiluje optymalizowaną wersję binarną (-O3, inlining)."
+	@echo "  2. $(C_CYAN)make package$(C_RESET)           - Pakuje kod i artefakty do bezpiecznego archiwum dystrybucyjnego."
+	@echo "  3. $(C_CYAN)make git-tag-add$(C_RESET)       - Tworzy podpisany cyfrowo znacznik wersji na GitHubie."
+	@echo "$(C_BLUE)======================================================================$(C_RESET)"
 
 # ==============================================================================
 # KOMPILACJA I URUCHAMIANIE
@@ -76,57 +105,57 @@ help:
 
 ## build: Budowanie projektu w trybie deweloperskim (Debug + Asercje)
 build:
-	@echo "$(C_BLUE)==> Budowanie Snake Ada (Development)...$(C_RESET)"
+	@echo "$(C_BLUE)==> Budowanie projektu Gabyx (Środowisko deweloperskie)...$(C_RESET)"
 	# EDUKACJA: Tryb deweloperski aktywuje flagi -g i -gnata (asercje).
 	alr build -- -j0
-	@echo "$(C_GREEN)==> Build zakonczony pomyslnie!$(C_RESET)"
+	@echo "$(C_GREEN)==> Kompilacja zakończona pomyślnie!$(C_RESET)"
 
-## build-prod: Budowanie produkcyjne z pełną optymalizacja (-O3)
+## build-prod: Budowanie produkcyjne z pełną optymalizacją (-O3)
 build-prod:
-	@echo "$(C_BLUE)==> Budowanie Snake Ada (Release/Optimization)...$(C_RESET)"
-	# EDUKACJA: Tryb release wylacza asercje i wlacza agresywny inlining kodu.
+	@echo "$(C_BLUE)==> Budowanie projektu Gabyx (Wersja optymalizowana/produkcyjna)...$(C_RESET)"
+	# EDUKACJA: Tryb release wyłącza asercje i włącza agresywny inlining kodu.
 	alr build --release -- -j0
-	@echo "$(C_GREEN)==> Build produkcyjny zakonczony!$(C_RESET)"
+	@echo "$(C_GREEN)==> Kompilacja produkcyjna zakończona sukcesem!$(C_RESET)"
 
-## run: Uruchamianie gry w srodowisku Alire
+## run: Uruchamianie gry w środowisku Alire
 run:
-	@echo "$(C_BLUE)==> Uruchamianie gry Snake Ada...$(C_RESET)"
+	@echo "$(C_BLUE)==> Uruchamianie gry Gabyx...$(C_RESET)"
 	alr run
-	@echo "$(C_GREEN)==> Program zakonczyl dzialanie.$(C_RESET)"
+	@echo "$(C_GREEN)==> Program zakończył działanie.$(C_RESET)"
 
 ## clean: Usuwanie plików binarnych, obiektowych i artefaktów SPARK/COV
 clean:
-	@echo "$(C_YELLOW)==> Czyszczenie projektu (obj, bin, rts, trace)...$(C_RESET)"
-	$(RM) obj bin gnatcov_rts gnatcov_rts.gpr *.trace *.srctrace game_tests.trace
-	@echo "$(C_GREEN)==> Projekt wyczyszczony.$(C_RESET)"
+	@echo "$(C_YELLOW)==> Czyszczenie projektu (katalogi wyjściowe, runtime, ślady)...$(C_RESET)"
+	$(RM) obj bin gnatcov_rts gnatcov_rts.gpr *.trace *.srctrace game_tests.trace context.txt
+	@echo "$(C_GREEN)==> Projekt został wyczyszczony.$(C_RESET)"
 
 # ==============================================================================
 # ANALIZA STATYCZNA (SPARK)
 # ==============================================================================
 
-## prove-l1: Analiza przeplywu danych (Stone level - Flow Analysis)
+## prove-l1: Analiza przepływu danych (Stone level - Flow Analysis)
 prove-l1:
-	@echo "$(C_BLUE)==> SPARK: Analiza przeplywu danych (Level 1)...$(C_RESET)"
-	alr exec gnatprove -- -P snake_ada.gpr --level=1 -XSPARK_MODE=On --timeout=30 -v -j0
-	@echo "$(C_GREEN)==> Analiza Level 1 zakonczona.$(C_RESET)"
+	@echo "$(C_BLUE)==> SPARK: Analiza przepływu danych (Poziom 1)...$(C_RESET)"
+	alr exec gnatprove -- -P gabyx.gpr --level=1 -XSPARK_MODE=On --timeout=30 -v -j0
+	@echo "$(C_GREEN)==> Analiza przepływu danych zakończona.$(C_RESET)"
 
-## prove-l2: Dowod braku bledow wykonania (Silver level - AoRE)
+## prove-l2: Dowód braku błędów wykonania (Silver level - AoRE)
 prove-l2:
-	@echo "$(C_BLUE)==> SPARK: Dowod braku bledow wykonania (Level 2)...$(C_RESET)"
-	alr exec gnatprove -- -P snake_ada.gpr --level=2 -XSPARK_MODE=On --timeout=30 -v -j0
-	@echo "$(C_GREEN)==> Analiza Level 2 zakonczona.$(C_RESET)"
+	@echo "$(C_BLUE)==> SPARK: Dowód braku błędów wykonania (Poziom 2)...$(C_RESET)"
+	alr exec gnatprove -- -P gabyx.gpr --level=2 -XSPARK_MODE=On --timeout=30 -v -j0
+	@echo "$(C_GREEN)==> Analiza braku błędów wykonania zakończona.$(C_RESET)"
 
-## prove-l3: Dowod poprawnosci kontraktow Pre/Post (Gold level)
+## prove-l3: Dowód poprawności kontraktów Pre/Post (Gold level)
 prove-l3:
-	@echo "$(C_BLUE)==> SPARK: Weryfikacja kontraktow (Level 3)...$(C_RESET)"
-	alr exec gnatprove -- -P snake_ada.gpr --level=3 -XSPARK_MODE=On --timeout=30 -v -j0
-	@echo "$(C_GREEN)==> Analiza Level 3 zakonczona.$(C_RESET)"
+	@echo "$(C_BLUE)==> SPARK: Weryfikacja kontraktów Pre/Post (Poziom 3)...$(C_RESET)"
+	alr exec gnatprove -- -P gabyx.gpr --level=3 -XSPARK_MODE=On --timeout=30 -v -j0
+	@echo "$(C_GREEN)==> Analiza kontraktów zakończona.$(C_RESET)"
 
-## prove-l4: Pelna poprawnosc funkcjonalna (Diamond level)
+## prove-l4: Pełna poprawność funkcjonalna (Diamond level)
 prove-l4:
-	@echo "$(C_BLUE)==> SPARK: Pelne dowodzenie logiczne (Level 4)...$(C_RESET)"
-	alr exec gnatprove -- -P snake_ada.gpr --level=4 -XSPARK_MODE=On --timeout=30 -v -j0
-	@echo "$(C_GREEN)==> Analiza Level 4 zakonczona sukcesem!$(C_RESET)"
+	@echo "$(C_BLUE)==> SPARK: Pełne dowodzenie logiczne (Poziom 4 - Diamentowy)...$(C_RESET)"
+	alr exec gnatprove -- -P gabyx.gpr --level=4 -XSPARK_MODE=On --timeout=30 -v -j0
+	@echo "$(C_GREEN)==> Pełna weryfikacja formalna zakończona sukcesem!$(C_RESET)"
 
 # ==============================================================================
 # ANALIZA POKRYCIA KODU (COVERAGE)
@@ -136,22 +165,22 @@ COV_LEVEL := stmt+decision
 
 ## coverage: Generuje raport pokrycia kodu testami (XCOV)
 coverage: clean
-	@echo "$(C_BLUE)==> KROK 0: Przygotowanie lokalnego runtime GNATcov...$(C_RESET)"
+	@echo "$(C_BLUE)==> KROK 0: Inicjalizacja lokalnego runtime GNATcov...$(C_RESET)"
 	alr exec -- gnatcov setup --prefix=$(COV_RTS_DIR)
-	@echo "$(C_BLUE)==> KROK 1: Instrumentacja kodu zrodlowego...$(C_RESET)"
+	@echo "$(C_BLUE)==> KROK 1: Instrumentacja kodu źródłowego (Gnatcov)...$(C_RESET)"
 	alr exec -- sh -c 'GPR_PROJECT_PATH="$(COV_RTS_DIR)/share/gpr:$$GPR_PROJECT_PATH" \
-		gnatcov instrument -P tests.gpr --level=$(COV_LEVEL) --projects=snake_ada --projects=tests'
-	@echo "$(C_BLUE)==> KROK 2: Budowanie instrumentowanych binariow...$(C_RESET)"
+		gnatcov instrument -P tests.gpr --level=$(COV_LEVEL) --projects=gabyx --projects=tests'
+	@echo "$(C_BLUE)==> KROK 2: Konsolidacja i kompilacja instrumentowanych plików obiektowych...$(C_RESET)"
 	alr exec -- sh -c 'GPR_PROJECT_PATH="$(COV_RTS_DIR)/share/gpr:$$GPR_PROJECT_PATH" \
 		gprbuild -P tests.gpr -j0 --src-subdirs=gnatcov-instr --implicit-with=gnatcov_rts.gpr'
-	@echo "$(C_BLUE)==> KROK 3: Uruchamianie testow i zrzut sladow...$(C_RESET)"
+	@echo "$(C_BLUE)==> KROK 3: Uruchomienie testów i generowanie śladu wykonania (trace)...$(C_RESET)"
 	alr exec -- sh -c 'GNATCOV_TRACE_FILE=game_tests.trace ./bin/tests/run_all_tests'
-	@echo "$(C_BLUE)==> KROK 4: Generowanie raportu XCOV...$(C_RESET)"
+	@echo "$(C_BLUE)==> KROK 4: Agregacja pokrycia i generowanie raportu HTML (XCOV)...$(C_RESET)"
 	@mkdir -p $(COV_REPORT)
 	alr exec -- sh -c 'GPR_PROJECT_PATH="$(COV_RTS_DIR)/share/gpr:$$GPR_PROJECT_PATH" \
 		gnatcov coverage -P tests.gpr --level=$(COV_LEVEL) \
-		--annotate=xcov --output-dir=$(COV_REPORT) --projects=snake_ada game_tests.trace'
-	@echo "$(C_GREEN)==> Analiza pokrycia zakonczona. Raport w: $(COV_REPORT)/$(C_RESET)"
+		--annotate=xcov --output-dir=$(COV_REPORT) --projects=gabyx game_tests.trace'
+	@echo "$(C_GREEN)==> Analiza pokrycia kodu zakończona pomyślnie. Raport w: $(COV_REPORT)/$(C_RESET)"
 
 ## show-coverage: Otwiera katalog z raportami pokrycia XCOV
 show-coverage:
@@ -159,68 +188,68 @@ show-coverage:
 		echo "$(C_BLUE)==> Otwieranie katalogu z raportami XCOV...$(C_RESET)"; \
 		if [ "$(UNAME_S)" = "Darwin" ]; then open $(COV_REPORT); else xdg-open $(COV_REPORT); fi; \
 	else \
-		echo "$(C_RED)Blad: Raport nie istnieje. Uruchom 'make coverage'.$(C_RESET)"; \
+		echo "$(C_RED)Błąd: Raport nie istnieje. Uruchom najpierw 'make coverage'.$(C_RESET)"; \
 	fi
 
 # ==============================================================================
 # TESTY JEDNOSTKOWE I INTEGRACYJNE
 # ==============================================================================
 
-## test: Uruchamia domyslny zestaw testow Alire
+## test: Uruchamia domyślny zestaw testów Alire
 test:
-	@echo "$(C_BLUE)==> Uruchamianie testow Alire...$(C_RESET)"
+	@echo "$(C_BLUE)==> Uruchamianie pakietu testowego Alire...$(C_RESET)"
 	alr test
-	@echo "$(C_GREEN)==> Testy zakonczone.$(C_RESET)"
+	@echo "$(C_GREEN)==> Pakiet testowy Alire zakończył działanie.$(C_RESET)"
 
-## test-drivers: Uruchamia reczne sterowniki testowe (Etap 1)
+## test-drivers: Uruchamia ręczne sterowniki testowe (Etap 1)
 test-drivers:
-	@echo "$(C_BLUE)==> Uruchamianie sterownikow testowych (Etap 1)...$(C_RESET)"
+	@echo "$(C_BLUE)==> Uruchamianie sterowników testowych (Etap 1 - Klasyczne asercje)...$(C_RESET)"
 	alr exec gprbuild -- -P tests.gpr -j0
 	@./bin/tests/test_snake
 	@./bin/tests/test_board
 	@./bin/tests/test_engine
-	@echo "$(C_GREEN)==> Etap 1: Wszystkie testy zaliczone!$(C_RESET)"
+	@echo "$(C_GREEN)==> Etap 1: Wszystkie testy jednostkowe zakończone powodzeniem!$(C_RESET)"
 
-## test-aunit: Uruchamia profesjonalna uprzaz testowa AUnit (Etap 2)
+## test-aunit: Uruchamia profesjonalną uprząż testową AUnit (Etap 2)
 test-aunit:
-	@echo "$(C_BLUE)==> Budowanie i uruchamianie AUnit Suite (Etap 2)...$(C_RESET)"
+	@echo "$(C_BLUE)==> Kompilacja i uruchamianie uprzęży testowej AUnit (Etap 2)...$(C_RESET)"
 	alr exec gprbuild -- -P tests.gpr -j0
 	@./bin/tests/run_all_tests
-	@echo "$(C_GREEN)==> Etap 2: Testy AUnit zakończone sukcesem!$(C_RESET)"
+	@echo "$(C_GREEN)==> Etap 2: Wszystkie testy jednostkowe AUnit zakończone sukcesem!$(C_RESET)"
 
 # ==============================================================================
 # NARZĘDZIA DEWELOPERSKIE (DX)
 # ==============================================================================
 
-## check: Szybkie sprawdzenie skladni kodu bez pelnej kompilacji
+## check: Szybkie sprawdzenie składni kodu oraz reguł stylowych (gnatcheck)
 check:
-	@echo "$(C_BLUE)==> Sprawdzanie skladni kodu (gnatcheck)...$(C_RESET)"
-	alr exec gnat -- make -gnats -P snake_ada.gpr
-	@echo "$(C_GREEN)==> Skladnia poprawna.$(C_RESET)"
+	@echo "$(C_BLUE)==> Sprawdzanie składni kodu oraz reguł stylowych (gnatcheck)...$(C_RESET)"
+	alr exec gnat -- make -gnats -P gabyx.gpr
+	@echo "$(C_GREEN)==> Weryfikacja składniowa zakończona pomyślnie.$(C_RESET)"
 
-## deps: Wizualizacja drzewa zaleznosci projektu
+## deps: Wizualizacja drzewa zależności projektu
 deps:
-	@echo "$(C_BLUE)==> Pobieranie drzewa zaleznosci projektu...$(C_RESET)"
+	@echo "$(C_BLUE)==> Pobieranie i rozwiązywanie drzewa zależności projektu...$(C_RESET)"
 	@alr show --detail --tree --solve --system --external-detect
-	@echo "$(C_GREEN)==> Koniec listy zaleznosci.$(C_RESET)"
+	@echo "$(C_GREEN)==> Koniec listy zależności.$(C_RESET)"
 
-## format: Automatyczne formatowanie kodu (GNAT Pretty Printer)
+## format: Automatyczne formatowanie kodu źródłowego (gnatpp)
 format:
-	@echo "$(C_BLUE)==> Formatowanie kodu zrodlowego (gnatpp)...$(C_RESET)"
+	@echo "$(C_BLUE)==> Automatyczne formatowanie kodu źródłowego (gnatpp)...$(C_RESET)"
 	# EDUKACJA: gnatpp wymaga instalacji gnat_util w toolchainie Alire.
-	alr exec gnatpp -- -P snake_ada.gpr -r
-	@echo "$(C_GREEN)==> Formatowanie zakonczone.$(C_RESET)"
+	alr exec gnatpp -- -P gabyx.gpr -r
+	@echo "$(C_GREEN)==> Formatowanie kodu zakończone pomyślnie.$(C_RESET)"
 
-## open-project-in-terminal: Otwiera projekt w domyslnym terminalu
+## open-project-in-terminal: Otwiera projekt w domyślnym terminalu systemowym
 open-project-in-terminal:
-	@if [ ! -f $(ENV_CONFIG) ]; then echo "$(C_RED)Uruchom 'make setup-terminal'$(C_RESET)"; exit 1; fi
+	@if [ ! -f $(ENV_CONFIG) ]; then echo "$(C_RED)Błąd: Uruchom najpierw 'make setup-terminal'$(C_RESET)"; exit 1; fi
 	@TERM_CMD=$$(grep '^default_terminal=' $(ENV_CONFIG) | cut -d'=' -f2); \
-	if [ -z "$$TERM_CMD" ]; then echo "$(C_RED)Ustaw terminal w 'make setup-terminal'$(C_RESET)"; exit 1; fi; \
-	echo "$(C_BLUE)==> Otwieranie projektu w $$TERM_CMD...$(C_RESET)"; \
+	if [ -z "$$TERM_CMD" ]; then echo "$(C_RED)Błąd: Ustaw terminal za pomocą 'make setup-terminal'$(C_RESET)"; exit 1; fi; \
+	echo "$(C_BLUE)==> Otwieranie projektu w edytorze $$TERM_CMD...$(C_RESET)"; \
 	if [ "$(UNAME_S)" = "Darwin" ] && [ -d "/Applications/$$TERM_CMD.app" ]; \
 		then open -a "$$TERM_CMD" .; else $$TERM_CMD . & fi
 
-## setup-editor: Skanuje system i pozwala wybrac domyslny edytor
+## setup-editor: Skanuje system i pozwala wybrać domyślny edytor programisty
 setup-editor: _scan-tools
 	@echo "$(C_YELLOW)Znalezione edytory:$(C_RESET)"
 	@awk '/^\[editors\]/{f=1;next}/^\[/{f=0}f && NF{print "  - " $$0}' $(ENV_CONFIG)
@@ -228,7 +257,7 @@ setup-editor: _scan-tools
 	awk -v v="$$CHOSEN" 'BEGIN{FS=OFS="="}/^default_editor/{$$2=v}1' $(ENV_CONFIG) \
 		> $(ENV_CONFIG).tmp && mv $(ENV_CONFIG).tmp $(ENV_CONFIG)
 
-## setup-terminal: Skanuje system i pozwala wybrac domyslny terminal
+## setup-terminal: Skanuje system i pozwala wybrać domyślny terminal systemowy
 setup-terminal: _scan-tools
 	@echo "$(C_YELLOW)Znalezione terminale:$(C_RESET)"
 	@awk '/^\[terminals\]/{f=1;next}/^\[/{f=0}f && NF{print "  - " $$0}' $(ENV_CONFIG)
@@ -236,13 +265,13 @@ setup-terminal: _scan-tools
 	awk -v v="$$CHOSEN" 'BEGIN{FS=OFS="="}/^default_terminal/{$$2=v}1' $(ENV_CONFIG) \
 		> $(ENV_CONFIG).tmp && mv $(ENV_CONFIG).tmp $(ENV_CONFIG)
 
-## show-report: Otwiera raport SPARK w domyslnym edytorze
+## show-report: Otwiera raport SPARK w wybranym edytorze deweloperskim
 show-report:
-	@if [ ! -f $(ENV_CONFIG) ]; then echo "$(C_RED)Uruchom 'make setup-editor'$(C_RESET)"; exit 1; fi
+	@if [ ! -f $(ENV_CONFIG) ]; then echo "$(C_RED)Błąd: Uruchom najpierw 'make setup-editor'$(C_RESET)"; exit 1; fi
 	@EDITOR=$$(grep '^default_editor=' $(ENV_CONFIG) | cut -d'=' -f2); \
-	if [ -z "$$EDITOR" ]; then echo "$(C_RED)Ustaw edytor w 'make setup-editor'$(C_RESET)"; exit 1; fi; \
-	if [ ! -f $(SPARK_REPORT) ]; then echo "$(C_RED)Brak raportu. Uruchom 'make prove-l1'$(C_RESET)"; exit 1; fi; \
-	echo "$(C_BLUE)==> Otwieranie raportu w $$EDITOR...$(C_RESET)"; \
+	if [ -z "$$EDITOR" ]; then echo "$(C_RED)Błąd: Ustaw edytor za pomocą 'make setup-editor'$(C_RESET)"; exit 1; fi; \
+	if [ ! -f $(SPARK_REPORT) ]; then echo "$(C_RED)Błąd: Brak raportu. Uruchom najpierw 'make prove-l1'$(C_RESET)"; exit 1; fi; \
+	echo "$(C_BLUE)==> Otwieranie raportu analizy SPARK w edytorze $$EDITOR...$(C_RESET)"; \
 	if [ "$(UNAME_S)" = "Darwin" ] && [ -d "/Applications/$$EDITOR.app" ]; \
 		then open -a "$$EDITOR" $(SPARK_REPORT); else $$EDITOR $(SPARK_REPORT); fi
 
@@ -250,32 +279,32 @@ show-report:
 # ZARZĄDZANIE REPOZYTORIUM I DYSTRYBUCJA
 # ==============================================================================
 
-## package: Pakuje projekt do archiwum ZIP (wersja dystrybucyjna)
+## package: Pakuje projekt do archiwum ZIP (wersja dystrybucyjna dla graczy)
 package:
-	@echo "$(C_BLUE)==> Pakowanie projektu do wersji 1.0.0...$(C_RESET)"
+	@echo "$(C_BLUE)==> Archiwizacja i pakowanie dystrybucyjne projektu...$(C_RESET)"
 	@mkdir -p dist
-	@zip -r dist/snake_ada_v1.0.0.zip src tests LLM Makefile alire.toml \
-		snake_ada.gpr tests.gpr README.md VERSION LICENSE .dev_env.ini
-	@echo "$(C_GREEN)==> Archiwum gotowe w katalogu dist/$(C_RESET)"
+	@zip -r dist/gabyx_v0.1.1.zip src configs LLM Makefile alire.toml \
+		gabyx.gpr tests.gpr README.md VERSION LICENSE .dev_env.ini
+	@echo "$(C_GREEN)==> Archiwum ZIP przygotowane w katalogu dist/$(C_RESET)"
 
-## git-tag-add: Interaktywna procedura tworzenia tagu wersji
+## git-tag-add: Interaktywna procedura tworzenia taga wersji (GitHub Release)
 git-tag-add:
-	@printf "$(C_YELLOW)Podaj wersje (np. v1.0.0): $(C_RESET)"; read tag; \
-	printf "$(C_YELLOW)Opis: $(C_RESET)"; read desc; \
+	@printf "$(C_YELLOW)Podaj wersję (np. v0.1.1): $(C_RESET)"; read tag; \
+	printf "$(C_YELLOW)Opis zmian dla taga: $(C_RESET)"; read desc; \
 	git tag -a "$$tag" -m "$$desc" && git push origin "$$tag"
 
-## clear: Czysci bufor terminala
+## clear: Czyści bufor terminala systemowego
 clear:
 	@clear
 
-# Wewnetrzny target skanujacy system (ukryty przed help)
+# Wewnętrzny target skanujący system operacyjny (Ukryty przed komendą help)
 _scan-tools:
-	@echo "$(C_BLUE)==> Skanowanie systemu w poszukiwaniu narzedzi...$(C_RESET)"
+	@echo "$(C_BLUE)==> Skanowanie systemu operacyjnego w poszukiwaniu narzędzi deweloperskich...$(C_RESET)"
 	@if [ ! -f $(ENV_CONFIG) ]; then \
 		printf "[default-config]\ndefault_editor=\ndefault_terminal=\n\n[editors]\n[terminals]\n" \
 			> $(ENV_CONFIG); \
 	fi
-	@echo "# Konfiguracja srodowiska deweloperskiego" > $(ENV_CONFIG).tmp
+	@echo "# Konfiguracja środowiska deweloperskiego" > $(ENV_CONFIG).tmp
 	@echo "[default-config]" >> $(ENV_CONFIG).tmp
 	@DEF_ED=$$(grep '^default_editor=' $(ENV_CONFIG) 2>/dev/null | cut -d'=' -f2 || echo ""); \
 	 echo "default_editor=$$DEF_ED" >> $(ENV_CONFIG).tmp
@@ -296,47 +325,46 @@ _scan-tools:
 	@mv $(ENV_CONFIG).tmp $(ENV_CONFIG)
 
 # ==============================================================================
-# EKSPORT KONTEKSTU DLA AI STUDIO
+# EKSPORT KONTEKSTU ARCHITEKTURY DLA AI STUDIO (DUMP)
 # ==============================================================================
 
 CONTEXT_OUT := context.txt
 
-## dump-context: Generuje skonsolidowany plik tekstowy z architektura projektu dla AI Studio (Alias: ctx)
+## dump-context: Generuje skonsolidowany plik tekstowy z architekturą projektu dla AI Studio (Alias: ctx)
 dump-context ctx:
-	@echo "$(C_BLUE)==> KROK 1: Skanowanie i generowanie struktury katalogow...$(C_RESET)"
-	@echo "=== STRUKTURA PROJEKTU (Wygenerowano: $$(date '+%Y-%m-%d %H:%M:%S')) ===" > $(CONTEXT_OUT)
+	@echo "$(C_BLUE)==> KROK 1: Analiza struktury katalogów projektu...$(C_RESET)"
+	@echo "=== STRUKTURA PROJEKTU GABYX (Wygenerowano: $$(date '+%Y-%m-%d %H:%M:%S')) ===" > $(CONTEXT_OUT)
 	@if command -v tree >/dev/null 2>&1; then \
-		tree -I 'build|obj|bin|.git|gnatcov_rts|coverage_report' >> $(CONTEXT_OUT); \
+		tree -I 'build|obj|bin|.git|gnatcov_rts|coverage_report|alire' >> $(CONTEXT_OUT); \
 	else \
 		find . -maxdepth 4 -not -path '*/.*' -not -path './obj*' -not -path './bin*' -not -path \
-			'./gnatcov_rts*' -not -path './coverage_report*' >> $(CONTEXT_OUT); \
+			'./gnatcov_rts*' -not -path './coverage_report*' -not -path './alire*' >> $(CONTEXT_OUT); \
 	fi
 	@echo "" >> $(CONTEXT_OUT)
 
-	@echo "$(C_BLUE)==> KROK 2: Dolaczanie bazowych konfiguracji i API Ady...$(C_RESET)"
-	@if [ -f config.toml ]; then \
-		echo "=== BAZOWA KONFIGURACJA SILNIKA (config.toml) ===" >> $(CONTEXT_OUT); \
-		cat config.toml >> $(CONTEXT_OUT); \
-		echo "" >> $(CONTEXT_OUT); \
+	@echo "$(C_BLUE)==> KROK 2: Agregacja specyfikacji konfiguracji oraz interfejsów...$(C_RESET)"
+	@if [ -d configs ]; then \
+		echo "=== PLIKI KONFIGURACYJNE TOML (configs/) ===" >> $(CONTEXT_OUT); \
+		find configs -name "*.toml" -type f -exec sh -c 'echo "--- PLIK: {} ---" >> $(CONTEXT_OUT); cat {} >> $(CONTEXT_OUT); echo "" >> $(CONTEXT_OUT)' \;; \
 	fi
-	@if [ -f snake_ada.gpr ]; then \
-		echo "=== PLIK PROJEKTU ALIRE (snake_ada.gpr) ===" >> $(CONTEXT_OUT); \
-		cat snake_ada.gpr >> $(CONTEXT_OUT); \
+	@if [ -f gabyx.gpr ]; then \
+		echo "=== KONFIGURACJA GPRBUILD (gabyx.gpr) ===" >> $(CONTEXT_OUT); \
+		cat gabyx.gpr >> $(CONTEXT_OUT); \
 		echo "" >> $(CONTEXT_OUT); \
 	fi
 
-	@echo "$(C_BLUE)==> KROK 3: Agregacja specyfikacji architektonicznych (Pliki .ads)...$(C_RESET)"
-	@echo "=== SPECIFIKACJE INTERFEJSOW (API ADY) ===" >> $(CONTEXT_OUT)
+	@echo "$(C_BLUE)==> KROK 3: Agregacja specyfikacji pakietów Ady (pliki .ads)...$(C_RESET)"
+	@echo "=== INTERFEJSY I SPECYFIKACJE APID (Pliki .ads) ===" >> $(CONTEXT_OUT)
 	@find src -name "*.ads" -type f -exec sh -c 'echo "--- PLIK: {} ---" >> $(CONTEXT_OUT); cat {} >> $(CONTEXT_OUT); echo "" >> $(CONTEXT_OUT)' \;
 
-	@echo "$(C_BLUE)==> KROK 4: Skanowanie modulow zewnetrznych i logiki obiektow...$(C_RESET)"
+	@echo "$(C_BLUE)==> KROK 4: Konsolidacja zewnętrznych skryptów logiki i struktur...$(C_RESET)"
 	@if [ -d src/entities ]; then \
-		echo "=== AKTYWNE OBIEKTY GRY (Skrypty Lua) ===" >> $(CONTEXT_OUT); \
+		echo "=== SKRYPTY DEFINICJI STRUKTUR I OBIEKTOW LUA (entities/) ===" >> $(CONTEXT_OUT); \
 		find src/entities -name "*.lua" -type f -exec sh -c 'echo "--- PLIK: {} ---" >> $(CONTEXT_OUT); cat {} >> $(CONTEXT_OUT); echo "" >> $(CONTEXT_OUT)' \;; \
 	fi
 
-	@echo "$(C_GREEN)==> Sukces! Pelny kontekst spakowany do: $(CONTEXT_OUT) ($$(wc -l < $(CONTEXT_OUT) | xargs) linii)$(C_RESET)"
-	@echo "$(C_YELLOW)[INFO] Skopiuj zawartosc '$(CONTEXT_OUT)' i wklej na start nowej sesji w AI Studio.$(C_RESET)"
+	@echo "$(C_GREEN)==> Sukces! Kompletny kontekst projektu spakowany do: $(CONTEXT_OUT) ($$(wc -l < $(CONTEXT_OUT) | xargs) linii)$(C_RESET)"
+	@echo "$(C_YELLOW)[INFO] Skopiuj zawartość pliku '$(CONTEXT_OUT)' i przekaż swojemu asystentowi AI.$(C_RESET)"
 
 
 # ==============================================================================
@@ -367,4 +395,5 @@ dump-context ctx:
 	test \
 	test-aunit \
 	test-drivers \
-	dump-context ctx
+	dump-context ctx \
+	workflow wf
