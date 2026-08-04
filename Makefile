@@ -366,6 +366,15 @@ dump-context ctx:
 	@echo "$(C_GREEN)==> Sukces! Kompletny kontekst projektu spakowany do: $(CONTEXT_OUT) ($$(wc -l < $(CONTEXT_OUT) | xargs) linii)$(C_RESET)"
 	@echo "$(C_YELLOW)[INFO] Skopiuj zawartość pliku '$(CONTEXT_OUT)' i przekaż swojemu asystentowi AI.$(C_RESET)"
 
+# ==============================================================================
+# NARZĘDZIA DEWELOPERSKIE (DX)
+# ==============================================================================
+
+## metrics: Generuje raport metryk złożoności i jakości kodu (gnatmetric)
+metrics:
+	@echo "$(C_BLUE)==> Analiza metryk kodu źródłowego (gnatmetric)...$(C_RESET)"
+	alr exec gnatmetric -- -P gabyx.gpr -d -e --complexity-all --lines-all --contract-metrics
+	@echo "$(C_GREEN)==> Generowanie metryk zakończone pomyślnie.$(C_RESET)"
 
 # ==============================================================================
 # DEKLARACJA TARGETÓW WIRTUALNYCH (.PHONY)
@@ -396,4 +405,5 @@ dump-context ctx:
 	test-aunit \
 	test-drivers \
 	dump-context ctx \
-	workflow wf
+	workflow wf\
+	metrics
