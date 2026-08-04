@@ -370,11 +370,11 @@ dump-context ctx:
 # NARZĘDZIA DEWELOPERSKIE (DX)
 # ==============================================================================
 
-## metrics: Generuje raport metryk złożoności i jakości kodu (gnatmetric)
-metrics:
+## metrics: Analizuje złożoność cyklomatyczną, linie kodu oraz kontrakty SPARK (Alias: mt)
+metrics mt:
 	@echo "$(C_BLUE)==> Analiza metryk kodu źródłowego (gnatmetric)...$(C_RESET)"
-	alr exec gnatmetric -- -P gabyx.gpr -d -e --complexity-all --lines-all --contract-metrics
-	@echo "$(C_GREEN)==> Generowanie metryk zakończone pomyślnie.$(C_RESET)"
+	alr exec gnatmetric -- -P gabyx.gpr -d -e --complexity-all --lines-all --contract-metrics -- [NOWE]
+	@echo "$(C_GREEN)==> Generowanie metryk zakończone pomyślnie.$(C_RESET)"-- [NOWE]
 
 # ==============================================================================
 # DEKLARACJA TARGETÓW WIRTUALNYCH (.PHONY)
@@ -406,4 +406,4 @@ metrics:
 	test-drivers \
 	dump-context ctx \
 	workflow wf\
-	metrics
+	metrics mt
