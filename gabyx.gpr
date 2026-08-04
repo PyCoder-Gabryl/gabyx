@@ -70,7 +70,8 @@ project Gabyx is
                         "-gnatwa",
                         "-gnatyy",
                         "-gnatybchiklmnprst",
-                        "-gnatyM120");
+                        "-gnatyM120",
+                        "-fno-strict-aliasing");
 
       --  Konfiguracja specyficzna dla trybu budowania (Build Mode)
       case Build_Mode is
