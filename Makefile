@@ -235,7 +235,7 @@ test-aunit:
 ## check: Szybkie sprawdzenie składni kodu oraz reguł stylowych (gnatcheck)
 syntax:
 	@echo "$(C_BLUE)==> Sprawdzanie składni kodu kompilatorem...$(C_RESET)"
-	@alr exec gnat -- make -gnats -P gabyx.gpr
+	@alr exec -- gprbuild -gnatc -P gabyx.gpr
 	@echo "$(C_GREEN)==> Weryfikacja składniowa zakończona pomyślnie.$(C_RESET)"
 
 ## check: Weryfikuje standard kodowania i reguły lintera (gnatcheck) (Alias: gc)
