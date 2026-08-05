@@ -12,7 +12,7 @@
 --                    formatowania kodu źródłowego.
 --  ============================================================================
 --  PATH:             gabyx.gpr
---  FILE VERSION:     0.1.2
+--  FILE VERSION:     0.1.3
 --  CREATED:          2026-08-04
 --  ============================================================================
 
@@ -37,13 +37,17 @@ project Gabyx is
    type Build_Mode_Type is ("debug", "release", "test");
    Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "debug");
 
+   --  EDUKACJA: Zmienna scenariusza do dynamicznego wykluczania sterowników.
+   type Driver_Selection is ("terminal", "raylib", "sdl2", "all");
+   Active_Driver : Driver_Selection := external ("GABYX_DRIVER", "terminal");
+
    --  EDUKACJA: Zmienna scenariusza dla SPARK. Używamy jej do ukrycia flag
    --  systemowych macOS przed analizatorem logicznym (gnat2why), który ich
    --  nie wspiera. Uruchomienie: 'make prove-l1' wymusza wartość "On".
    SPARK_Mode := external ("SPARK_MODE", "Off");
 
    --  ============================================================================
-   --  STRUKTURA KATALOGÓW
+   --  STRUKTURA KATALOGÓW I WYKLUCZENIA SILNIKÓW (OMNI-ENGINE)
    --  ============================================================================
 
    --  EDUKACJA: Separacja źródeł (src) od plików tymczasowych (obj) i binariów
@@ -54,6 +58,22 @@ project Gabyx is
    for Create_Missing_Dirs use "True";   --  Automatyczne tworzenie obj/bin
    for Exec_Dir use "bin";              --  Miejsce na gotowy plik wykonywalny
    for Main use ("main.adb");           --  Główny plik wejściowy programu
+
+   --  EDUKACJA: Atrybut 'Excluded_Source_Files' pozwala na dynamiczne wykluczenie
+   --  plików źródłowych konkretnych sterowników z procesu kompilacji.
+   --  Zapobiega to błędom kompilacji brakujących bibliotek C (np. SDL2) na maszynach,
+   --  które nie posiadają zainstalowanych odpowiednich pakietów deweloperskich.
+   case Active_Driver is
+      when "terminal" =>
+         for Excluded_Source_Files use ("gabyx-drivers-raylib.adb",
+                                        "gabyx-drivers-sdl.adb");
+      when "raylib" =>
+         for Excluded_Source_Files use ("gabyx-drivers-sdl.adb");
+      when "sdl2" =>
+         for Excluded_Source_Files use ("gabyx-drivers-raylib.adb");
+      when "all" =>
+         null;
+   end case;
 
    --  ============================================================================
    --  KOMPILATOR (Ada Compiler)
@@ -112,6 +132,10 @@ project Gabyx is
    --  BUILDER (Zarządzanie procesem budowania)
    --  ============================================================================
    package Builder is
+      --  EDUKACJA: Atrybut 'Global_Configuration_Pragmas' pozwala na wskazanie pliku
+      --  konfiguracyjnego z globalnymi restrykcjami i regułami bezpieczeństwa.
+      for Global_Configuration_Pragmas use "configs/gabyx.adc";
+
       --  Ustalenie nazwy pliku wykonywalnego na 'gabyx'.
       for Executable ("main.adb") use "gabyx";
 
@@ -135,6 +159,10 @@ project Gabyx is
    --  LINKER (Tworzenie pliku wykonywalnego)
    --  ============================================================================
    package Linker is
+      --  EDUKACJA: Atrybut 'Map_File_Option' generuje szczegółową mapę pamięci
+      --  podczas linkowania, pokazując zużycie bajtów przez poszczególne funkcje.
+      for Map_File_Option use "-Wl,-map,gabyx.map";
+
       case Host_OS is
          when "macos" =>
             --  EDUKACJA: Na macOS linker wymaga jawnego wskazania ścieżki do SDK.
@@ -176,20 +204,6 @@ project Gabyx is
    end Prove;
 
    --  ============================================================================
-   --  IDE (Konfiguracja środowiska programistycznego)
-   --  ============================================================================
-   package Ide is
-      for VCS_Kind use "git"; --  Integracja z systemem kontroli wersji Git
-
-      --  Wybór odpowiedniego debuggera w zależności od systemu operacyjnego.
-      case Host_OS is
-         when "macos"   => for Debugger_Command use "lldb";
-         when "windows" => for Debugger_Command use "gdb";
-         when others    => for Debugger_Command use "gdb";
-      end case;
-   end Ide;
-
-   --  ============================================================================
    --  METRICS (Konfiguracja metryk kodu gnatmetric)
    --  ============================================================================
    package Metrics is
@@ -205,5 +219,27 @@ project Gabyx is
          "--lines-spark"            --  Zlicza linie w bezpiecznym standardzie
       );
    end Metrics;
+
+   --  ============================================================================
+   --  GNATTEST (Automatyczna generacja szkieletów testowych AUnit)
+   --  ============================================================================
+   package Gnattest is
+      for Tests_Dir use "tests";              --  Katalog na wygenerowane testy
+      for Harness_Dir use "tests/harness";    --  Katalog na uprząż testową runnera
+   end Gnattest;
+
+   --  ============================================================================
+   --  IDE (Konfiguracja środowiska programistycznego)
+   --  ============================================================================
+   package Ide is
+      for VCS_Kind use "git"; --  Integracja z systemem kontroli wersji Git
+
+      --  Wybór odpowiedniego debuggera w zależności od systemu operacyjnego.
+      case Host_OS is
+         when "macos"   => for Debugger_Command use "lldb";
+         when "windows" => for Debugger_Command use "gdb";
+         when others    => for Debugger_Command use "gdb";
+      end case;
+   end Ide;
 
 end Gabyx;

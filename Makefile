@@ -11,7 +11,7 @@
 #                   oprogramowania wysokiej niezawodności.
 # ------------------------------------------------------------------------------
 # PATH:             Makefile
-# FILE VERSION:     0.1.17
+# FILE VERSION:     0.1.21
 # CREATED:          2026-07-07
 # ==============================================================================
 
@@ -26,7 +26,7 @@ C_RED    := \033[31;1m
 C_CYAN   := \033[36;1m
 
 # ==============================================================================
-# KONFIGURACJA WIELOPLATFORMOWOŚCI
+# KONFIGURACJA WIELOPLATFORMOWOŚCI I ZMIENNYCH
 # ==============================================================================
 
 .SHELLFLAGS = -ec
@@ -49,6 +49,9 @@ export PATH := $(shell echo $$HOME)/.alire/bin:$(PATH)
 
 # Bezwzględna ścieżka do globalnych binariów Alire (omija ograniczenia macOS SIP)
 ALR_BIN_DIR  := $(shell echo $$HOME)/.alire/bin
+
+# Odczyt wersji projektu z pliku VERSION (zapobiega twardemu kodowaniu wersji)
+VERSION      := $(shell cat VERSION 2>/dev/null || echo "0.1.0")
 
 # Ścieżki do plików konfiguracyjnych i raportów
 ENV_CONFIG   := .dev_env.ini
@@ -78,7 +81,7 @@ help:
 	}' $(MAKEFILE_LIST)
 	@echo ""
 
-## workflow: Wyświetla szczegółowy przewodnik po cyklu deweloperskim i kolejności poleceń (Alias: wf)
+## workflow: Wyświetla szczegółowy przewodnik po cyklu deweloperskim (Alias: wf)
 workflow wf:
 	@echo "$(C_BLUE)======================================================================$(C_RESET)"
 	@echo "$(C_GREEN)                   DOKUMENTACJA CYKLU PRACY (WORKFLOW)                $(C_RESET)"
@@ -88,16 +91,16 @@ workflow wf:
 	@echo "  2. $(C_CYAN)make build$(C_RESET)             - Buduje szkielet w trybie deweloperskim."
 	@echo ""
 	@echo "$(C_YELLOW)FAZA 2: ITERACYJNY CYKL WYTÓRCZY (DX)$(C_RESET)"
-	@echo "  Podczas pisania kodu regularnie wywołuj te polecenia w podanej kolejności:"
+	@echo "  Podczas pisania kodu deweloperskiego wywołuj regularnie te komendy:"
 	@echo "  1. $(C_CYAN)make format$(C_RESET)            - Dba o poprawność stylu i wcięć (gnatpp)."
-	@echo "  2. $(C_CYAN)make check$(C_RESET)             - Weryfikuje składnię bez pełnej kompilacji."
+	@echo "  2. $(C_CYAN)make syntax$(C_RESET)            - Weryfikuje semantykę i składnię bez buildu."
 	@echo "  3. $(C_CYAN)make prove-l1$(C_RESET)          - Uruchamia analizę przepływu danych SPARK."
 	@echo "  4. $(C_CYAN)make run$(C_RESET)               - Odpala aplikację do testów manualnych."
 	@echo ""
 	@echo "$(C_YELLOW)FAZA 3: MATEMATYCZNA WERYFIKACJA I TESTOWANIE$(C_RESET)"
 	@echo "  Przed zatwierdzeniem zmian (commit) wykonaj pełną kontrolę jakości:"
 	@echo "  1. $(C_CYAN)make test-aunit$(C_RESET)        - Uruchamia automatyczne testy jednostkowe."
-	@echo "  2. $(C_CYAN)make coverage$(C_RESET)          - Generuje raporty pokrycia kodu (GNATcov)."
+	@echo "  2. $(C_CYAN)make coverage$(C_RESET)          - Analizuje pokrycie kodu (Gnatcov)."
 	@echo "  3. $(C_CYAN)make prove-l2$(C_RESET)          - Dowodzi braku błędów wykonania (AoRE)."
 	@echo "  4. $(C_CYAN)make prove-l3$(C_RESET)          - Weryfikuje formalne kontrakty Pre/Post."
 	@echo ""
@@ -216,9 +219,9 @@ test:
 test-drivers:
 	@echo "$(C_BLUE)==> Uruchamianie sterowników testowych (Etap 1 - Klasyczne asercje)...$(C_RESET)"
 	alr exec gprbuild -- -P tests.gpr -j0
-	@./bin/tests/test_snake
-	@./bin/tests/test_board
-	@./bin/tests/test_engine
+	# TODO: Zaktualizować ścieżki po zaimplementowaniu modułów testowych Gabyx
+	@./bin/tests/test_core
+	@./bin/tests/test_logging
 	@echo "$(C_GREEN)==> Etap 1: Wszystkie testy jednostkowe zakończone powodzeniem!$(C_RESET)"
 
 ## test-aunit: Uruchamia profesjonalną uprząż testową AUnit (Etap 2)
@@ -232,15 +235,15 @@ test-aunit:
 # NARZĘDZIA DEWELOPERSKIE (DX)
 # ==============================================================================
 
-## check: Szybkie sprawdzenie składni kodu oraz reguł stylowych (gnatcheck)
+## syntax: Szybkie sprawdzenie poprawności semantyki i składni (gprbuild -gnatc)
 syntax:
-	@echo "$(C_BLUE)==> Sprawdzanie składni kodu kompilatorem...$(C_RESET)"
+	@echo "$(C_BLUE)==> Sprawdzanie składni i semantyki kompilatorem...$(C_RESET)"
 	@alr exec -- gprbuild -gnatc -P gabyx.gpr
 	@echo "$(C_GREEN)==> Weryfikacja składniowa zakończona pomyślnie.$(C_RESET)"
 
 ## deps: Wizualizacja drzewa zależności projektu
 deps:
-	@echo "$(C_BLUE)==> Pobieranie i rozwiązywanie drzewa zależności projektu...$(C_RESET)"
+	@echo "$(C_BLUE)==> Pobieranie i rozwiązywanie drzewa zależności...$(C_RESET)"
 	@alr show --detail --tree --solve --system --external-detect
 	@echo "$(C_GREEN)==> Koniec listy zależności.$(C_RESET)"
 
@@ -294,14 +297,14 @@ show-report:
 package:
 	@echo "$(C_BLUE)==> Archiwizacja i pakowanie dystrybucyjne projektu...$(C_RESET)"
 	@mkdir -p dist
-	@zip -r dist/gabyx_v0.1.1.zip \
+	@zip -r dist/gabyx_v$(VERSION).zip \
 		src configs LLM Makefile alire.toml \
 		gabyx.gpr tests.gpr README.md VERSION LICENSE .dev_env.ini
 	@echo "$(C_GREEN)==> Archiwum ZIP przygotowane w katalogu dist/$(C_RESET)"
 
 ## git-tag-add: Interaktywna procedura tworzenia taga wersji (GitHub Release)
 git-tag-add:
-	@printf "$(C_YELLOW)Podaj wersję (np. v0.1.1): $(C_RESET)"; read tag; \
+	@printf "$(C_YELLOW)Podaj wersję (np. v$(VERSION)): $(C_RESET)"; read tag; \
 	printf "$(C_YELLOW)Opis zmian dla taga: $(C_RESET)"; read desc; \
 	git tag -a "$$tag" -m "$$desc" && git push origin "$$tag"
 
@@ -387,7 +390,8 @@ dump-context ctx:
 			echo "" >> $(CONTEXT_OUT)' \;; \
 	fi
 
-	@echo "$(C_GREEN)==> Sukces! Kompletny kontekst spakowany do: $(CONTEXT_OUT) ($$(wc -l < $(CONTEXT_OUT) | xargs) linii)$(C_RESET)"
+	@echo "$(C_GREEN)==> Sukces! Kompletny kontekst spakowany do: $(CONTEXT_OUT) \
+		($$(wc -l < $(CONTEXT_OUT) | xargs) linii)$(C_RESET)"
 	@echo "$(C_YELLOW)[INFO] Skopiuj zawartość pliku '$(CONTEXT_OUT)' i przekaż swojemu asystentowi AI.$(C_RESET)"
 
 # ==============================================================================
@@ -445,4 +449,5 @@ metrics mt:
 	metrics mt \
 	install-gnatmetric-gnatpp \
 	igmp \
-	install-tools
+	install-tools \
+	syntax
