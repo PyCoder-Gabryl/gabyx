@@ -1,0 +1,8 @@
+--  Wymuszenie sprawdzania asercji i kontraktów.
+pragma Assertion_Policy (Check);
+
+--  Blokada przestarzałych funkcji języka.
+pragma Restrictions (No_Obsolescent_Features);
+
+--  Wymuszenie bezpiecznej inicjalizacji (elaboracji).
+pragma Restrictions (No_Entry_Calls_In_Elaboration_Code);
