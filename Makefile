@@ -47,6 +47,9 @@ export LC_ALL := pl_PL.UTF-8
 # Eksport ścieżki do globalnych binariów Alire (rozwiązuje błędy środowiskowe w IDE na macOS)
 export PATH := $(HOME)/.alire/bin:$(PATH)
 
+# Jawna, bezwzględna ścieżka do globalnych binariów Alire (omija ograniczenia macOS SIP w IDE)
+ALR_BIN_DIR  := $(shell echo $$HOME)/.alire/bin
+
 # Ścieżki do plików konfiguracyjnych i raportów
 ENV_CONFIG   := .dev_env.ini
 SPARK_REPORT := obj/gnatprove/gnatprove.out
@@ -373,15 +376,22 @@ dump-context ctx:
 # NARZĘDZIA DEWELOPERSKIE (DX)
 # ==============================================================================
 
+## install-gnatmetric-gnatpp: Instaluje narzędzia gnatmetric, gnatpp i gnatstub poprzez kompilację libadalang_tools (Alias: igmp, install-tools)
+install-gnatmetric-gnatpp igmp install-tools:
+	@echo "$(C_YELLOW)==> Rozpoczynanie wymuszonej instalacji narzędzi deweloperskich (gnatmetric, gnatpp, gnatstub)...$(C_RESET)"
+	@echo "$(C_CYAN)[URUCHAMIANIE]: alr --force install libadalang_tools$(C_RESET)"
+	alr --force install libadalang_tools
+	@echo "$(C_GREEN)==> Instalacja narzędzi gnatmetric, gnatpp i gnatstub zakończona pomyślnie!$(C_RESET)"
+
 ## metrics: Analizuje złożoność cyklomatyczną, linie kodu oraz kontrakty SPARK (Alias: mt)
 metrics mt:
-	@if ! alr exec -- sh -c 'command -v gnatmetric' >/dev/null 2>&1; then \
-		echo "$(C_YELLOW)[INFO] Narzędzie gnatmetric nie zostało znalezione. \
-			Rozpoczynanie instalacji libadalang_tools...$(C_RESET)"; \
+	@if [ ! -f $(ALR_BIN_DIR)/gnatmetric ]; then \
+		echo "$(C_YELLOW)[INFO] Narzędzie gnatmetric nie zostało znalezione w $(ALR_BIN_DIR)." ; \
+		echo "Rozpoczynanie instalacji libadalang_tools...$(C_RESET)"; \
 		alr install libadalang_tools; \
 	fi
 	@echo "$(C_BLUE)==> Analiza metryk kodu źródłowego (gnatmetric)...$(C_RESET)"
-	alr exec gnatmetric -- -P gabyx.gpr -d -e --complexity-all --lines-all --contract-metrics
+	$(ALR_BIN_DIR)/gnatmetric -P gabyx.gpr -d -e --complexity-all --lines-all --contract-metrics
 	@echo "$(C_GREEN)==> Generowanie metryk zakończone pomyślnie.$(C_RESET)"
 
 # ==============================================================================
@@ -414,4 +424,5 @@ metrics mt:
 	test-drivers \
 	dump-context ctx \
 	workflow wf\
-	metrics mt
+	metrics mt \
+	install-gnatmetric-gnatpp igmp install-tools
