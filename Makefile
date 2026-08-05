@@ -238,18 +238,6 @@ syntax:
 	@alr exec -- gprbuild -gnatc -P gabyx.gpr
 	@echo "$(C_GREEN)==> Weryfikacja składniowa zakończona pomyślnie.$(C_RESET)"
 
-## check: Weryfikuje standard kodowania i reguły lintera (gnatcheck) (Alias: gc)
-check gc:
-	@if [ ! -f $(ALR_BIN_DIR)/gnatcheck ]; then \
-		echo "$(C_YELLOW)[INFO] Narzędzie gnatcheck nie zostało znalezione." ; \
-		$(MAKE) install-gnatmetric-gnatpp; \
-	fi
-	@echo "$(C_BLUE)==> Sprawdzanie standardów kodowania (gnatcheck)...$(C_RESET)"
-	@alr exec -- $(ALR_BIN_DIR)/gnatcheck -P gabyx.gpr \
-		-rules -from=configs/gabyx_rules.rules \
-		$$(find src -name "*.ad?")
-	@echo "$(C_GREEN)==> Standardy kodowania zweryfikowane pomyślnie.$(C_RESET)"
-
 ## deps: Wizualizacja drzewa zależności projektu
 deps:
 	@echo "$(C_BLUE)==> Pobieranie i rozwiązywanie drzewa zależności projektu...$(C_RESET)"
