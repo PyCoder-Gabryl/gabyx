@@ -409,10 +409,7 @@ metrics mt:
 		$(MAKE) install-gnatmetric-gnatpp; \
 	fi
 	@echo "$(C_BLUE)==> Analiza metryk kodu źródłowego (gnatmetric)...$(C_RESET)"
-	@alr exec -- $(ALR_BIN_DIR)/gnatmetric -P gabyx.gpr \
-		--complexity-all --lines-all \
-		--contract --post --contract-complexity --lines-spark \
-		$$(find src -name "*.ad?")
+	@alr exec -- $(ALR_BIN_DIR)/gnatmetric -P gabyx.gpr $$(find src -name "*.ad?")
 	@echo "$(C_GREEN)==> Generowanie metryk zakończone pomyślnie.$(C_RESET)"
 
 # ==============================================================================

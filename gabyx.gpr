@@ -189,4 +189,21 @@ project Gabyx is
       end case;
    end Ide;
 
+   --  ============================================================================
+   --  METRICS (Konfiguracja metryk kodu gnatmetric)
+   --  ============================================================================
+   package Metrics is
+      --  EDUKACJA: Pakiet 'Metrics' konfiguruje domyślne przełączniki gnatmetric.
+      --  Dzięki temu nie musimy zaśmiecać komend Makefile długimi flagami.
+      --  Każde wywołanie gnatmetric -P automatycznie odczyta te parametry.
+      for Default_Switches ("Ada") use (
+         "--complexity-all",        --  Złożoność cyklomatyczna dla wszystkich
+         "--lines-all",             --  Pełne statystyki linii (kod, komentarze)
+         "--contract",              --  Zlicza podprogramy z kontraktami SPARK
+         "--post",                  --  Zlicza podprogramy z warunkami Post
+         "--contract-complexity",   --  Oblicza złożoność samych kontraktów
+         "--lines-spark"            --  Zlicza linie w bezpiecznym standardzie
+      );
+   end Metrics;
+
 end Gabyx;
