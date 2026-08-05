@@ -44,6 +44,9 @@ endif
 export LANG := pl_PL.UTF-8
 export LC_ALL := pl_PL.UTF-8
 
+# Eksport ścieżki do globalnych binariów Alire (rozwiązuje błędy środowiskowe w IDE na macOS)
+export PATH := $(HOME)/.alire/bin:$(PATH)
+
 # Ścieżki do plików konfiguracyjnych i raportów
 ENV_CONFIG   := .dev_env.ini
 SPARK_REPORT := obj/gnatprove/gnatprove.out
