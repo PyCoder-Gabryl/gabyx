@@ -5,14 +5,16 @@
 --  GITHUB:           https://github.com/PyCoder-Gabryl/
 --  LICENSE:          Apache License 2.0
 --  ============================================================================
---  DESCRIPTION:      Główny plik projektu GNAT (GPRbuild). Definiuje strukturę
---                    katalogów, flagi kompilacji dla standardu Ada 2022 oraz
---                    konfiguruje parametry specyficzne dla systemów (macOS).
---                    Zarządza procesem budowania, dowodzenia SPARK oraz
---                    formatowania kodu źródłowego.
+--  DESCRIPTION:      Główny plik projektu GNAT (GPRbuild) dla Gabyx.
+--                    Integruje rygorystyczny standard stylu (3 spacje),
+--                    zaawansowaną analizę formalną SPARK, konfigurację
+--                    wieloplatformową (macOS/Linux/Windows) oraz mechanizm
+--                    dynamicznego wykluczania sterowników (Omni-Engine).
+--                    Zarządza pełnym cyklem budowania, od kompilacji po
+--                    generowanie metryk i testów jednostkowych.
 --  ============================================================================
 --  PATH:             gabyx.gpr
---  FILE VERSION:     0.1.3
+--  FILE VERSION:     0.2.0
 --  CREATED:          2026-08-04
 --  ============================================================================
 
@@ -37,32 +39,31 @@ project Gabyx is
    type Build_Mode_Type is ("debug", "release", "test");
    Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "debug");
 
-   --  EDUKACJA: Zmienna scenariusza do dynamicznego wykluczania sterowników.
-   type Driver_Selection is ("terminal", "raylib", "sdl2", "all");
-   Active_Driver : Driver_Selection := external ("GABYX_DRIVER", "terminal");
-
    --  EDUKACJA: Zmienna scenariusza dla SPARK. Używamy jej do ukrycia flag
    --  systemowych macOS przed analizatorem logicznym (gnat2why), który ich
-   --  nie wspiera. Uruchomienie: 'make prove-l1' wymusza wartość "On".
-   SPARK_Mode := external ("SPARK_MODE", "Off");
+   --  nie wspiera. Uruchomienie: 'alr build -- -XSPARK_MODE=On'.
+   type SPARK_Mode_Type is ("Off", "On");
+   SPARK_Mode : SPARK_Mode_Type := external ("SPARK_MODE", "Off");
+
+   --  EDUKACJA: Zmienna scenariusza do dynamicznego wykluczania sterowników.
+   --  Pozwala na budowanie wersji terminalowej bez zależności od Raylib/SDL.
+   type Driver_Selection is ("terminal", "raylib", "sdl2", "all");
+   Active_Driver : Driver_Selection := external ("GABYX_DRIVER", "terminal");
 
    --  ============================================================================
    --  STRUKTURA KATALOGÓW I WYKLUCZENIA SILNIKÓW (OMNI-ENGINE)
    --  ============================================================================
 
    --  EDUKACJA: Separacja źródeł (src) od plików tymczasowych (obj) i binariów
-   --  (bin) to fundament czystego projektu. Zapobiega to zaśmiecaniu repozytorium
-   --  i ułatwia konfigurację systemu kontroli wersji Git.
-   for Source_Dirs use ("src/**");      --  Rekurencyjne przeszukiwanie katalogu src
-   for Object_Dir use "obj";            --  Miejsce na pliki .o oraz .ali
-   for Create_Missing_Dirs use "True";   --  Automatyczne tworzenie obj/bin
-   for Exec_Dir use "bin";              --  Miejsce na gotowy plik wykonywalny
-   for Main use ("main.adb");           --  Główny plik wejściowy programu
+   --  (bin) to fundament czystego projektu. Zapobiega to zaśmiecaniu repozytorium.
+   for Source_Dirs use ("src/**");            --  Rekurencyjne przeszukiwanie katalogu src
+   for Object_Dir use "obj";                  --  Miejsce na pliki .o oraz .ali
+   for Create_Missing_Dirs use "True";        --  Automatyczne tworzenie obj/bin
+   for Exec_Dir use "bin";                    --  Miejsce na gotowy plik wykonywalny
+   for Main use ("main.adb");                 --  Główny plik wejściowy programu
 
    --  EDUKACJA: Atrybut 'Excluded_Source_Files' pozwala na dynamiczne wykluczenie
    --  plików źródłowych konkretnych sterowników z procesu kompilacji.
-   --  Zapobiega to błędom kompilacji brakujących bibliotek C (np. SDL2) na maszynach,
-   --  które nie posiadają zainstalowanych odpowiednich pakietów deweloperskich.
    case Active_Driver is
       when "terminal" =>
          for Excluded_Source_Files use ("gabyx-drivers-raylib.adb",
@@ -76,170 +77,275 @@ project Gabyx is
    end case;
 
    --  ============================================================================
-   --  KOMPILATOR (Ada Compiler)
+   --  PAKIET COMPILER (Rygor techniczny i standard stylu)
    --  ============================================================================
+
    package Compiler is
+
       --  EDUKACJA: Base_Switches definiują rygor projektu.
       --  -gnat2022: Włącza najnowszy standard języka.
       --  -gnatW8: Wymusza kodowanie UTF-8 (bezpieczne polskie znaki w komentarzach).
       --  -gnatwa: Włącza wszystkie ostrzeżenia (Warn All).
-      --  -gnatyy: Rygorystyczny test stylu (wcięcia, wielkość liter).
-      Base_Switches := ("-gnat2022",
-                        "-gnatW8",
-                        "-gnatf",
-                        "-gnatwa",
-                        "-gnatyy",
-                        "-gnatybchiklmnprst",
-                        "-gnatyM120",
-                        "-fno-strict-aliasing");
+      Base_Switches :=
+        ("-gnat2022",              --  Włączenie najnowszego standardu języka Ada 2022
+         "-gnatW8",                --  Obsługa kodowania UTF-8
+         "-gnatf",                 --  Pełne komunikaty o błędach (Full error info)
+         "-gnatU",                 --  Unikalne komunikaty błędów z tagami jednostek
+         "-gnatwa",                --  Włączenie niemal wszystkich ostrzeżeń (Warn All)
+         "-gnatwe",                --  Traktowanie wszystkich ostrzeżeń jako błędy krytyczne
+         "-gnatVa",                --  Włączenie pełnej walidacji danych (Validity checks)
+         "-fstack-check",          --  Dynamiczne sprawdzanie przepełnienia stosu
+         "-fstack-usage",          --  Generowanie statycznej analizy zużycia stosu
+         "-ffunction-sections",    --  Sekcje dla funkcji (optymalizacja linkera)
+         "-fdata-sections",        --  Sekcje dla danych (optymalizacja rozmiaru binarki)
+         "-fno-strict-aliasing");  --  Wyłączenie restrykcyjnego aliasingu
+
+      --  EDUKACJA: Style_Switches wymuszają dyscyplinę kodu (standard 3-spacjowy).
+      --  Zastępuje narzędzia typu gnatcheck, wymuszając dyscyplinę kodu.
+      Style_Switches :=
+        ("-gnaty3",                --  Wymuszenie dokładnie 3 spacji wcięcia (Twoja preferencja)
+         "-gnatya",                --  Sprawdzanie poprawnej wielkości liter w atrybutach
+         "-gnatyb",                --  Całkowity zakaz spacji na końcach linii
+         "-gnatyc",                --  Wymóg spacji po znaczniku komentarza -- (czytelność)
+         "-gnatyh",                --  Całkowity zakaz używania tabulacji
+         "-gnatyi",                --  Weryfikacja poprawnego układu instrukcji IF
+         "-gnatyk",                --  Wymuszenie małych liter w słowach kluczowych
+         "-gnatyl",                --  Weryfikacja układu sekcji deklaratywnej
+         "-gnatym",                --  Kontrola długości podprogramów
+         "-gnatyn",                --  Wielkość liter w nazwach bibliotek standardowych
+         "-gnatyp",                --  Spójność wielkości liter w pragmach
+         "-gnatyr",                --  Sprawdzanie spójności nazw identyfikatorów
+         "-gnatys",                --  Wymuszanie posiadania osobnych plików specyfikacji (.ads)
+         "-gnatyt",                --  Sprawdzanie poprawności odstępów między tokenami
+         "-gnatyM120");            --  Maksymalna dopuszczalna szerokość linii: 120 znaków
 
       --  Konfiguracja specyficzna dla trybu budowania (Build Mode)
       case Build_Mode is
          when "debug" | "test" =>
-            Base_Switches := Base_Switches &
-              ("-g",       --  Generowanie informacji dla debuggera (GDB/LLDB)
-               "-gnata",   --  Włączenie asercji (pragma Assert) i kontraktów
-               "-gnato",   --  Włączenie sprawdzania przepełnień (Overflow checks)
-               "-gnatVa",  --  Włączenie wszystkich sprawdzeń poprawności danych
-               "-O0");     --  Brak optymalizacji (ułatwia debugowanie)
+            for Default_Switches ("Ada") use Base_Switches & Style_Switches &
+              ("-g",               --  Generowanie symboli dla debuggera (GDB/LLDB)
+               "-gnata",           --  Włączenie asercji (pragma Assert) i kontraktów
+               "-gnato",           --  Włączenie sprawdzania przepełnień (Overflow checks)
+               "-O0");             --  Brak optymalizacji (ułatwia debugowanie)
 
          when "release" =>
-            Base_Switches := Base_Switches &
-              ("-O3",      --  Maksymalna optymalizacja wydajnościowa
-               "-gnatn");  --  Włączenie mechanizmu Inliningu
+            for Default_Switches ("Ada") use Base_Switches & Style_Switches &
+              ("-O3",              --  Maksymalna optymalizacja wydajnościowa
+               "-gnatn");          --  Włączenie mechanizmu Inliningu
       end case;
 
-      --  Konfiguracja specyficzna dla systemu operacyjnego (Host OS)
+      --  Konfiguracja specyficzna dla systemu i obsługa SDK (sysroot) na macOS.
+      --  EDUKACJA: Używamy zagnieżdżonego 'case', aby flaga -isysroot była podawana
+      --  tylko podczas kompilacji, a nigdy podczas dowodzenia SPARK (gnat2why).
       case Host_OS is
          when "macos" =>
-            --  EDUKACJA: Używamy zagnieżdżonego 'case', aby flaga -isysroot
-            --  była podawana tylko podczas kompilacji, a nigdy podczas
-            --  dowodzenia SPARK, co zapobiega błędom narzędzia gnat2why.
             case SPARK_Mode is
                when "Off" =>
-                  for Default_Switches ("Ada") use Base_Switches &
-                     ("-isysroot", "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk");
+                  for Default_Switches ("Ada") use Compiler'Default_Switches ("Ada") &
+                    ("-isysroot", "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk");
                when others =>
-                  for Default_Switches ("Ada") use Base_Switches;
+                  null;
             end case;
-
          when others =>
-            for Default_Switches ("Ada") use Base_Switches;
+            null;
       end case;
+
+      --  Dodatkowy rygor dla fazy analizy formalnej SPARK.
+      case SPARK_Mode is
+         when "On" =>
+            for Default_Switches ("Ada") use Compiler'Default_Switches ("Ada") & ("-gnatd.F");
+         when others =>
+            null;
+      end case;
+
    end Compiler;
 
    --  ============================================================================
-   --  BUILDER (Zarządzanie procesem budowania)
+   --  PAKIET BUILDER (Orkiestracja i wydajność procesu budowania)
    --  ============================================================================
+
    package Builder is
       --  EDUKACJA: Atrybut 'Global_Configuration_Pragmas' pozwala na wskazanie pliku
       --  konfiguracyjnego z globalnymi restrykcjami i regułami bezpieczeństwa.
       for Global_Configuration_Pragmas use "configs/gabyx.adc";
 
-      --  Ustalenie nazwy pliku wykonywalnego na 'gabyx'.
+      --  Mapowanie głównego pliku źródłowego na nazwę pliku wykonywalnego.
       for Executable ("main.adb") use "gabyx";
 
       for Switches ("Ada") use (
-         "-s",    --  Tryb Smart: kompiluj tylko zmienione pliki
-         "-j0",   --  Automatyczne wykorzystanie wszystkich rdzeni procesora
-         "-gnatQ" --  Generuj pliki biblioteczne nawet przy błędach (pomoc dla IDE)
+         "-j0",    --  Wykorzystanie wszystkich rdzeni procesora (kluczowe na Apple Silicon)
+         "-k",     --  Keep-going: kontynuuj kompilację mimo błędów w innych jednostkach
+         "-s",     --  Smart Compilation: przetwarzaj tylko te pliki, które się zmieniły
+         "-m",     --  Minimalna rekompilacja (sprawdzanie sum kontrolnych plików)
+         "-gnatQ"  --  Generuj pliki .ali nawet przy błędach (niezbędne dla IDE)
       );
+
+      --  Ustalenie rozszerzenia pliku wykonywalnego w zależności od platformy.
+      case Host_OS is
+         when "windows" => for Executable_Suffix use ".exe";
+         when others    => for Executable_Suffix use "";
+      end case;
    end Builder;
 
    --  ============================================================================
-   --  BINDER (Łączenie jednostek kompilacji)
+   --  PAKIET BINDER (Zarządzanie inicjalizacją i obsługą błędów)
    --  ============================================================================
+
    package Binder is
       --  EDUKACJA: Flaga -Es (Symbolic traceback) sprawia, że w razie błędu
       --  program wypisze czytelną ścieżkę (plik i linia), a nie tylko adresy.
-      for Switches ("Ada") use ("-Es");
+      for Switches ("Ada") use ("-E", "-Es");
+
+      case Host_OS is
+         when "macos" =>
+            --  Dostosowanie rozmiaru stosu dla stabilności zadań na macOS ARM64.
+            for Default_Switches ("Ada") use Binder'Default_Switches ("Ada") & ("-D1M");
+         when others =>
+            null;
+      end case;
    end Binder;
 
    --  ============================================================================
-   --  LINKER (Tworzenie pliku wykonywalnego)
+   --  PAKIET LINKER (Tworzenie i optymalizacja końcowej binarki)
    --  ============================================================================
+
    package Linker is
-      --  EDUKACJA: Atrybut 'Map_File_Option' generuje szczegółową mapę pamięci
-      --  podczas linkowania, pokazując zużycie bajtów przez poszczególne funkcje.
+      --  EDUKACJA: Atrybut 'Map_File_Option' generuje szczegółową mapę pamięci.
       for Map_File_Option use "-Wl,-map,gabyx.map";
 
       case Host_OS is
          when "macos" =>
             --  EDUKACJA: Na macOS linker wymaga jawnego wskazania ścieżki do SDK.
-            --  Flaga -Wl,-syslibroot to "ostatnia instancja" dla linkera ld.
             for Default_Switches ("Ada") use (
+               "-g",               --  Przekazanie symboli debugowania do linkera
+               "-Wl,-dead_strip",  --  Usuwanie nieużywanego kodu i danych
                "-isysroot", "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
                "-Wl,-syslibroot,/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
             );
+
+         when "linux" | "windows" =>
+            --  Odpowiednik dead_strip dla Linuxa i Windowsa (GNU Linker).
+            for Default_Switches ("Ada") use (
+               "-Wl,--gc-sections", --  Usuwanie martwego kodu
+               "-Wl,--as-needed"    --  Linkuj biblioteki tylko jeśli są użyte
+            );
+
          when others =>
             null;
       end case;
    end Linker;
 
    --  ============================================================================
-   --  PRETTY PRINTER (Formatowanie kodu)
+   --  PAKIET PRETTY PRINTER (Formatowanie kodu gnatpp)
    --  ============================================================================
+
    package Pretty_Printer is
       --  EDUKACJA: Pakiet konfigurujący narzędzie 'gnatpp', które dba o
       --  jednolity styl kodu (wcięcia, spacje) w całym zespole.
       for Switches ("Ada") use (
-         "-M120", --  Maksymalna szerokość linii 120 znaków
-         "-nD");  --  Zachowaj formatowanie komentarzy dokumentacyjnych
+         "-i3",               --  Indentation: Wymuszenie 3 spacji wcięcia (zgodność z -gnaty3)
+         "-M120",             --  Maximum line length: Limit 120 znaków na linię
+         "-cl3",              --  Comment level: Wcięcia komentarzy również na 3 spacje
+         "-nD",               --  No Dozen: Zachowanie formatowania komentarzy dokumentacyjnych
+         "-c3",               --  Alignment: Wyrównuj dwukropki w deklaracjach (agresywny poziom 3)
+         "-c4",               --  Alignment: Wyrównuj strzałki '=>' w asocjacjach
+         "-A1",               --  Align assignments: Wyrównuj znaki przypisania ':='
+         "-kL",               --  Keywords Lowercase: Słowa kluczowe zawsze małymi literami
+         "-aL",               --  Attributes Lowercase: Pierwsza litera atrybutów wielka
+         "-pL",               --  Pragmas Lowercase: Nazwy pragm pierwsza litera wielka
+         "-rnb",              --  Remove new lines: Usuwanie zbędnych pustych linii
+         "-ff"                --  Form feed: Używaj znaku nowej strony przed podprogramami
+      );
    end Pretty_Printer;
 
    --  ============================================================================
-   --  PROVE (Analiza statyczna SPARK)
+   --  PAKIET PROVE (Konfiguracja formalnej weryfikacji SPARK)
    --  ============================================================================
+
    package Prove is
       --  EDUKACJA: Konfiguracja silnika dowodzącego SPARK (gnatprove).
       --  --report=all: Pokazuje każdy udowodniony warunek (pełna transparentność).
-      --  --level=1: Podstawowa analiza przepływu danych.
-      --  --steps=0: Brak limitu kroków (pozwala na rozwiązanie trudnych dowodów).
       --  --prover=z3,cvc5: Wykorzystanie dwóch potężnych silników matematycznych.
-      for Proof_Switches ("Ada") use (
-         "--report=all",
-         "--level=1",
-         "--steps=0",
-         "--prover=z3,cvc5");
+      Prove_Switches := (
+         "--report=all",         --  Raportuj sukces każdego dowiedzionego warunku
+         "--prover=z3,cvc5",     --  Użycie silników SMT Z3 i CVC5
+         "--counterexamples=on", --  W razie porażki dowodu pokaż wartości zmiennych
+         "--checks-as-errors=on" --  Traktuj naruszenia SPARK jako błędy kompilacji
+      );
+
+      case Build_Mode is
+         when "debug" | "test" =>
+            for Proof_Switches ("Ada") use Prove_Switches &
+              ("--level=1",       --  Podstawowa analiza przepływu danych (Data flow)
+               "--timeout=5");    --  Szybkie sprawdzenie (max 5 sek. na dowód)
+
+         when "release" =>
+            for Proof_Switches ("Ada") use Prove_Switches &
+              ("--level=2",       --  Dowodzenie braku błędów Runtime (AoRTE)
+               "--steps=1000");   --  Duża liczba kroków dowodzenia
+      end case;
    end Prove;
 
    --  ============================================================================
-   --  METRICS (Konfiguracja metryk kodu gnatmetric)
+   --  PAKIET METRICS (Konfiguracja metryk kodu gnatmetric)
    --  ============================================================================
+
    package Metrics is
       --  EDUKACJA: Pakiet 'Metrics' konfiguruje domyślne przełączniki gnatmetric.
-      --  Dzięki temu nie musimy zaśmiecać komend Makefile długimi flagami.
-      --  Każde wywołanie gnatmetric -P automatycznie odczyta te parametry.
       for Default_Switches ("Ada") use (
-         "--complexity-all",        --  Złożoność cyklomatyczna dla wszystkich
+         "-v",                      --  Verbose: Pokaż szczegóły procesu analizy
+         "-x",                      --  Eksportuj metryki również do formatu XML
+         "-o", "gabyx_metrics.txt", --  Zapisz główny raport tekstowy do pliku
+         "--complexity-all",        --  Złożoność cyklomatyczna (McCabe)
          "--lines-all",             --  Pełne statystyki linii (kod, komentarze)
-         "--contract",              --  Zlicza podprogramy z kontraktami SPARK
-         "--post",                  --  Zlicza podprogramy z warunkami Post
-         "--contract-complexity",   --  Oblicza złożoność samych kontraktów
-         "--lines-spark"            --  Zlicza linie w bezpiecznym standardzie
+         "--contract",              --  Zliczanie podprogramów z kontraktami SPARK
+         "--post",                  --  Zliczanie podprogramów z warunkami Post
+         "--contract-complexity",   --  Obliczanie złożoności samych kontraktów
+         "--lines-spark"            --  Zliczanie linii kodu zgodnych ze SPARK
       );
    end Metrics;
 
    --  ============================================================================
-   --  GNATTEST (Automatyczna generacja szkieletów testowych AUnit)
+   --  PAKIET GNATTEST (Zarządzanie testami jednostkowymi AUnit)
    --  ============================================================================
+
    package Gnattest is
-      for Tests_Dir use "tests";              --  Katalog na wygenerowane testy
-      for Harness_Dir use "tests/harness";    --  Katalog na uprząż testową runnera
+      for Tests_Dir use "tests";              --  Katalog docelowy na wygenerowane testy
+      for Harness_Dir use "tests/harness";    --  Katalog na infrastrukturę testów
+      for Switches use ("--keep-test-dirs", "--skeleton-default=fail");
    end Gnattest;
 
    --  ============================================================================
-   --  IDE (Konfiguracja środowiska programistycznego)
+   --  NARZĘDZIA POMOCNICZE (Clean i Gnatls)
    --  ============================================================================
+
+   package Clean is
+      for Switches use ("-r", "-p", "-f");    --  Wymuszone i rekurencyjne czyszczenie
+   end Clean;
+
+   package Gnatls is
+      for Switches use ("-d");                --  Wyświetlanie pełnej listy zależności
+   end Gnatls;
+
+   --  ============================================================================
+   --  PAKIET IDE (Integracja ze środowiskiem programistycznym)
+   --  ============================================================================
+
    package Ide is
       for VCS_Kind use "git"; --  Integracja z systemem kontroli wersji Git
+      for Documentation_Dir use "doc";
 
       --  Wybór odpowiedniego debuggera w zależności od systemu operacyjnego.
       case Host_OS is
          when "macos"   => for Debugger_Command use "lldb";
-         when "windows" => for Debugger_Command use "gdb";
+         when "windows" | "linux" => for Debugger_Command use "gdb";
          when others    => for Debugger_Command use "gdb";
       end case;
    end Ide;
+
+   --  Konfiguracja dla Ada Language Server (używanego przez JetBrains i VS Code).
+   package Language_Server is
+      for Runtime_Source_Dir ("Ada") use "src";
+   end Language_Server;
 
 end Gabyx;
