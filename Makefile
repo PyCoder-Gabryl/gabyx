@@ -11,7 +11,7 @@
 #                   oprogramowania wysokiej niezawodności.
 # ------------------------------------------------------------------------------
 # PATH:             Makefile
-# FILE VERSION:     0.1.13
+# FILE VERSION:     0.1.17
 # CREATED:          2026-07-07
 # ==============================================================================
 
@@ -233,10 +233,22 @@ test-aunit:
 # ==============================================================================
 
 ## check: Szybkie sprawdzenie składni kodu oraz reguł stylowych (gnatcheck)
-check:
-	@echo "$(C_BLUE)==> Sprawdzanie składni kodu oraz reguł stylowych (gnatcheck)...$(C_RESET)"
-	alr exec gnat -- make -gnats -P gabyx.gpr
+syntax:
+	@echo "$(C_BLUE)==> Sprawdzanie składni kodu kompilatorem...$(C_RESET)"
+	@alr exec gnat -- make -gnats -P gabyx.gpr
 	@echo "$(C_GREEN)==> Weryfikacja składniowa zakończona pomyślnie.$(C_RESET)"
+
+## check: Weryfikuje standard kodowania i reguły lintera (gnatcheck) (Alias: gc)
+check gc:
+	@if [ ! -f $(ALR_BIN_DIR)/gnatcheck ]; then \
+		echo "$(C_YELLOW)[INFO] Narzędzie gnatcheck nie zostało znalezione." ; \
+		$(MAKE) install-gnatmetric-gnatpp; \
+	fi
+	@echo "$(C_BLUE)==> Sprawdzanie standardów kodowania (gnatcheck)...$(C_RESET)"
+	@alr exec -- $(ALR_BIN_DIR)/gnatcheck -P gabyx.gpr \
+		-rules -from=configs/gabyx_rules.rules \
+		$$(find src -name "*.ad?")
+	@echo "$(C_GREEN)==> Standardy kodowania zweryfikowane pomyślnie.$(C_RESET)"
 
 ## deps: Wizualizacja drzewa zależności projektu
 deps:
@@ -387,8 +399,7 @@ dump-context ctx:
 			echo "" >> $(CONTEXT_OUT)' \;; \
 	fi
 
-	@echo "$(C_GREEN)==> Sukces! Kompletny kontekst spakowany do: $(CONTEXT_OUT) \
-		($$(wc -l < $(CONTEXT_OUT) | xargs) linii)$(C_RESET)"
+	@echo "$(C_GREEN)==> Sukces! Kompletny kontekst spakowany do: $(CONTEXT_OUT) ($$(wc -l < $(CONTEXT_OUT) | xargs) linii)$(C_RESET)"
 	@echo "$(C_YELLOW)[INFO] Skopiuj zawartość pliku '$(CONTEXT_OUT)' i przekaż swojemu asystentowi AI.$(C_RESET)"
 
 # ==============================================================================
@@ -410,7 +421,7 @@ metrics mt:
 		$(MAKE) install-gnatmetric-gnatpp; \
 	fi
 	@echo "$(C_BLUE)==> Analiza metryk kodu źródłowego (gnatmetric)...$(C_RESET)"
-	@alr exec -- $(ALR_BIN_DIR)/gnatmetric -P gabyx.gpr -d obj -e \
+	@alr exec -- $(ALR_BIN_DIR)/gnatmetric -P gabyx.gpr \
 		--complexity-all --lines-all \
 		--contract --post --contract-complexity --lines-spark \
 		$$(find src -name "*.ad?")
