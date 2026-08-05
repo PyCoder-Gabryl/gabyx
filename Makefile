@@ -372,9 +372,14 @@ dump-context ctx:
 
 ## metrics: Analizuje złożoność cyklomatyczną, linie kodu oraz kontrakty SPARK (Alias: mt)
 metrics mt:
+	@if ! alr exec -- sh -c 'command -v gnatmetric' >/dev/null 2>&1; then \
+		echo "$(C_YELLOW)[INFO] Narzędzie gnatmetric nie zostało znalezione. \
+			Rozpoczynanie instalacji libadalang_tools...$(C_RESET)"; \
+		alr install libadalang_tools; \
+	fi
 	@echo "$(C_BLUE)==> Analiza metryk kodu źródłowego (gnatmetric)...$(C_RESET)"
-	alr exec gnatmetric -- -P gabyx.gpr -d -e --complexity-all --lines-all --contract-metrics -- [NOWE]
-	@echo "$(C_GREEN)==> Generowanie metryk zakończone pomyślnie.$(C_RESET)"-- [NOWE]
+	alr exec gnatmetric -- -P gabyx.gpr -d -e --complexity-all --lines-all --contract-metrics
+	@echo "$(C_GREEN)==> Generowanie metryk zakończone pomyślnie.$(C_RESET)"
 
 # ==============================================================================
 # DEKLARACJA TARGETÓW WIRTUALNYCH (.PHONY)
