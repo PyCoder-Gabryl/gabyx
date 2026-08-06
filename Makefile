@@ -329,6 +329,48 @@ _scan-tools:
 	done
 	@mv $(ENV_CONFIG).tmp $(ENV_CONFIG)
 
+#  =============================================================================
+#  GIT
+#  =============================================================================
+
+git-init:
+	@if [ ! -d .git ]; then \
+		echo "-> Inicjalizacja repozytorium Git..."; \
+		git init -b main; \
+	else \
+		echo "-> Repozytorium Git już istnieje."; \
+	fi
+	@echo "-> Konfigurowanie hooka post-commit..."
+	@mkdir -p .git/hooks
+	@echo '#!/bin/sh' > .git/hooks/post-commit
+	@echo 'LAST_MSG=$$(git log -1 --pretty=%B)' >> .git/hooks/post-commit
+	@echo 'case "$$LAST_MSG" in' >> .git/hooks/post-commit
+	@echo '  bump:*|bump\(*)' >> .git/hooks/post-commit
+	@echo '    exit 0' >> .git/hooks/post-commit
+	@echo '    ;;' >> .git/hooks/post-commit
+	@echo '  *)' >> .git/hooks/post-commit
+	@echo '    cz bump --yes --files-only' >> .git/hooks/post-commit
+	@echo '    GIT_HASH=$$(git rev-parse --short HEAD)' >> .git/hooks/post-commit
+	@echo '    BASE_VER=$$(cat VERSION | cut -d"+" -f1)' >> .git/hooks/post-commit
+	@echo '    echo "$${BASE_VER}+git.$${GIT_HASH}" > VERSION' >> .git/hooks/post-commit
+	@echo '    NEW_VER=$$(cat VERSION | cut -d"+" -f1)' >> .git/hooks/post-commit
+	@echo '    git add VERSION alire.toml .cz.toml 2>/dev/null' >> .git/hooks/post-commit
+	@echo '    git commit -m "bump: version -> $${NEW_VER}"' >> .git/hooks/post-commit
+	@echo '    git tag "v$${NEW_VER}"' >> .git/hooks/post-commit
+	@echo '    ;;' >> .git/hooks/post-commit
+	@echo 'esac' >> .git/hooks/post-commit
+	@chmod +x .git/hooks/post-commit
+	@echo "-> Gotowe! Git i automatyczne wersjonowanie zostały skonfigurowane."
+
+git-reset:
+	@echo "-> Usuwanie historii i folderu .git..."
+	@rm -rf .git
+	@echo "-> Przywracanie wersji bazowej 0.1.0..."
+	@echo "0.1.0" > VERSION
+	@sed -i '' 's/version = ".*"/version = "0.1.0"/' .cz.toml 2>/dev/null || true
+	@sed -i '' 's/version = ".*"/version = "0.1.0"/' alire.toml 2>/dev/null || true
+	@$(MAKE) git-init
+
 .PHONY: help workflow wf setup build build-prod run clean prove-l1 prove-l2 \
         prove-l3 coverage show-coverage test test-gen test-aunit syntax \
         format metrics mt info setup-editor setup-terminal package \
