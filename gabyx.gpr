@@ -56,7 +56,9 @@ project Gabyx is
 
    --  EDUKACJA: Separacja źródeł (src) od plików tymczasowych (obj) i binariów
    --  (bin) to fundament czystego projektu. Zapobiega to zaśmiecaniu repozytorium.
-   for Source_Dirs use ("src/**");            --  Rekurencyjne przeszukiwanie katalogu src
+   for Source_Dirs use ("src/**",             --  Rekurencyjne przeszukiwanie katalogu src
+                        "configs/"
+                       );
    for Object_Dir use "obj";                  --  Miejsce na pliki .o oraz .ali
    for Create_Missing_Dirs use "True";        --  Automatyczne tworzenie obj/bin
    for Exec_Dir use "bin";                    --  Miejsce na gotowy plik wykonywalny
@@ -328,24 +330,144 @@ project Gabyx is
    end Gnatls;
 
    --  ============================================================================
-   --  PAKIET IDE (Integracja ze środowiskiem programistycznym)
+   --  PAKIET IDE (Integracja z GNAT Studio, VS Code/Codium, JetBrains i Zed)
    --  ============================================================================
 
    package Ide is
-      for VCS_Kind use "git"; --  Integracja z systemem kontroli wersji Git
+
+      --  EDUKACJA: Wskazanie systemu kontroli wersji. Integracja z Git pozwala
+      --  środowiskom (np. GNAT Studio, CLion) na pokazywanie annotacji gita (blame),
+      --  statusu zmian w plikach oraz zarządzanie branchami bezpośrednio z IDE.
+      for VCS_Kind use "git";
+
+      --  EDUKACJA: Wskazanie głównego katalogu z dokumentacją projektu.
+      --  Edytory i serwery języka (ALS) używają tej ścieżki do indeksowania
+      --  podręczników, specyfikacji architektonicznych oraz generowanych raportów.
       for Documentation_Dir use "doc";
 
-      --  Wybór odpowiedniego debuggera w zależności od systemu operacyjnego.
+      --  =========================================================================
+      --  WYBÓR DEBUGGERA W ZALEŻNOŚCI OD PLATFORMY (macOS / Linux / BSD / Windows)
+      --  =========================================================================
+
+      --  EDUKACJA: Narzędzia programistyczne (GNAT Studio, VS Code via launch.json)
+      --  odczytują atrybut 'Debugger_Command', aby wiedzieć, jaki proces debuggera
+      --  uruchomić podczas sesji debugowania.
       case Host_OS is
-         when "macos"   => for Debugger_Command use "lldb";
-         when "windows" | "linux" => for Debugger_Command use "gdb";
-         when others    => for Debugger_Command use "gdb";
+         when "macos" =>
+            --  Na macOS natywnym i wspieranym debuggerem dla architektury ARM64/x86_64 jest LLDB.
+            for Debugger_Command use "lldb";
+
+         when "linux" | "bsd" | "windows" =>
+            --  Na Linuksie, systemach BSD oraz Windowsie (środowisko MinGW/Alire)
+            --  standardem dla języka Ada jest GDB (GNU Debugger).
+            for Debugger_Command use "gdb";
+
+         when others =>
+            for Debugger_Command use "gdb";
       end case;
+
+      --  =========================================================================
+      --  DEDYKOWANE USTAWIENIA DLA GNAT STUDIO I INTEGRACJI Z ALS
+      --  =========================================================================
+
+      --  EDUKACJA: Domyślny główny plik wykonywalny do uruchamiania z poziomu IDE.
+      for Default_Switches ("gnatls") use ("-d");
+
    end Ide;
 
    --  Konfiguracja dla Ada Language Server (używanego przez JetBrains i VS Code).
    package Language_Server is
       for Runtime_Source_Dir ("Ada") use "src";
    end Language_Server;
+
+   --  ============================================================================
+   --  PAKIET INSTALL (Wieloplatformowa dystrybucja: macOS / Linux / BSD / Windows)
+   --  ============================================================================
+
+   package Install is
+
+      --  =========================================================================
+      --  1. ARTEFAKTY I ZASOBY WSPÓŁDZIELONE (CROSS-PLATFORM)
+      --  =========================================================================
+
+      --  EDUKACJA: Atrybut 'Artifacts' definiuje pliki i katalogi zasobów statycznych
+      --  (niebędące kodem źródłowym Ady), które mają zostać skopiowane do struktury
+      --  instalacyjnej (domyślnie prefix/share/<Install_Name>/).
+      --  UWAGA: Zgodnie z architekturą projektu używamy "configs" zamiast auto-generowanego "config".
+      for Artifacts (".") use ("share", "configs", "assets");
+
+      --  EDUKACJA: Identyfikator instalacji – tworzy podkatalog w share/ oraz unikalny
+      --  wpis w rejestrze gprinstall na wszystkich systemach operacyjnych.
+      for Install_Name use "gabyx";
+
+      --  EDUKACJA: Ścieżka podkatalogu dla dokumentacji i plików tekstowych.
+      --  Na systemach POSIX: prefix/share/doc/gabyx/
+      --  Na Windowsie:       <Install_Dir>\doc\
+      for Doc_Subdir use "doc";
+
+      --  =========================================================================
+      --  2. WARUNKOWE ŚCIEŻKI I TRYBY INSTALACJI (ZALEŻNE OD OS)
+      --  =========================================================================
+
+      --  EDUKACJA: W zależności od docelowego systemu operacyjnego (Host_OS)
+      --  dostosowujemy docelową strukturę katalogów oraz wywoływane skrypty.
+      case Host_OS is
+         when "macos" | "linux" | "bsd" =>
+            --  Standard FHS (Filesystem Hierarchy Standard) dla systemów UNIX/POSIX.
+            for Exec_Subdir use "bin";
+            for Mode        use "usage";
+
+            --  Skrypty instalacyjne dla środowisk POSIX (sh/bash)
+            --  for Pre_Install_Script  use "scripts/posix_pre_install.sh";
+            --  for Post_Install_Script use "scripts/posix_post_install.sh";
+
+         when "windows" =>
+            --  Na Windowsie pliki wykonywalne i biblioteki DLL często lądują
+            --  w głównym katalogu aplikacji lub w podkatalogu bin.
+            for Exec_Subdir use "bin";
+            for Mode        use "usage";
+
+            --  Skrypty instalacyjne dla środowiska Windows (PowerShell / Batch)
+            --  for Pre_Install_Script  use "scripts/win_pre_install.bat";
+            --  for Post_Install_Script use "scripts/win_post_install.bat";
+
+         when others =>
+            for Exec_Subdir use "bin";
+            for Mode        use "usage";
+      end case;
+
+      --  =========================================================================
+      --  3. MANIFEST I CONTROL KROKÓW INSTALACJI
+      --  =========================================================================
+
+      --  EDUKACJA: Generowanie manifestu instalacji w formacie XML. Pozwala na
+      --  precyzyjne odinstalowanie projektu ('gprinstall --uninstall') niezależnie
+      --  od platformy, usuwając tylko skopiowane pliki bez naruszania systemu.
+      for Manifest use "gabyx_install_manifest.xml";
+
+      --  EDUKACJA: Włączenie aktywnej instalacji dla projektu głównego.
+      for Active use "True";
+
+      --  EDUKACJA: Zapobiega dublowaniu instalacji wewnętrznych narzędzi deweloperskich.
+      for Side_Builds use "False";
+
+      --  =========================================================================
+      --  4. KONFIGURACJA DLA LIBRARIES / BINDINGS (ŚRODOWISKA BIBLIOTECZNE)
+      --  =========================================================================
+      --  Poniższe atrybuty są przydatne, gdyby Gabyx w przyszłości eksportował
+      --  moduły jako bibliotekę (.a / .dylib / .so / .dll) dla innych aplikacji:
+      --
+      --  case Host_OS is
+      --     when "windows" =>
+      --        for Lib_Subdir use "bin";     -- Pliki .dll na Windowsie muszą być w PATH (obok .exe)
+      --     when others =>
+      --        for Lib_Subdir use "lib";     -- Pliki .so / .dylib w standardowym folderze lib
+      --  end case;
+      --
+      --  for Sources_Subdir use "include/gabyx";
+      --  for Ali_Subdir     use "lib/gabyx/ali";
+      --  for Project_Subdir use "share/gpr";
+
+   end Install;
 
 end Gabyx;
