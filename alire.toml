@@ -70,13 +70,9 @@ SDKROOT.set  = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
 [environment.'case(os)'.windows]
 #  Dla systemu Windows wymuszamy zmienną środowiskową platformy dla Alire / GNAT
 ALIRE_HOST_OS.set = "windows"
-CFLAGS.set        = "-Isrc -Iraygui/src -I.."
-CPATH.set         = "src"
 
 [environment.'case(os)'.linux]
 ALIRE_HOST_OS.set = "linux"
-CFLAGS.set        = "-Isrc -Iraygui/src -I.."
-CPATH.set         = "src"
 
 [environment.'case(os)'.'...']
 #  Dla systemu BSD nie wymagamy dodatkowych flag SDK [TODO: do sprawdzenia].
@@ -105,5 +101,8 @@ raylib = "*"           # Silnik renderowania grafiki 2D
 #  Użycie: alr build -- -XBUILD_MODE=release
 BUILD_MODE = ["debug", "release", "validation"]
 
-GABYX_DRIVER = ["terminal", "raylib", "sdl2", "all"]
+GABYX_MODE = ["graphical", "terminal"]
+GABYX_GFX_DRIVER = ["raylib", "sdl", "gtk"]
+GABYX_TERM_DRIVER = ["ansi", "ncurses", "trendy"]
+
 SPARK_MODE = ["Off", "On"]

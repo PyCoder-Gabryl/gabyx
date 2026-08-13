@@ -46,52 +46,35 @@ project Gabyx is
    type SPARK_Mode_Type is ("Off", "On");
    SPARK_Mode : SPARK_Mode_Type := external ("SPARK_MODE", "Off");
 
-   --  EDUKACJA: Zmienna scenariusza do dynamicznego wykluczania sterowników.
-   --  Pozwala na budowanie wersji terminalowej bez zależności od Raylib/SDL.
-   type Driver_Selection is ("terminal", "raylib", "sdl2", "all");
+   --  Definicje trybów i sterowników zgodne z alire.toml
+   type Mode_Type is ("graphical", "terminal");
+   Mode : Mode_Type := external ("GABYX_MODE", "graphical");
 
-   -- Ustalenie domyślnego sterownika na podstawie systemu operacyjnego:
-   Default_Driver : Driver_Selection := "terminal";
+   type Gfx_Driver_Type is ("raylib", "sdl", "gtk");
+   Gfx_Driver : Gfx_Driver_Type := external ("GABYX_GFX_DRIVER", "raylib");
 
-   case Host_OS is
-      when "windows" | "macos" | "linux" =>
-         Default_Driver := "raylib";
-      when others =>
-         Default_Driver := "terminal";
-   end case;
+   type Term_Driver_Type is ("ansi", "ncurses", "trendy");
+   Term_Driver : Term_Driver_Type := external ("GABYX_TERM_DRIVER", "ansi");
 
-   -- Pozwala nadać własny sterownik z zewnątrz (np. -XGABYX_DRIVER=sdl2),
-   -- a jeśli brak zmiennej - użyje automatycznie dobranego Default_Driver:
-   -- NAPRAWIONO: Usunięto 'Image (niedozwolony w języku GPR, wywoływał wykrzyk/CONSTRAINT_ERROR w parserze GPR2).
-   Active_Driver : Driver_Selection := external ("GABYX_DRIVER", Default_Driver);
+   --  Dynamiczne budowanie listy katalogów źródłowych
+   Src_Dirs := ("src", "src/core/**", "src/drivers/abstract");
 
-   --  ============================================================================
-   --  STRUKTURA KATALOGÓW I WYKLUCZENIA SILNIKÓW (OMNI-ENGINE)
-   --  ============================================================================
-
-   --  EDUKACJA: Separacja źródeł (src) od plików tymczasowych (obj) i binariów
-   --  (bin) to fundament czystego projektu. Zapobiega to zaśmiecaniu repozytorium.
-   for Source_Dirs use ("src/**",             --  Rekurencyjne przeszukiwanie katalogu src
-                        "configs/"
-                       );
-   for Object_Dir use "obj";                  --  Miejsce na pliki .o oraz .ali
-   for Create_Missing_Dirs use "True";        --  Automatyczne tworzenie obj/bin
-   for Exec_Dir use "bin";                    --  Miejsce na gotowy plik wykonywalny
-   for Main use ("main.adb");                 --  Główny plik wejściowy programu
-
-   --  EDUKACJA: Atrybut 'Excluded_Source_Files' pozwala na dynamiczne wykluczenie
-   --  plików źródłowych konkretnych sterowników z procesu kompilacji.
-   case Active_Driver is
+   case Mode is
+      when "graphical" =>
+         case Gfx_Driver is
+            when "raylib" => Src_Dirs := Src_Dirs & ("src/drivers/graphical/raylib");
+            when "sdl"    => Src_Dirs := Src_Dirs & ("src/drivers/graphical/sdl");
+            when "gtk"    => Src_Dirs := Src_Dirs & ("src/drivers/graphical/gtk");
+         end case;
       when "terminal" =>
-         for Excluded_Source_Files use ("gabyx-drivers-raylib.adb",
-                                        "gabyx-drivers-sdl.adb");
-      when "raylib" =>
-         for Excluded_Source_Files use ("gabyx-drivers-sdl.adb");
-      when "sdl2" =>
-         for Excluded_Source_Files use ("gabyx-drivers-raylib.adb");
-      when "all" =>
-         null;
+         case Term_Driver is
+            when "ansi"    => Src_Dirs := Src_Dirs & ("src/drivers/terminal/ansi");
+            when "ncurses" => Src_Dirs := Src_Dirs & ("src/drivers/terminal/ncurses");
+            when "trendy"  => Src_Dirs := Src_Dirs & ("src/drivers/terminal/trendy");
+         end case;
    end case;
+
+   for Source_Dirs use Src_Dirs;
 
    --  ============================================================================
    --  PAKIET COMPILER (Rygor techniczny i standard stylu)
@@ -105,7 +88,7 @@ project Gabyx is
       --  -gnatwa: Włącza wszystkie ostrzeżenia (Warn All).
       Base_Switches :=
         ("-gnat2022",              --  Włączenie najnowszego standardu języka Ada 2022
-         "-gnatec=" & Gabyx'Project_Dir & "configs/gabyx.adc",  --  NAPRAWIONO: Dodano Gabyx'Project_Dir
+         "-gnatec=" & Gabyx'Project_Dir & "data/config/gabyx.adc",
          "-gnatW8",                --  Obsługa kodowania UTF-8
          "-gnatf",                 --  Pełne komunikaty o błędach (Full error info)
          "-gnatU",                 --  Unikalne komunikaty błędów z tagami jednostek
@@ -183,9 +166,8 @@ project Gabyx is
    --  ============================================================================
 
    package Builder is
-      --  EDUKACJA: Atrybut 'Global_Configuration_Pragmas' pozwala na wskazanie pliku
-      --  konfiguracyjnego z globalnymi restrykcjami i regułami bezpieczeństwa.
-      --  for Global_Configuration_Pragmas use "configs/gabyx.adc";
+      --  Wymuszenie wyłączenia ostrzeżeń o aliasingu we WSZYSTKICH projektach zależnych (Raylib itp.)
+      for Global_Compilation_Switches ("Ada") use ("-fno-strict-aliasing", "-gnatwW");
 
       --  Mapowanie głównego pliku źródłowego na nazwę pliku wykonywalnego.
       for Executable ("main.adb") use "gabyx";
@@ -410,7 +392,7 @@ project Gabyx is
       --  (niebędące kodem źródłowym Ady), które mają zostać skopiowane do struktury
       --  instalacyjnej (domyślnie prefix/share/<Install_Name>/).
       --  UWAGA: Zgodnie z architekturą projektu używamy "configs" zamiast auto-generowanego "config".
-      for Artifacts (".") use ("share", "configs", "assets");
+      for Artifacts (".") use ("share", "data", "assets");
 
       --  EDUKACJA: Identyfikator instalacji – tworzy podkatalog w share/ oraz unikalny
       --  wpis w rejestrze gprinstall na wszystkich systemach operacyjnych.

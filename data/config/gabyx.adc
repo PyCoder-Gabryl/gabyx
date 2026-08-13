@@ -6,3 +6,6 @@ pragma Restrictions (No_Obsolescent_Features);
 
 --  Wymuszenie bezpiecznej inicjalizacji (elaboracji).
 pragma Restrictions (No_Entry_Calls_In_Elaboration_Code);
+
+
+pragma Warnings (Off, "possible aliasing problem*");
