@@ -27,7 +27,7 @@ procedure Main is
    --  ============================================================================
    --  SEKCJA DEFINICJI
    --  ============================================================================
-   Config_Path : constant String := "configs/window.toml";
+   Config_Path : constant String := "data/config/window.toml";
 
    Choice         : Integer := 0;
    Exit_Requested : Boolean := False;
