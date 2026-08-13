@@ -12,7 +12,6 @@
 #                    oraz definicje profili kompilacji (debug/release).
 #  ------------------------------------------------------------------------------
 #  PATH:             alire.toml
-#  FILE VERSION:     0.2.0
 #  CREATED:          2026-08-04
 #  ==============================================================================
 
@@ -68,8 +67,19 @@ LDFLAGS.set  = "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
 #  użycie odpowiedniego SDK (rozwiązuje m.in. błąd "-lSystem").
 SDKROOT.set  = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
 
+[environment.'case(os)'.windows]
+#  Dla systemu Windows wymuszamy zmienną środowiskową platformy dla Alire / GNAT
+ALIRE_HOST_OS.set = "windows"
+CFLAGS.set        = "-Isrc -Iraygui/src -I.."
+CPATH.set         = "src"
+
+[environment.'case(os)'.linux]
+ALIRE_HOST_OS.set = "linux"
+CFLAGS.set        = "-Isrc -Iraygui/src -I.."
+CPATH.set         = "src"
+
 [environment.'case(os)'.'...']
-#  Dla systemów Linux, Windows i BSD nie wymagamy dodatkowych flag SDK.
+#  Dla systemu BSD nie wymagamy dodatkowych flag SDK [TODO: do sprawdzenia].
 
 #  ============================================================================
 #  ZALEŻNOŚCI PROJEKTU (DEPENDENCIES)
@@ -79,12 +89,12 @@ SDKROOT.set  = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
 #  przy jednoczesnym dopuszczeniu bezpiecznych poprawek błędów.
 
 [[depends-on]]
-gnatprove = "^16.1.0"       # Narzędzie do formalnej weryfikacji SPARK
-gnatcov = "^26.2.1"         # Narzędzie do analizy pokrycia kodu (Coverage)
-aunit = "^24.0.0"           # Framework do testów jednostkowych (xUnit style)
+gnatprove = "*"       # Narzędzie do formalnej weryfikacji SPARK
+gnatcov = "*"         # Narzędzie do analizy pokrycia kodu (Coverage)
+aunit = "*"           # Framework do testów jednostkowych (xUnit style)
 
-ada_toml = "^0.5.0"         # Parser plików konfiguracyjnych TOML
-raylib = "^2.0.0"           # Silnik renderowania grafiki 2D
+ada_toml = "*"         # Parser plików konfiguracyjnych TOML
+raylib = "*"           # Silnik renderowania grafiki 2D
 
 #  ============================================================================
 #  PROFILE KOMPILACJI (PRZEKAZYWANE DO PLIKU .GPR)
@@ -94,3 +104,6 @@ raylib = "^2.0.0"           # Silnik renderowania grafiki 2D
 #  Zmienna BUILD_MODE pozwala na przełączanie flag kompilatora z poziomu Alire.
 #  Użycie: alr build -- -XBUILD_MODE=release
 BUILD_MODE = ["debug", "release", "validation"]
+
+GABYX_DRIVER = ["terminal", "raylib", "sdl2", "all"]
+SPARK_MODE = ["Off", "On"]

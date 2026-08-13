@@ -31,7 +31,8 @@ project Gabyx is
    --  EDUKACJA: Funkcja 'external' pozwala na pobieranie wartości z otoczenia
    --  (zmiennych systemowych lub parametrów linii komend -X). Dzięki temu
    --  plik projektu jest elastyczny i reaguje na system operacyjny hosta.
-   type Host_OS_Type is ("macos", "windows", "linux", "others");
+   --  NAPRAWIONO: Dodano "bsd" do typu, aby zapobiec błędowi 'illegal case label "bsd"' w pakietach Ide i Install.
+   type Host_OS_Type is ("macos", "windows", "linux", "bsd", "others");
    Host_OS : Host_OS_Type := external ("ALIRE_HOST_OS", "others");
 
    --  EDUKACJA: Tryb budowania (Build Mode) pozwala na warunkowe włączanie
@@ -48,7 +49,21 @@ project Gabyx is
    --  EDUKACJA: Zmienna scenariusza do dynamicznego wykluczania sterowników.
    --  Pozwala na budowanie wersji terminalowej bez zależności od Raylib/SDL.
    type Driver_Selection is ("terminal", "raylib", "sdl2", "all");
-   Active_Driver : Driver_Selection := external ("GABYX_DRIVER", "terminal");
+
+   -- Ustalenie domyślnego sterownika na podstawie systemu operacyjnego:
+   Default_Driver : Driver_Selection := "terminal";
+
+   case Host_OS is
+      when "windows" | "macos" | "linux" =>
+         Default_Driver := "raylib";
+      when others =>
+         Default_Driver := "terminal";
+   end case;
+
+   -- Pozwala nadać własny sterownik z zewnątrz (np. -XGABYX_DRIVER=sdl2),
+   -- a jeśli brak zmiennej - użyje automatycznie dobranego Default_Driver:
+   -- NAPRAWIONO: Usunięto 'Image (niedozwolony w języku GPR, wywoływał wykrzyk/CONSTRAINT_ERROR w parserze GPR2).
+   Active_Driver : Driver_Selection := external ("GABYX_DRIVER", Default_Driver);
 
    --  ============================================================================
    --  STRUKTURA KATALOGÓW I WYKLUCZENIA SILNIKÓW (OMNI-ENGINE)
@@ -90,6 +105,7 @@ project Gabyx is
       --  -gnatwa: Włącza wszystkie ostrzeżenia (Warn All).
       Base_Switches :=
         ("-gnat2022",              --  Włączenie najnowszego standardu języka Ada 2022
+         "-gnatec=" & Gabyx'Project_Dir & "configs/gabyx.adc",  --  NAPRAWIONO: Dodano Gabyx'Project_Dir
          "-gnatW8",                --  Obsługa kodowania UTF-8
          "-gnatf",                 --  Pełne komunikaty o błędach (Full error info)
          "-gnatU",                 --  Unikalne komunikaty błędów z tagami jednostek
@@ -169,7 +185,7 @@ project Gabyx is
    package Builder is
       --  EDUKACJA: Atrybut 'Global_Configuration_Pragmas' pozwala na wskazanie pliku
       --  konfiguracyjnego z globalnymi restrykcjami i regułami bezpieczeństwa.
-      for Global_Configuration_Pragmas use "configs/gabyx.adc";
+      --  for Global_Configuration_Pragmas use "configs/gabyx.adc";
 
       --  Mapowanie głównego pliku źródłowego na nazwę pliku wykonywalnego.
       for Executable ("main.adb") use "gabyx";
