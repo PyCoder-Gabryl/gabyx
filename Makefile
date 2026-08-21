@@ -345,7 +345,7 @@ git-init:
 	@echo '#!/bin/sh' > .git/hooks/post-commit
 	@echo 'LAST_MSG=$$(git log -1 --pretty=%B)' >> .git/hooks/post-commit
 	@echo 'case "$$LAST_MSG" in' >> .git/hooks/post-commit
-	@echo '  bump:*|bump\(*)' >> .git/hooks/post-commit
+	@echo '  bump:*|bump\(*))' >> .git/hooks/post-commit
 	@echo '    exit 0' >> .git/hooks/post-commit
 	@echo '    ;;' >> .git/hooks/post-commit
 	@echo '  *)' >> .git/hooks/post-commit
