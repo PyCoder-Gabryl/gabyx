@@ -8,13 +8,79 @@
 # DESCRIPTION:     GABYX - WINDOW CONFIGURATION (TOML)
 # ----------------------------------------------------------------------------
 # PATH:            configs/window.toml
-# VERSION:         0.1.0
 # CREATED:         2026-08-04
 # ============================================================================
 
+# @formatter:off
 
 [window]
-title = "Gabyx - Roguelike RPG / City-Builder"
-width = 800
-height = 600
-fullscreen = false
+title                 = "Gabyx - Roguelike RPG / City-Builder"
+
+# Wybór aktywnego zestawu rozdzielczości:
+# 0 = tryb domyślny (automatyczny wybór zestawu nr 3: 1280x720)
+# 1 = Zestaw 1 (800x450)
+# 2 = Zestaw 2 (1024x576)
+# 3 = Zestaw 3 (1280x720 - Rekomendowany / Standard HD)
+# 4 = Zestaw 4 (1920x1080 - Full HD)
+active_preset         = 0
+
+# Tryb wyświetlania:
+# false = tryb okienkowy (stały rozmiar bez rozciągania)
+# true  = tryb pełnoekranowy (obraz wycentrowany w pionie i poziomie)
+fullscreen            = false
+
+# Blokada ręcznej zmiany rozmiaru okna myszą
+resizable             = false
+
+# Pozostałe flagi systemowe okna
+borderless            = false
+high_dpi              = true
+always_on_top         = false
+
+# ----------------------------------------------------------------------------
+# 4 PREDEFINIOWANE ZESTAWY ROZDZIELCZOŚCI (PROPORCJE 16:9)
+# ----------------------------------------------------------------------------
+[presets.preset_1]
+width                 = 800
+height                = 450
+
+[presets.preset_2]
+width                 = 1024
+height                = 576
+
+[presets.preset_3]
+width                 = 1280
+height                = 720
+
+[presets.preset_4]
+width                 = 1920
+height                = 1080
+
+# ----------------------------------------------------------------------------
+# SYNCHRONIZACJA I KLATKARZ (FPS)
+# ----------------------------------------------------------------------------
+[graphics]
+# Synchronizacja pionowa (Vertical Synchronization)
+vsync                 = true
+
+# Zachowanie proporcji przy pełnym ekranie (czarne pasy po bokach/górze)
+maintain_aspect_ratio = true
+
+# Dostępne limity klatkarza w grze
+available_fps         = [30, 60, 75, 120]
+
+# Wybrany klatkarz:
+# 0 = domyślny / automatyczny (synchronizacja z ekranem, np. 60 lub 120 FPS)
+# Wartości > 0 muszą znajdować się na liście available_fps
+target_fps            = 0
+
+# ----------------------------------------------------------------------------
+# KOLOR TŁA I PASÓW EKRANU (RGBA)
+# ----------------------------------------------------------------------------
+[background]
+r                     = 18
+g                     = 22
+b                     = 26
+a                     = 255
+
+# @formatter:off

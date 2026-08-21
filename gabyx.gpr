@@ -14,7 +14,6 @@
 --                    generowanie metryk i testów jednostkowych.
 --  ============================================================================
 --  PATH:             gabyx.gpr
---  FILE VERSION:     0.2.0
 --  CREATED:          2026-08-04
 --  ============================================================================
 
@@ -75,91 +74,79 @@ project Gabyx is
    end case;
 
    for Source_Dirs use Src_Dirs;
+   for Object_Dir use "obj/" & Build_Mode;
+   for Exec_Dir use "bin";
+   for Main use ("main.adb");
 
    --  ============================================================================
    --  PAKIET COMPILER (Rygor techniczny i standard stylu)
    --  ============================================================================
 
-   package Compiler is
+package Compiler is
 
-      --  EDUKACJA: Base_Switches definiują rygor projektu.
-      --  -gnat2022: Włącza najnowszy standard języka.
-      --  -gnatW8: Wymusza kodowanie UTF-8 (bezpieczne polskie znaki w komentarzach).
-      --  -gnatwa: Włącza wszystkie ostrzeżenia (Warn All).
-      Base_Switches :=
-        ("-gnat2022",              --  Włączenie najnowszego standardu języka Ada 2022
-         "-gnatec=" & Gabyx'Project_Dir & "data/config/gabyx.adc",
-         "-gnatW8",                --  Obsługa kodowania UTF-8
-         "-gnatf",                 --  Pełne komunikaty o błędach (Full error info)
-         "-gnatU",                 --  Unikalne komunikaty błędów z tagami jednostek
-         "-gnatwa",                --  Włączenie niemal wszystkich ostrzeżeń (Warn All)
-         "-gnatwe",                --  Traktowanie wszystkich ostrzeżeń jako błędy krytyczne
-         "-gnatVa",                --  Włączenie pełnej walidacji danych (Validity checks)
-         "-fstack-check",          --  Dynamiczne sprawdzanie przepełnienia stosu
-         "-fstack-usage",          --  Generowanie statycznej analizy zużycia stosu
-         "-ffunction-sections",    --  Sekcje dla funkcji (optymalizacja linkera)
-         "-fdata-sections",        --  Sekcje dla danych (optymalizacja rozmiaru binarki)
-         "-fno-strict-aliasing");  --  Wyłączenie restrykcyjnego aliasingu
+   --  EDUKACJA: Base_Switches definiują rygor projektu.
+   Base_Switches :=
+     ("-gnat2022",              --  Włączenie najnowszego standardu języka Ada 2022
+      "-gnatec=" & Gabyx'Project_Dir & "data/config/gabyx.adc",
+      "-gnatW8",                --  Obsługa kodowania UTF-8
+      "-gnatf",                 --  Pełne komunikaty o błędach (Full error info)
+      "-gnatU",                 --  Unikalne komunikaty błędów z tagami jednostek
+      "-gnatwa",                --  Włączenie niemal wszystkich ostrzeżeń (Warn All)
+      "-gnatwe",                --  Traktowanie wszystkich ostrzeżeń jako błędy krytyczne
+      "-gnatVa",                --  Włączenie pełnej walidacji danych (Validity checks)
+      "-fstack-check",          --  Dynamiczne sprawdzanie przepełnienia stosu
+      "-fstack-usage",          --  Generowanie statycznej analizy zużycia stosu
+      "-ffunction-sections",    --  Sekcje dla funkcji (optymalizacja linkera)
+      "-fdata-sections",        --  Sekcje dla danych (optymalizacja rozmiaru binarki)
+      "-fno-strict-aliasing");  --  Wyłączenie restrykcyjnego aliasingu
 
-      --  EDUKACJA: Style_Switches wymuszają dyscyplinę kodu (standard 3-spacjowy).
-      --  Zastępuje narzędzia typu gnatcheck, wymuszając dyscyplinę kodu.
-      Style_Switches :=
-        ("-gnaty3",                --  Wymuszenie dokładnie 3 spacji wcięcia (Twoja preferencja)
-         "-gnatya",                --  Sprawdzanie poprawnej wielkości liter w atrybutach
-         "-gnatyb",                --  Całkowity zakaz spacji na końcach linii
-         "-gnatyc",                --  Wymóg spacji po znaczniku komentarza -- (czytelność)
-         "-gnatyh",                --  Całkowity zakaz używania tabulacji
-         "-gnatyi",                --  Weryfikacja poprawnego układu instrukcji IF
-         "-gnatyk",                --  Wymuszenie małych liter w słowach kluczowych
-         "-gnatyl",                --  Weryfikacja układu sekcji deklaratywnej
-         "-gnatym",                --  Kontrola długości podprogramów
-         "-gnatyn",                --  Wielkość liter w nazwach bibliotek standardowych
-         "-gnatyp",                --  Spójność wielkości liter w pragmach
-         "-gnatyr",                --  Sprawdzanie spójności nazw identyfikatorów
-         "-gnatys",                --  Wymuszanie posiadania osobnych plików specyfikacji (.ads)
-         "-gnatyt",                --  Sprawdzanie poprawności odstępów między tokenami
-         "-gnatyM120");            --  Maksymalna dopuszczalna szerokość linii: 120 znaków
+   --  EDUKACJA: Style_Switches wymuszają dyscyplinę kodu (standard 3-spacjowy).
+   Style_Switches :=
+     ("-gnaty3",                --  Wymuszenie dokładnie 3 spacji wcięcia
+      "-gnatya",                --  Sprawdzanie poprawnej wielkości liter w atrybutach
+      "-gnatyb",                --  Całkowity zakaz spacji na końcach linii
+      "-gnatyc",                --  Wymóg spacji po znaczniku komentarza -- (czytelność)
+      "-gnatyh",                --  Całkowity zakaz używania tabulacji
+      "-gnatyi",                --  Weryfikacja poprawnego układu instrukcji IF
+      "-gnatyk",                --  Wymuszenie małych liter w słowach kluczowych
+      "-gnatyl",                --  Weryfikacja układu sekcji deklaratywnej
+      "-gnatym",                --  Kontrola długości podprogramów
+      "-gnatyn",                --  Wielkość liter w nazwach bibliotek standardowych
+      "-gnatyp",                --  Spójność wielkości liter w pragmach
+      "-gnatyr",                --  Sprawdzanie spójności nazw identyfikatorów
+      "-gnatys",                --  Wymuszanie posiadania osobnych plików specyfikacji (.ads)
+      "-gnatyt",                --  Sprawdzanie poprawności odstępów między tokenami
+      "-gnatyM120");            --  Maksymalna dopuszczalna szerokość linii: 120 znaków
 
-      --  Konfiguracja specyficzna dla trybu budowania (Build Mode)
-      case Build_Mode is
-         when "debug" | "test" =>
-            for Default_Switches ("Ada") use Base_Switches & Style_Switches &
-              ("-g",               --  Generowanie symboli dla debuggera (GDB/LLDB)
-               "-gnata",           --  Włączenie asercji (pragma Assert) i kontraktów
-               "-gnato",           --  Włączenie sprawdzania przepełnień (Overflow checks)
-               "-O0");             --  Brak optymalizacji (ułatwia debugowanie)
+   --  Flagi dla trybów budowania (Build Mode)
+   Mode_Switches := ();
+   case Build_Mode is
+      when "debug" | "test" =>
+         Mode_Switches :=
+           ("-g",               --  Generowanie symboli dla debuggera (GDB/LLDB)
+            "-gnata",           --  Włączenie asercji (pragma Assert) i kontraktów
+            "-gnato",           --  Włączenie sprawdzania przepełnień (Overflow checks)
+            "-O0");             --  Brak optymalizacji (ułatwia debugowanie)
 
-         when "release" =>
-            for Default_Switches ("Ada") use Base_Switches & Style_Switches &
-              ("-O3",              --  Maksymalna optymalizacja wydajnościowa
-               "-gnatn");          --  Włączenie mechanizmu Inliningu
-      end case;
+      when "release" =>
+         Mode_Switches :=
+           ("-O3",              --  Maksymalna optymalizacja wydajnościowa
+            "-gnatn");          --  Włączenie mechanizmu Inliningu
+   end case;
 
-      --  Konfiguracja specyficzna dla systemu i obsługa SDK (sysroot) na macOS.
-      --  EDUKACJA: Używamy zagnieżdżonego 'case', aby flaga -isysroot była podawana
-      --  tylko podczas kompilacji, a nigdy podczas dowodzenia SPARK (gnat2why).
-      case Host_OS is
-         when "macos" =>
-            case SPARK_Mode is
-               when "Off" =>
-                  for Default_Switches ("Ada") use Compiler'Default_Switches ("Ada") &
-                    ("-isysroot", "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk");
-               when others =>
-                  null;
-            end case;
-         when others =>
-            null;
-      end case;
+   --  Flagi dla fazy analizy formalnej SPARK
+   SPARK_Switches := ();
+   case SPARK_Mode is
+      when "On" =>
+         SPARK_Switches := ("-gnatd.F");
+      when others =>
+         null;
+   end case;
 
-      --  Dodatkowy rygor dla fazy analizy formalnej SPARK.
-      case SPARK_Mode is
-         when "On" =>
-            for Default_Switches ("Ada") use Compiler'Default_Switches ("Ada") & ("-gnatd.F");
-         when others =>
-            null;
-      end case;
+   --  Jednorazowe i bezpieczne przypisanie wszystkich flag kompilatora
+   for Default_Switches ("Ada") use Base_Switches & Style_Switches & Mode_Switches & SPARK_Switches;
 
-   end Compiler;
+end Compiler;
 
    --  ============================================================================
    --  PAKIET BUILDER (Orkiestracja i wydajność procesu budowania)
@@ -215,12 +202,9 @@ project Gabyx is
 
       case Host_OS is
          when "macos" =>
-            --  EDUKACJA: Na macOS linker wymaga jawnego wskazania ścieżki do SDK.
             for Default_Switches ("Ada") use (
                "-g",               --  Przekazanie symboli debugowania do linkera
-               "-Wl,-dead_strip",  --  Usuwanie nieużywanego kodu i danych
-               "-isysroot", "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
-               "-Wl,-syslibroot,/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+               "-Wl,-dead_strip"   --  Usuwanie nieużywanego kodu i danych
             );
 
          when "linux" | "windows" =>

@@ -27,7 +27,7 @@ Gabyx to klasyczna gra typu Roguelike i City-Builder pisana w języku Ada
 z wykorzystaniem najnowszych standardów Ada 2022 oraz formalnej weryfikacji SPARK.
 Projekt integruje silnik Raylib dla grafiki oraz obsługę formatu TOML dla konfiguracji.
 """
-version = "0.1.0-dev"
+version = "0.1.0"
 
 authors = ["PyCoder Gabryl"]
 maintainers = ["PyCoder Gabryl <pycoder.gabryl@gmail.com>"]
@@ -59,13 +59,13 @@ MACOSX_DEPLOYMENT_TARGET.set = "26.0"
 
 #  Poniższe ustawienia są specyficzne dla macOS ARM (M1/M2/M3).
 #  Przekazanie ścieżki SDK do każdej zewnętrznej zależności w C oraz linkera.
-CFLAGS.set   = "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+CFLAGS.set = "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
 CXXFLAGS.set = "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
-LDFLAGS.set  = "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+LDFLAGS.set = "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
 
 #  Globalna zmienna środowiskowa Apple, wymuszająca na wszystkich narzędziach
 #  użycie odpowiedniego SDK (rozwiązuje m.in. błąd "-lSystem").
-SDKROOT.set  = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+SDKROOT.set = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
 
 [environment.'case(os)'.windows]
 #  Dla systemu Windows wymuszamy zmienną środowiskową platformy dla Alire / GNAT

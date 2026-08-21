@@ -1,13 +1,20 @@
 # 📄 DOKUMENT KONCEPCYJNY: PROJEKT GABYX
 
-| Parametr | Wartość |
-| :--- | :--- |
-| **Nazwa Projektu** | Gabyx |
-| **Wersja Projektu** | `[0.1.0]` |
-| **Autor** | PyCoder Gabryl (https://github.com/PyCoder-Gabryl/) |
-| **Licencja** | Apache License 2.0 |
-| **Główna Technologia** | Ada 2022, SPARK |
-| **Docelowe Platformy** | macOS M1 (Apple Silicon / Tahoe), Linux (Debian), Windows |
+| Parametr         | Wartość                         |
+| :--------------- | :------------------------------ |
+| **Nazwa Projektu | Gabyx                           |
+| **               |                                 |
+| **Wersja         | `[0.1.0]`                       |
+| Projektu **      |                                 |
+| **Autor*         | PyCoder Gabryl                  |
+| *                | (https://github.com/PyCoder-Gab |
+|                  | ryl/)                           |
+| **Licenc ja**    | Apache License 2.0              |
+| **Główna         | Ada 2022, SPARK                 |
+| Technolo gia**   |                                 |
+| **Docelo         | macOS M1 (Apple Silicon /       |
+|                  | Tahoe), Linux                   |
+| we Platform y**  | (Debian), Windows               |
 
 ---
 
