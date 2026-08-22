@@ -157,8 +157,12 @@ run:
 ## clean: Usuwanie plików binarnych, obiektowych i artefaktów
 clean:
 	@echo "$(C_YELLOW)==> Czyszczenie projektu i artefaktów...$(C_RESET)"
-	@alr clean
+	@# 1. Czyszczenie artefaktów (.stdout, .stderr, .cswi, .lexch) z lokalnego obj i cache Alire
+	@find . ~/.local/share/alire/builds -type f \( -name "*.stdout" -o -name "*.stderr" -o -name "*.cswi" -o -name "*.lexch" \) -delete 2>/dev/null || true
+	@# 2. Fizyczne usunięcie folderów build/obj przed alr clean
 	$(RM) obj bin gnatcov_rts gnatcov_rts.gpr *.trace *.srctrace *.map context.txt
+	@# 3. Wywołanie alr clean na już pustych strukturach
+	@alr clean
 	@echo "$(C_GREEN)==> Projekt został wyczyszczony.$(C_RESET)"
 
 #  =============================================================================

@@ -56,7 +56,12 @@ project Gabyx is
    Term_Driver : Term_Driver_Type := external ("GABYX_TERM_DRIVER", "ansi");
 
    --  Dynamiczne budowanie listy katalogów źródłowych
-   Src_Dirs := ("src", "src/core/**", "src/drivers/abstract");
+   Src_Dirs := ("src",
+      "src/core/**",
+      "src/config",
+      "src/logging",
+      "src/drivers/abstract"
+   );
 
    case Mode is
       when "graphical" =>
@@ -304,7 +309,7 @@ end Compiler;
    --  ============================================================================
 
    package Clean is
-      for Switches use ("-r", "-p", "-f");    --  Wymuszone i rekurencyjne czyszczenie
+      for Switches use ("-p", "-f");    --  Wymuszone i rekurencyjne czyszczenie
    end Clean;
 
    package Gnatls is
