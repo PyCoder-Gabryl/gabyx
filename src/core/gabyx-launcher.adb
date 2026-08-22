@@ -19,6 +19,7 @@ with Ada.Text_IO;
 with Ada.Integer_Text_IO;
 with Ada.Strings.Unbounded;
 with Gabyx.Config;
+with Gabyx.Drivers.Raylib;
 
 package body Gabyx.Launcher is
 
@@ -88,6 +89,7 @@ package body Gabyx.Launcher is
                   Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika Trendy_Terminal TUI...");
                when 4 =>
                   Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika Raylib 2D Engine...");
+                  Gabyx.Drivers.Raylib.Run (App_Config);
                when 5 =>
                   Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika SDL2 Engine...");
                when 6 =>

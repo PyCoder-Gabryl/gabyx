@@ -21,6 +21,28 @@ with TOML.File_IO;
 
 package body Gabyx.Config is
 
+   --  Otwarcie widoczności operatorów dla typu wyliczeniowego z pakietu TOML
+   use type TOML.Any_Value_Kind;
+
+   --  ============================================================================
+   --  DEKLARACJE FUNKCJI WEWNĘTRZNYCH (WYMÓG STYLU -gnatys)
+   --  ============================================================================
+
+   function Read_String
+     (Table   : TOML.TOML_Value;
+      Key     : String;
+      Default : String) return String;
+
+   function Read_Boolean
+     (Table   : TOML.TOML_Value;
+      Key     : String;
+      Default : Boolean) return Boolean;
+
+   function Read_Integer
+     (Table   : TOML.TOML_Value;
+      Key     : String;
+      Default : Integer) return Integer;
+
    --  ============================================================================
    --  POMOCNICZE FUNKCJE WEWNĘTRZNE (BEZPIECZNY ODCZYT TOML)
    --  ============================================================================
@@ -30,13 +52,17 @@ package body Gabyx.Config is
       Key     : String;
       Default : String) return String
    is
-      Val : constant TOML.TOML_Value := Table.Get (Key);
    begin
-      if Val.Kind = TOML.TOML_String then
-         return Val.As_String;
-      else
-         return Default;
+      if Table.Kind = TOML.TOML_Table and then Table.Has (Key) then
+         declare
+            Val : constant TOML.TOML_Value := Table.Get (Key);
+         begin
+            if Val.Kind = TOML.TOML_String then
+               return Val.As_String;
+            end if;
+         end;
       end if;
+      return Default;
    end Read_String;
 
    function Read_Boolean
@@ -44,13 +70,17 @@ package body Gabyx.Config is
       Key     : String;
       Default : Boolean) return Boolean
    is
-      Val : constant TOML.TOML_Value := Table.Get (Key);
    begin
-      if Val.Kind = TOML.TOML_Boolean then
-         return Val.As_Boolean;
-      else
-         return Default;
+      if Table.Kind = TOML.TOML_Table and then Table.Has (Key) then
+         declare
+            Val : constant TOML.TOML_Value := Table.Get (Key);
+         begin
+            if Val.Kind = TOML.TOML_Boolean then
+               return Val.As_Boolean;
+            end if;
+         end;
       end if;
+      return Default;
    end Read_Boolean;
 
    function Read_Integer
@@ -58,13 +88,17 @@ package body Gabyx.Config is
       Key     : String;
       Default : Integer) return Integer
    is
-      Val : constant TOML.TOML_Value := Table.Get (Key);
    begin
-      if Val.Kind = TOML.TOML_Integer then
-         return Integer (Val.As_Integer);
-      else
-         return Default;
+      if Table.Kind = TOML.TOML_Table and then Table.Has (Key) then
+         declare
+            Val : constant TOML.TOML_Value := Table.Get (Key);
+         begin
+            if Val.Kind = TOML.TOML_Integer then
+               return Integer (Val.As_Integer);
+            end if;
+         end;
       end if;
+      return Default;
    end Read_Integer;
 
    --  ============================================================================
@@ -93,7 +127,7 @@ package body Gabyx.Config is
          Root : constant TOML.TOML_Value := Result.Value;
       begin
          --  1. Sekcja [window]
-         if Root.Has ("window") then
+         if Root.Kind = TOML.TOML_Table and then Root.Has ("window") then
             declare
                Window_Tab : constant TOML.TOML_Value := Root.Get ("window");
                Preset_Num : constant Integer := Read_Integer (Window_Tab, "active_preset", 0);
@@ -117,34 +151,36 @@ package body Gabyx.Config is
          end if;
 
          --  2. Sekcja [presets] - dopasowanie wymiarów
-         declare
-            Selected_Preset_Key : constant String :=
-              (case Config.Active_Preset is
-                  when Preset_1     => "presets.preset_1",
-                  when Preset_2     => "presets.preset_2",
-                  when Preset_3     => "presets.preset_3",
-                  when Preset_4     => "presets.preset_4",
-                  when Auto_Default => "presets.preset_3");
-
-            Preset_Tab : constant TOML.TOML_Value := Root.Get (Selected_Preset_Key);
-         begin
-            if Preset_Tab.Kind = TOML.TOML_Table then
-               declare
-                  Raw_W : constant Integer := Read_Integer (Preset_Tab, "width", 1280);
-                  Raw_H : constant Integer := Read_Integer (Preset_Tab, "height", 720);
-               begin
-                  if Raw_W in Width_Type'Range then
-                     Config.Width := Width_Type (Raw_W);
-                  end if;
-                  if Raw_H in Height_Type'Range then
-                     Config.Height := Height_Type (Raw_H);
-                  end if;
-               end;
-            end if;
-         end;
+         if Root.Kind = TOML.TOML_Table and then Root.Has ("presets") then
+            declare
+               Presets_Tab : constant TOML.TOML_Value := Root.Get ("presets");
+               Sub_Key     : constant String :=
+                 (case Config.Active_Preset is
+                     when Preset_1     => "preset_1",
+                     when Preset_2     => "preset_2",
+                     when Preset_3     => "preset_3",
+                     when Preset_4     => "preset_4",
+                     when Auto_Default => "preset_3");
+            begin
+               if Presets_Tab.Kind = TOML.TOML_Table and then Presets_Tab.Has (Sub_Key) then
+                  declare
+                     Preset_Tab : constant TOML.TOML_Value := Presets_Tab.Get (Sub_Key);
+                     Raw_W      : constant Integer := Read_Integer (Preset_Tab, "width", 1280);
+                     Raw_H      : constant Integer := Read_Integer (Preset_Tab, "height", 720);
+                  begin
+                     if Raw_W in Width_Type'Range then
+                        Config.Width := Width_Type (Raw_W);
+                     end if;
+                     if Raw_H in Height_Type'Range then
+                        Config.Height := Height_Type (Raw_H);
+                     end if;
+                  end;
+               end if;
+            end;
+         end if;
 
          --  3. Sekcja [graphics]
-         if Root.Has ("graphics") then
+         if Root.Kind = TOML.TOML_Table and then Root.Has ("graphics") then
             declare
                Gfx_Tab : constant TOML.TOML_Value := Root.Get ("graphics");
                Raw_FPS : constant Integer := Read_Integer (Gfx_Tab, "target_fps", 0);
@@ -162,7 +198,7 @@ package body Gabyx.Config is
          end if;
 
          --  4. Sekcja [background]
-         if Root.Has ("background") then
+         if Root.Kind = TOML.TOML_Table and then Root.Has ("background") then
             declare
                Bg_Tab : constant TOML.TOML_Value := Root.Get ("background");
                Raw_R  : constant Integer := Read_Integer (Bg_Tab, "r", 18);
