@@ -48,9 +48,9 @@ project-files = ["gabyx.gpr"]
 #  ============================================================================
 
 [environment.'case(os)'.macos]
-#  EDUKACJA: Sekcja [environment] pozwala na wstrzykiwanie zmiennych do powłoki
-#  systemowej przed uruchomieniem kompilatora. Jest to mechanizm separacji
-#  konfiguracji systemowej od kodu źródłowego (Cross-Platform Portability).
+#  EDUKACJA: Ustawienie zmiennej platformy, aby plik projektu gabyx.gpr
+#  poprawnie rozpoznał system macOS i zaaplikował odpowiednie flagi linkera.
+ALIRE_HOST_OS.set = "macos"
 
 #  Instrukcja sprawdzania wersji systemu:
 #  1. Otwórz terminal i wpisz polecenie: sw_vers -productVersion

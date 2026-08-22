@@ -197,7 +197,7 @@ end Compiler;
       end case;
    end Binder;
 
-   --  ============================================================================
+--  ============================================================================
    --  PAKIET LINKER (Tworzenie i optymalizacja końcowej binarki)
    --  ============================================================================
 
@@ -207,20 +207,44 @@ end Compiler;
 
       case Host_OS is
          when "macos" =>
-            for Default_Switches ("Ada") use (
-               "-g",               --  Przekazanie symboli debugowania do linkera
-               "-Wl,-dead_strip"   --  Usuwanie nieużywanego kodu i danych
+            --  EDUKACJA: Na systemie macOS (Apple Silicon ARM64) pakiet Linker
+            --  wymaga atrybutu 'Switches' (zamiast Default_Switches), aby flagi
+            --  zostały bezpośrednio przekazane do konsolidatora pliku wykonywalnego.
+            for Switches ("Ada") use (
+               "-g",                     --  Przekazanie symboli debugowania do linkera (dla LLDB)
+               "-Wl,-dead_strip",        --  Usuwanie nieużywanego kodu i martwych sekcji binarki
+               "/opt/homebrew/lib/libraylib.a",
+                                          --  Statyczne wlinkowanie Raylib (eliminuje błędy dyld i LC_RPATH)
+                                          --  Ścieżka do natywnych bibliotek C Homebrew na Apple Silicon
+               "-lm",                    --  Standardowa biblioteka matematyczna języka C (libm)
+               "-lpthread",              --  Biblioteka wielowątkowości POSIX Threads
+               "-framework", "OpenGL",   --  Framework graficzny OpenGL systemu macOS
+               "-framework", "Cocoa",    --  Główny framework okienkowy i zdarzeń systemu macOS
+               "-framework", "IOKit",    --  Obsługa bezpośredniego wejścia/wyjścia (klawiatura, mysz, pady)
+               "-framework", "CoreVideo" --  Synchronizacja odświeżania bufora ekranu z monitorem (V-Sync)
             );
 
          when "linux" | "windows" =>
             --  Odpowiednik dead_strip dla Linuxa i Windowsa (GNU Linker).
-            for Default_Switches ("Ada") use (
-               "-Wl,--gc-sections", --  Usuwanie martwego kodu
-               "-Wl,--as-needed"    --  Linkuj biblioteki tylko jeśli są użyte
+            for Switches ("Ada") use (
+               "-Wl,--gc-sections",      --  Usuwanie martwego kodu i nieużywanych sekcji
+               "-Wl,--as-needed",        --  Linkuj biblioteki dynamiczne tylko jeśli są rzeczywiście użyte
+               "-lraylib",               --  Natywna biblioteka Raylib
+               "-lm"                     --  Biblioteka matematyczna języka C
             );
 
          when others =>
-            null;
+            --  Awaryjna konfiguracja konsolidatora dla nierozpoznanych środowisk
+            for Switches ("Ada") use (
+               "-L/opt/homebrew/lib",    --  Domyślna ścieżka Homebrew na macOS ARM64
+               "-L/usr/local/lib",       --  Standardowa ścieżka bibliotek UNIX/x86_64
+               "-lraylib",               --  Linkowanie biblioteki Raylib
+               "-lm",                    --  Biblioteka matematyczna
+               "-framework", "OpenGL",
+               "-framework", "Cocoa",
+               "-framework", "IOKit",
+               "-framework", "CoreVideo"
+            );
       end case;
    end Linker;
 

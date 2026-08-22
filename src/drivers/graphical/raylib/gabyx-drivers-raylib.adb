@@ -15,7 +15,6 @@
 with Interfaces.C;
 with Ada.Strings.Unbounded;
 with Raylib;
-with Raylib.Colors;
 
 package body Gabyx.Drivers.Raylib is
 
@@ -26,64 +25,69 @@ package body Gabyx.Drivers.Raylib is
    procedure Run (Config : Gabyx.Config.Window_Configuration) is
       use Interfaces.C;
 
-      --  Konwersja składowych koloru z konfiguracji do formatu Raylib
-      Clear_Color : constant global::Raylib.Color :=
-        (R => unsigned_char (Config.Clear_Color.R),
-         G => unsigned_char (Config.Clear_Color.G),
-         B => unsigned_char (Config.Clear_Color.B),
-         A => unsigned_char (Config.Clear_Color.A));
+      --  Konwersja składowych koloru z konfiguracji do formatu rekordu Raylib
+      Clear_Color : constant Standard.Raylib.Color :=
+        (r => unsigned_char (Config.Clear_Color.R),
+         g => unsigned_char (Config.Clear_Color.G),
+         b => unsigned_char (Config.Clear_Color.B),
+         a => unsigned_char (Config.Clear_Color.A));
+
+      --  Zdefiniowane stałe kolorów tekstu
+      Text_White : constant Standard.Raylib.Color := (r => 245, g => 245, b => 245, a => 255);
+      Text_Gray  : constant Standard.Raylib.Color := (r => 180, g => 180, b => 180, a => 255);
+      Text_Gold  : constant Standard.Raylib.Color := (r => 255, g => 203, b => 0,   a => 255);
 
       Title_Str : constant String :=
         Ada.Strings.Unbounded.To_String (Config.Title);
-      Win_W     : constant Integer := Integer (Config.Width);
-      Win_H     : constant Integer := Integer (Config.Height);
-      FPS       : constant Integer :=
-        (if Config.Target_FPS > 0 then Integer (Config.Target_FPS) else 60);
+      Win_W     : constant int := int (Config.Width);
+      Win_H     : constant int := int (Config.Height);
+      FPS       : constant int :=
+        (if Config.Target_FPS > 0 then int (Config.Target_FPS) else 60);
 
    begin
-      --  1. Inicjalizacja okna graficznego i kontekstu OpenGL / Metal
-      global::Raylib.Init_Window (Win_W, Win_H, Title_Str);
-      global::Raylib.Set_Target_FPS (FPS);
+      --  1. Inicjalizacja okna graficznego i kontekstu graficznego
+      Standard.Raylib.InitWindow (Win_W, Win_H, Title_Str);
+      Standard.Raylib.SetTargetFPS (FPS);
 
       --  2. Główna pętla renderowania okna
-      while not global::Raylib.Window_Should_Close loop
-         global::Raylib.Begin_Drawing;
-         global::Raylib.Clear_Background (Clear_Color);
+      while not Boolean (Standard.Raylib.WindowShouldClose) loop
+         Standard.Raylib.BeginDrawing;
+         Standard.Raylib.ClearBackground (Clear_Color);
 
          --  Wyświetlenie informacji diagnostycznych na ekranie
-         global::Raylib.Draw_Text
+         Standard.Raylib.DrawText
            ("GABYX OMNI-ENGINE (RAYLIB 2D BACKEND)",
             40,
             40,
             24,
-            global::Raylib.Colors.Ray_White);
+            Text_White);
 
-         global::Raylib.Draw_Text
-           ("Rozdzielczosc: " & Win_W'Image & " x " & Win_H'Image & " px",
+         Standard.Raylib.DrawText
+           ("Rozdzielczosc: " & Integer (Win_W)'Image & " x " & Integer (Win_H)'Image & " px",
             40,
             80,
             18,
-            global::Raylib.Colors.Light_Gray);
+            Text_Gray);
 
-         global::Raylib.Draw_Text
-           ("Docelowy klatkarz: " & FPS'Image & " FPS",
+         Standard.Raylib.DrawText
+           ("Docelowy klatkarz: " & Integer (FPS)'Image & " FPS",
             40,
             110,
             18,
-            global::Raylib.Colors.Light_Gray);
+            Text_Gray);
 
-         global::Raylib.Draw_Text
+         Standard.Raylib.DrawText
            ("Nacisnij ESC lub zamknij okno, aby wrocic do menu.",
             40,
             160,
             18,
-            global::Raylib.Colors.Gold);
+            Text_Gold);
 
-         global::Raylib.End_Drawing;
+         Standard.Raylib.EndDrawing;
       end loop;
 
-      --  3. Bezpieczne zwolnienie kontekstu GPU i zamknięcie okna
-      global::Raylib.Close_Window;
+      --  3. Bezpieczne zwolnienie zasobów GPU i zamknięcie okna
+      Standard.Raylib.CloseWindow;
    end Run;
 
 end Gabyx.Drivers.Raylib;
