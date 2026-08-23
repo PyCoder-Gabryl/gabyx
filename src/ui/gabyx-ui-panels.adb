@@ -5,9 +5,9 @@
 --  EMAIL:           pycoder.gabryl@gmail.com
 --  LICENSE:         Apache 2.0
 --  ----------------------------------------------------------------------------
---  DESCRIPTION:      Implementacja formaterow tekstowych paneli UI. Odpowiada za
---                    generowanie tresci diagnostycznych oraz algorytm bezpiecznego
---                    zmniejszania rozmiaru glifow przy przekroczeniu ramki slotu.
+--  DESCRIPTION:     Implementacja formaterów tekstowych paneli UI. Odpowiada za
+--                   generowanie treści diagnostycznych oraz algorytm bezpiecznego
+--                   zmniejszania rozmiaru glifów przy przekroczeniu ramki slotu.
 --  ----------------------------------------------------------------------------
 --  PATH:            src/ui/gabyx-ui-panels.adb
 --  CREATED:         2026-08-23
@@ -17,6 +17,10 @@
 with Ada.Characters.Latin_1;
 
 package body Gabyx.UI.Panels is
+
+   --  ============================================================================
+   --  IMPLEMENTACJA INTERFEJSU PUBLICZNEGO
+   --  ============================================================================
 
    function Get_Top_Bar_Text
      (View          : HUD_View_Type;

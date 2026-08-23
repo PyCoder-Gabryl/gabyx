@@ -5,11 +5,11 @@
 --  EMAIL:           pycoder.gabryl@gmail.com
 --  LICENSE:         Apache 2.0
 --  ----------------------------------------------------------------------------
---  DESCRIPTION:      Formalny moduł kalkulacji geometrii kontenerów UI.
---                    Dzieli wirtualną przestrzeń na 3 niezależne pojemniki:
---                    Górny pasek, Viewport świata oraz Dolny dashboard.
---                    Obsługuje buforowanie geometrii (Layout Cache) oraz
---                    automatyczne wykrywanie proporcji Ultra-Wide (21:9).
+--  DESCRIPTION:     Formalny moduł kalkulacji geometrii kontenerów UI.
+--                   Dzieli wirtualną przestrzeń na 3 niezależne pojemniki:
+--                   Górny pasek, Viewport świata oraz Dolny dashboard.
+--                   Obsługuje buforowanie geometrii (Layout Cache) oraz
+--                   automatyczne wykrywanie proporcji Ultra-Wide (21:9).
 --  ----------------------------------------------------------------------------
 --  PATH:            src/ui/gabyx-ui-layout.ads
 --  CREATED:         2026-08-23
@@ -17,6 +17,7 @@
 
 
 with Gabyx.Types;
+with Gabyx.UI.Types;
 
 package Gabyx.UI.Layout with
    SPARK_Mode => On,
@@ -24,6 +25,11 @@ package Gabyx.UI.Layout with
 is
 
    use Gabyx.Types;
+   use Gabyx.UI.Types;
+
+   --  ============================================================================
+   --  PUBLICZNY INTERFEJS KALKULATORA GEOMETRII (SPARK)
+   --  ============================================================================
 
    --  Zwraca efektywny profil HUD (rozwiązuje profil Auto na podstawie szerokości)
    function Resolve_Tier

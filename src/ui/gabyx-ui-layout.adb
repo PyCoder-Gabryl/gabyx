@@ -5,22 +5,22 @@
 --  EMAIL:           pycoder.gabryl@gmail.com
 --  LICENSE:         Apache 2.0
 --  ----------------------------------------------------------------------------
---  DESCRIPTION:      Implementacja kalkulatora geometrii kontenerów UI w SPARK.
---                    Gwarantuje matematyczny brak nakładania się paneli oraz
---                    zachowanie minimalnej dopuszczalnej wysokości Viewportu.
+--  DESCRIPTION:     Implementacja kalkulatora geometrii kontenerów UI w SPARK.
+--                   Gwarantuje matematyczny brak nakładania się paneli oraz
+--                   zachowanie minimalnej dopuszczalnej wysokości Viewportu.
 --  ----------------------------------------------------------------------------
 --  PATH:            src/ui/gabyx-ui-layout.adb
 --  CREATED:         2026-08-23
 --  ============================================================================
 
 
---  ============================================================================
---  KONTEKST ZMIANY W: src/ui/gabyx-ui-layout.adb
---  ============================================================================
-
 package body Gabyx.UI.Layout with
    SPARK_Mode => On
 is
+
+   --  ============================================================================
+   --  IMPLEMENTACJA INTERFEJSU PUBLICZNEGO
+   --  ============================================================================
 
    function Resolve_Tier
      (Width       : Width_Type;
@@ -43,7 +43,7 @@ is
    function Calculate_Layout
      (Width       : Width_Type;
       Height      : Height_Type;
-      Forced_Tier : HUD_Tier_Type) return Layout_Cache                                --  [ZMIENIONE]
+      Forced_Tier : HUD_Tier_Type) return Layout_Cache
    is
       Cache      : Layout_Cache;
       Tier       : constant HUD_Tier_Type := Resolve_Tier (Width, Forced_Tier);
@@ -70,6 +70,7 @@ is
       if Height > (Top_H + Bottom_H + 100) then
          Viewport_H := Height - Top_H - Bottom_H;
       else
+         --  Awaryjna ochrona minimalnej wysokości Viewportu
          Top_H      := 24;
          Bottom_H   := 64;
          Viewport_H := Height - Top_H - Bottom_H;
