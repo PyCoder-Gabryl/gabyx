@@ -20,7 +20,11 @@ with Gabyx.Config.Helpers;
 
 package body Gabyx.Config.Window is
 
+   use type TOML.Any_Value_Kind;
    use Gabyx.Config.Helpers;
+
+   --  Wcześniejsza deklaracja funkcji wewnętrznej (wymóg stylu -gnatys)
+   function Parse_Display_Mode (Mode_Str : String) return Display_Mode_Type;
 
    function Parse_Display_Mode (Mode_Str : String) return Display_Mode_Type is
    begin

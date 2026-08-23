@@ -20,6 +20,7 @@ with Gabyx.Config.Helpers;
 
 package body Gabyx.Config.Fonts is
 
+   use type TOML.Any_Value_Kind;
    use Gabyx.Config.Helpers;
 
    function Get_Default_Configuration return Font_Configuration is

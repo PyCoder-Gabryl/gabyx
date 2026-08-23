@@ -20,6 +20,7 @@ with Gabyx.Config.Helpers;
 
 package body Gabyx.Config.HUD is
 
+   use type TOML.Any_Value_Kind;
    use Gabyx.Config.Helpers;
 
    function Get_Default_Configuration return HUD_Configuration is

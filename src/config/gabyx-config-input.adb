@@ -20,6 +20,7 @@ with Gabyx.Config.Helpers;
 
 package body Gabyx.Config.Input is
 
+   use type TOML.Any_Value_Kind;
    use Gabyx.Config.Helpers;
 
    function Get_Default_Configuration return Input_Configuration is
@@ -31,7 +32,7 @@ package body Gabyx.Config.Input is
    function Load_Configuration
      (File_Path : String := Default_Config_Path) return Input_Configuration
    is
-      Config : Input_Configuration := Get_Default_Configuration;
+      Config : Input_Configuration := Get_Default_Input_Configuration;
       Result : constant TOML.Read_Result := TOML.File_IO.Load_File (File_Path);
    begin
       if not Result.Success then

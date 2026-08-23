@@ -28,16 +28,20 @@ package body Gabyx.Drivers.Raylib is
 
    use Gabyx.Types;
    use Gabyx.Commands;
+   use Gabyx.UI.Types;
 
    procedure Run
      (Config   : Gabyx.Config.Window.Window_Configuration;
       Font_Cfg : Gabyx.Config.Fonts.Font_Configuration)
    is
+      --  Wcześniejsza deklaracja procedury lokalnej (wymóg stylu -gnatys)
+      procedure Refresh_Layout;
+
       HUD_Cfg         : constant Gabyx.Config.HUD.HUD_Configuration := Gabyx.Config.HUD.Load_Configuration;
       Forced_HUD_Tier : HUD_Tier_Type := HUD_Auto;
-      Top_View        : Gabyx.UI.Types.HUD_View_Type := Gabyx.UI.Types.View_A;
-      Bottom_View     : Gabyx.UI.Types.HUD_View_Type := Gabyx.UI.Types.View_A;
-      Layout          : Gabyx.UI.Types.Layout_Cache;
+      Top_View        : HUD_View_Type := View_A;
+      Bottom_View     : HUD_View_Type := View_A;
+      Layout          : Layout_Cache;
 
       procedure Refresh_Layout is
       begin
@@ -59,27 +63,62 @@ package body Gabyx.Drivers.Raylib is
             Cmd : constant Game_Command := Gabyx.Drivers.Raylib.Input.Poll_Command;
          begin
             case Cmd is
-               when Cmd_Quit              => exit;
-               when Cmd_Select_Preset_1   => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (1); Refresh_Layout;
-               when Cmd_Select_Preset_2   => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (2); Refresh_Layout;
-               when Cmd_Select_Preset_3   => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (3); Refresh_Layout;
-               when Cmd_Select_Preset_4   => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (4); Refresh_Layout;
-               when Cmd_Select_Preset_5   => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (5); Refresh_Layout;
-               when Cmd_Select_Preset_6   => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (6); Refresh_Layout;
-               when Cmd_Select_Preset_7   => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (7); Refresh_Layout;
-               when Cmd_Select_Preset_8   => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (8); Refresh_Layout;
-               when Cmd_Select_Preset_9   => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (9); Refresh_Layout;
-               when Cmd_Toggle_Borderless => Gabyx.Drivers.Raylib.Window_Mgr.Toggle_Borderless;
+               when Cmd_Quit =>
+                  exit;
+               when Cmd_Select_Preset_1 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (1);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_2 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (2);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_3 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (3);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_4 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (4);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_5 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (5);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_6 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (6);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_7 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (7);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_8 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (8);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_9 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (9);
+                  Refresh_Layout;
+               when Cmd_Toggle_Borderless =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Toggle_Borderless;
 
-               when Cmd_HUD_Tier_Auto     => Forced_HUD_Tier := HUD_Auto;     Refresh_Layout;
-               when Cmd_HUD_Tier_Compact  => Forced_HUD_Tier := HUD_Compact;  Refresh_Layout;
-               when Cmd_HUD_Tier_Standard => Forced_HUD_Tier := HUD_Standard; Refresh_Layout;
-               when Cmd_HUD_Tier_HiDPI    => Forced_HUD_Tier := HUD_HiDPI;    Refresh_Layout;
+               when Cmd_HUD_Tier_Auto =>
+                  Forced_HUD_Tier := HUD_Auto;
+                  Refresh_Layout;
+               when Cmd_HUD_Tier_Compact =>
+                  Forced_HUD_Tier := HUD_Compact;
+                  Refresh_Layout;
+               when Cmd_HUD_Tier_Standard =>
+                  Forced_HUD_Tier := HUD_Standard;
+                  Refresh_Layout;
+               when Cmd_HUD_Tier_HiDPI =>
+                  Forced_HUD_Tier := HUD_HiDPI;
+                  Refresh_Layout;
 
-               when Cmd_Toggle_Top_View   => Top_View := (if Top_View = Gabyx.UI.Types.View_A then Gabyx.UI.Types.View_B else Gabyx.UI.Types.View_A);
-               when Cmd_Toggle_Bottom_View=> Bottom_View := (if Bottom_View = Gabyx.UI.Types.View_A then Gabyx.UI.Types.View_B else Gabyx.UI.Types.View_A);
-               when Cmd_Toggle_Font_Family=> Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
-               when Cmd_None              => null;
+               when Cmd_Toggle_Top_View =>
+                  Top_View := (if Top_View = View_A then View_B else View_A);
+
+               when Cmd_Toggle_Bottom_View =>
+                  Bottom_View := (if Bottom_View = View_A then View_B else View_A);
+
+               when Cmd_Toggle_Font_Family =>
+                  Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
+
+               when Cmd_None =>
+                  null;
             end case;
          end;
 

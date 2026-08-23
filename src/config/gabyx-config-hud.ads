@@ -15,10 +15,12 @@
 
 
 with Gabyx.Types;
+with Gabyx.UI.Types;
 
 package Gabyx.Config.HUD is
 
    use Gabyx.Types;
+   use Gabyx.UI.Types;
 
    Default_Config_Path : constant String := "data/config/hud.toml";
 
