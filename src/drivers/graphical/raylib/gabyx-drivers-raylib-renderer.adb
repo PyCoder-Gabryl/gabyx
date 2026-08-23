@@ -25,6 +25,7 @@ package body Gabyx.Drivers.Raylib.Renderer is
 
    use Interfaces.C;
    use Gabyx.Types;
+   use Gabyx.UI.Types;
 
    procedure Render_Frame
      (Layout      : Gabyx.UI.Types.Layout_Cache;
@@ -46,7 +47,7 @@ package body Gabyx.Drivers.Raylib.Renderer is
       Font_Name : constant String := Gabyx.Drivers.Raylib.Fonts.Get_Active_Font_Name;
 
       Color_Top : constant Standard.Raylib.Color :=
-        (if Top_View = Gabyx.UI.Types.View_A then
+        (if Top_View = View_A then
            (r => unsigned_char (HUD_Cfg.Color_Top_View_A.R),
             g => unsigned_char (HUD_Cfg.Color_Top_View_A.G),
             b => unsigned_char (HUD_Cfg.Color_Top_View_A.B),
@@ -58,7 +59,7 @@ package body Gabyx.Drivers.Raylib.Renderer is
             a => unsigned_char (HUD_Cfg.Color_Top_View_B.A)));
 
       Color_Bottom : constant Standard.Raylib.Color :=
-        (if Bottom_View = Gabyx.UI.Types.View_A then
+        (if Bottom_View = View_A then
            (r => unsigned_char (HUD_Cfg.Color_Bottom_View_A.R),
             g => unsigned_char (HUD_Cfg.Color_Bottom_View_A.G),
             b => unsigned_char (HUD_Cfg.Color_Bottom_View_A.B),
@@ -137,7 +138,7 @@ package body Gabyx.Drivers.Raylib.Renderer is
          (x => C_float (Vp_X + 20), y => C_float (Vp_Y + 8)),
          C_float (Font_Cfg.Size_Small),
          1.0,
-         (if Top_View = Gabyx.UI.Types.View_A then Text_White else Text_Cyan));
+         (if Top_View = View_A then Text_White else Text_Cyan));
 
       --  Tekst Viewportu
       Standard.Raylib.DrawTextEx
@@ -158,7 +159,7 @@ package body Gabyx.Drivers.Raylib.Renderer is
          (x => C_float (Vp_X + 20), y => C_float (Vp_Y + int (Layout.Bottom_Bar_Rect.Y) + 12)),
          C_float (Font_Cfg.Size_Small),
          1.0,
-         (if Bottom_View = Gabyx.UI.Types.View_A then Text_Gold else Text_White));
+         (if Bottom_View = View_A then Text_Gold else Text_White));
 
       Standard.Raylib.EndDrawing;
    end Render_Frame;
