@@ -74,4 +74,33 @@ is
    Default_Border_Bars_Color : constant RGBA_Color :=
      (R => 90, G => 20, B => 35, A => 255);
 
+   --  ============================================================================
+   --  KONTEKST ZMIANY W: src/core/gabyx-types.ads
+   --  ============================================================================
+
+   --  Profile rozmiarów HUD-u
+   type HUD_Tier_Type is (HUD_Auto, HUD_Compact, HUD_Standard, HUD_HiDPI);
+
+   --  Dwustanowe widoki pasków interfejsu
+   type HUD_View_Type is (View_A, View_B);
+
+   --  Generyczna struktura prostokąta dla kontenerów UI (100% SPARK)
+   type UI_Rectangle is record
+      X      : Integer := 0;
+      Y      : Integer := 0;
+      Width  : Integer := 0;
+      Height : Integer := 0;
+   end record;
+
+   --  Pamięć podręczna przeliczonej geometrii (Layout Cache)
+   type Layout_Cache is record
+      Screen_Width    : Width_Type    := 1280;
+      Screen_Height   : Height_Type   := 720;
+      Active_Tier     : HUD_Tier_Type := HUD_Compact;
+      Is_Ultra_Wide   : Boolean       := False;
+      Top_Bar_Rect    : UI_Rectangle  := (X => 0, Y => 0, Width => 1280, Height => 32);
+      Viewport_Rect   : UI_Rectangle  := (X => 0, Y => 32, Width => 1280, Height => 592);
+      Bottom_Bar_Rect : UI_Rectangle  := (X => 0, Y => 624, Width => 1280, Height => 96);
+   end record;
+
 end Gabyx.Types;

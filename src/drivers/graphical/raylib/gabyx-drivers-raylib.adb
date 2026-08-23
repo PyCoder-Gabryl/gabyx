@@ -17,6 +17,9 @@ with Ada.Characters.Latin_1;
 with Interfaces.C;
 with Ada.Strings.Unbounded;
 with Gabyx.Types;
+with Gabyx.Commands;
+with Gabyx.UI.Layout;
+with Gabyx.Drivers.Raylib.Input;
 with Raylib;
 
 package body Gabyx.Drivers.Raylib is
@@ -27,6 +30,7 @@ package body Gabyx.Drivers.Raylib is
    is
       use Interfaces.C;
       use Gabyx.Types;
+      use Gabyx.Commands;
       use type Standard.Raylib.ConfigFlags;
 
       --  Struktura wymiarów predefiniowanego zestawu rozdzielczości
@@ -35,7 +39,6 @@ package body Gabyx.Drivers.Raylib is
          Height : int;
       end record;
 
-      --  Tablica wymiarów dla 9 presetów (składnia nawiasów kwadratowych Ada 2022)
       Presets_Table : constant array (1 .. 9) of Preset_Dim :=
         [1 => (Width => 1280, Height => 720),
          2 => (Width => 1440, Height => 900),
@@ -47,7 +50,6 @@ package body Gabyx.Drivers.Raylib is
          8 => (Width => 3440, Height => 1440),
          9 => (Width => 3840, Height => 2160)];
 
-      --  Funkcja pomocnicza zwracająca czytelną nazwę presetu
       function Get_Preset_Name (Index : Positive) return String is
         (case Index is
             when 1 => "16:9 HD (Baza 1280x720)",
@@ -64,19 +66,52 @@ package body Gabyx.Drivers.Raylib is
       --  Deklaracje wcześniejsze procedur lokalnych (wymóg stylu -gnatys)
       procedure Center_Window (Target_W, Target_H : int);
       procedure Apply_Preset (Index : Positive);
+      procedure Refresh_Layout;
 
-      --  Stan bieżącego trybu okna i wirtualnego viewportu
+      --  Konfiguracja i stany bieżące
+      HUD_Cfg      : constant Gabyx.Config.HUD_Configuration := Gabyx.Config.Load_HUD_Configuration;
       Current_Mode : Display_Mode_Type := Config.Display_Mode;
       Virtual_W    : int := int (Config.Width);
       Virtual_H    : int := int (Config.Height);
       Is_Frameless : Boolean := (Config.Display_Mode /= Windowed);
 
-      --  Kolory
-      Game_Area_Color : constant Standard.Raylib.Color :=
-        (r => unsigned_char (Config.Clear_Color.R),
-         g => unsigned_char (Config.Clear_Color.G),
-         b => unsigned_char (Config.Clear_Color.B),
-         a => unsigned_char (Config.Clear_Color.A));
+      Forced_HUD_Tier : HUD_Tier_Type := HUD_Auto;
+      Top_View        : HUD_View_Type := View_A;
+      Bottom_View     : HUD_View_Type := View_A;
+      Active_Font_ID  : Integer := 1; --  1 = Intel One Mono, 2 = JetBrains Mono
+
+      Layout : Layout_Cache;
+
+      --  Paleta Kolorów
+      Color_Top_A : constant Standard.Raylib.Color :=
+        (r => unsigned_char (HUD_Cfg.Color_Top_View_A.R),
+         g => unsigned_char (HUD_Cfg.Color_Top_View_A.G),
+         b => unsigned_char (HUD_Cfg.Color_Top_View_A.B),
+         a => unsigned_char (HUD_Cfg.Color_Top_View_A.A));
+
+      Color_Top_B : constant Standard.Raylib.Color :=
+        (r => unsigned_char (HUD_Cfg.Color_Top_View_B.R),
+         g => unsigned_char (HUD_Cfg.Color_Top_View_B.G),
+         b => unsigned_char (HUD_Cfg.Color_Top_View_B.B),
+         a => unsigned_char (HUD_Cfg.Color_Top_View_B.A));
+
+      Color_Bottom_A : constant Standard.Raylib.Color :=
+        (r => unsigned_char (HUD_Cfg.Color_Bottom_View_A.R),
+         g => unsigned_char (HUD_Cfg.Color_Bottom_View_A.G),
+         b => unsigned_char (HUD_Cfg.Color_Bottom_View_A.B),
+         a => unsigned_char (HUD_Cfg.Color_Bottom_View_A.A));
+
+      Color_Bottom_B : constant Standard.Raylib.Color :=
+        (r => unsigned_char (HUD_Cfg.Color_Bottom_View_B.R),
+         g => unsigned_char (HUD_Cfg.Color_Bottom_View_B.G),
+         b => unsigned_char (HUD_Cfg.Color_Bottom_View_B.B),
+         a => unsigned_char (HUD_Cfg.Color_Bottom_View_B.A));
+
+      Color_Viewport : constant Standard.Raylib.Color :=
+        (r => unsigned_char (HUD_Cfg.Color_Viewport.R),
+         g => unsigned_char (HUD_Cfg.Color_Viewport.G),
+         b => unsigned_char (HUD_Cfg.Color_Viewport.B),
+         a => unsigned_char (HUD_Cfg.Color_Viewport.A));
 
       Border_Bars_Color : constant Standard.Raylib.Color :=
         (r => unsigned_char (Config.Border_Bars_Color.R),
@@ -89,21 +124,26 @@ package body Gabyx.Drivers.Raylib is
       Text_Gold  : constant Standard.Raylib.Color := (r => 255, g => 203, b => 0,   a => 255);
       Text_Cyan  : constant Standard.Raylib.Color := (r => 80,  g => 220, b => 240, a => 255);
 
-      Title_Str : constant String :=
-        Ada.Strings.Unbounded.To_String (Config.Title);
-      Font_Path : constant String :=
-        Ada.Strings.Unbounded.To_String (Font_Cfg.Regular_Path);
+      Title_Str : constant String := Ada.Strings.Unbounded.To_String (Config.Title);
+      FPS       : constant int := (if Config.Target_FPS > 0 then int (Config.Target_FPS) else 60);
 
-      FPS : constant int :=
-        (if Config.Target_FPS > 0 then int (Config.Target_FPS) else 60);
+      --  Zasoby czcionek
+      Font_Intel     : Standard.Raylib.Font;
+      Font_JetBrains : Standard.Raylib.Font;
 
-      --  Uchwyt czcionki i zmienne monitora
-      Game_Font : Standard.Raylib.Font;
-      Cur_Mon   : int := 0;
-      Mon_W     : int := 1920;
-      Mon_H     : int := 1080;
+      Cur_Mon : int := 0;
+      Mon_W   : int := 1920;
+      Mon_H   : int := 1080;
 
-      --  Procedura centrowania okna na monitorze
+      procedure Refresh_Layout is
+      begin
+         Layout := Gabyx.UI.Layout.Calculate_Layout
+           (Width       => Width_Type (Virtual_W),
+            Height      => Height_Type (Virtual_H),
+            Forced_Tier => Forced_HUD_Tier,
+            HUD_Cfg     => HUD_Cfg);
+      end Refresh_Layout;
+
       procedure Center_Window (Target_W, Target_H : int) is
          Pos_X : constant int := (Mon_W - Target_W) / 2;
          Pos_Y : constant int := (Mon_H - Target_H) / 2;
@@ -111,45 +151,33 @@ package body Gabyx.Drivers.Raylib is
          Standard.Raylib.SetWindowPosition (Pos_X, Pos_Y);
       end Center_Window;
 
-      --  Procedura bezpiecznej zmiany presetu
       procedure Apply_Preset (Index : Positive) is
          Req_W : constant int := Presets_Table (Index).Width;
          Req_H : constant int := Presets_Table (Index).Height;
       begin
          if Current_Mode = Borderless_Fullscreen then
-            --  W pełnym ekranie okno ma rozmiar monitora, zmieniamy tylko wirtualny viewport
             Virtual_W := Req_W;
             Virtual_H := Req_H;
-            Ada.Text_IO.Put_Line
-              ("[PRESET] Zmieniono wirtualny Viewport na: " & Get_Preset_Name (Index));
+            Refresh_Layout;
          else
-            --  W trybie okienkowym sprawdzamy czy okno mieści się na monitorze
             if Req_W <= Mon_W and then Req_H <= Mon_H then
                Virtual_W := Req_W;
                Virtual_H := Req_H;
                Standard.Raylib.SetWindowSize (Virtual_W, Virtual_H);
                Center_Window (Virtual_W, Virtual_H);
-               Ada.Text_IO.Put_Line
-                 ("[PRESET] Zmieniono rozmiar okna na: " & Get_Preset_Name (Index));
-            else
-               Ada.Text_IO.Put_Line
-                 ("[OSTRZEZENIE] Rozdzielczosc " & Get_Preset_Name (Index) &
-                  " przekracza wymiary monitora (" & Integer (Mon_W)'Image & "x" &
-                  Integer (Mon_H)'Image & ")!");
+               Refresh_Layout;
             end if;
          end if;
       end Apply_Preset;
 
    begin
-      --  1. Wstępna konfiguracja flag przed otwarciem okna
+      --  1. Konfiguracja flag okna
       if Config.High_DPI then
          Standard.Raylib.SetConfigFlags (Standard.Raylib.FLAG_WINDOW_HIGHDPI);
       end if;
-
       if Config.VSync then
          Standard.Raylib.SetConfigFlags (Standard.Raylib.FLAG_VSYNC_HINT);
       end if;
-
       if Current_Mode = Borderless then
          Standard.Raylib.SetConfigFlags (Standard.Raylib.FLAG_WINDOW_UNDECORATED);
       elsif Current_Mode = Borderless_Fullscreen then
@@ -157,202 +185,215 @@ package body Gabyx.Drivers.Raylib is
            (Standard.Raylib.FLAG_WINDOW_UNDECORATED or Standard.Raylib.FLAG_WINDOW_TOPMOST);
       end if;
 
-      --  2. Inicjalizacja bazowego okna
+      --  2. Inicjalizacja okna
       Standard.Raylib.InitWindow (Virtual_W, Virtual_H, Title_Str);
       Standard.Raylib.SetTargetFPS (FPS);
 
-      --  3. Odczyt właściwości monitora i dopasowanie pozycji/rozmiaru
       Cur_Mon := Standard.Raylib.GetCurrentMonitor;
       Mon_W   := Standard.Raylib.GetMonitorWidth (Cur_Mon);
       Mon_H   := Standard.Raylib.GetMonitorHeight (Cur_Mon);
 
       if Current_Mode = Borderless_Fullscreen then
-         --  Pełny ekran bezramkowy: okno wypełnia cały pulpit
          Standard.Raylib.SetWindowSize (Mon_W, Mon_H);
          Standard.Raylib.SetWindowPosition (0, 0);
       else
-         --  Bezpiecznik startowy: jeśli preset z TOML przekracza monitor, zredukuj do bezpiecznego
          if Virtual_W > Mon_W or else Virtual_H > Mon_H then
-            Ada.Text_IO.Put_Line
-              ("[CONFIG] Wybrany preset przekracza monitor. Dopasowanie do 1280x720...");
             Virtual_W := 1280;
             Virtual_H := 720;
             Standard.Raylib.SetWindowSize (Virtual_W, Virtual_H);
          end if;
-
          if Config.Center_On_Screen then
             Center_Window (Virtual_W, Virtual_H);
          end if;
       end if;
 
-      --  4. Wczytanie czcionki i włączenie filtru dwuliniowego
-      Ada.Text_IO.Put_Line ("[RAYLIB] Ladowanie czcionki: " & Font_Path);
-      Game_Font := Standard.Raylib.LoadFont (Font_Path);
+      --  3. Wczytanie obu czcionek (Intel One Mono i JetBrains Mono)
+      Font_Intel := Standard.Raylib.LoadFont
+        (Ada.Strings.Unbounded.To_String (Font_Cfg.Regular_Path));
       Standard.Raylib.SetTextureFilter
-        (Game_Font.texture_f,
-         Standard.Raylib.TEXTURE_FILTER_BILINEAR);
+        (Font_Intel.texture_f, Standard.Raylib.TEXTURE_FILTER_BILINEAR);
 
-      --  5. Główna pętla renderowania i testów interaktywnych
+      Font_JetBrains := Standard.Raylib.LoadFont
+        ("assets/fonts/jetbrains_mono/JetBrainsMonoNerdFont-Regular.ttf");
+      Standard.Raylib.SetTextureFilter
+        (Font_JetBrains.texture_f, Standard.Raylib.TEXTURE_FILTER_BILINEAR);
+
+      Refresh_Layout;
+
+      --  4. Pętla główna
       while not Boolean (Standard.Raylib.WindowShouldClose) loop
+         declare
+            Cmd : constant Game_Command := Gabyx.Drivers.Raylib.Input.Poll_Command;
+         begin
+            case Cmd is
+               when Cmd_Quit =>
+                  exit;
+               when Cmd_Select_Preset_1 => Apply_Preset (1);
+               when Cmd_Select_Preset_2 => Apply_Preset (2);
+               when Cmd_Select_Preset_3 => Apply_Preset (3);
+               when Cmd_Select_Preset_4 => Apply_Preset (4);
+               when Cmd_Select_Preset_5 => Apply_Preset (5);
+               when Cmd_Select_Preset_6 => Apply_Preset (6);
+               when Cmd_Select_Preset_7 => Apply_Preset (7);
+               when Cmd_Select_Preset_8 => Apply_Preset (8);
+               when Cmd_Select_Preset_9 => Apply_Preset (9);
 
-         --  Obsługa klawiszy wyboru rozdzielczości [1]..[9]
-         if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ONE)) then
-            Apply_Preset (1);
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_TWO)) then
-            Apply_Preset (2);
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_THREE)) then
-            Apply_Preset (3);
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FOUR)) then
-            Apply_Preset (4);
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then
-            Apply_Preset (5);
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SIX)) then
-            Apply_Preset (6);
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SEVEN)) then
-            Apply_Preset (7);
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_EIGHT)) then
-            Apply_Preset (8);
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_NINE)) then
-            Apply_Preset (9);
-         end if;
+               when Cmd_Toggle_Borderless =>
+                  if Current_Mode /= Borderless_Fullscreen then
+                     Is_Frameless := not Is_Frameless;
+                     if Is_Frameless then
+                        Standard.Raylib.SetWindowState (Standard.Raylib.FLAG_WINDOW_UNDECORATED);
+                        Current_Mode := Borderless;
+                     else
+                        Standard.Raylib.ClearWindowState (Standard.Raylib.FLAG_WINDOW_UNDECORATED);
+                        Current_Mode := Windowed;
+                     end if;
+                     Center_Window (Virtual_W, Virtual_H);
+                  end if;
 
-         --  Obsługa klawisza [B] - Przełączanie ramki okna
-         if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_B)) then
-            if Current_Mode /= Borderless_Fullscreen then
-               Is_Frameless := not Is_Frameless;
-               if Is_Frameless then
-                  Standard.Raylib.SetWindowState (Standard.Raylib.FLAG_WINDOW_UNDECORATED);
-                  Current_Mode := Borderless;
-                  Ada.Text_IO.Put_Line ("[OKNO] Przelaczono na: Bezramkowe (Borderless)");
-               else
-                  Standard.Raylib.ClearWindowState (Standard.Raylib.FLAG_WINDOW_UNDECORATED);
-                  Current_Mode := Windowed;
-                  Ada.Text_IO.Put_Line ("[OKNO] Przelaczono na: Z ramka (Windowed)");
-               end if;
-               Center_Window (Virtual_W, Virtual_H);
-            end if;
-         end if;
+               when Cmd_HUD_Tier_Auto     => Forced_HUD_Tier := HUD_Auto;     Refresh_Layout;
+               when Cmd_HUD_Tier_Compact  => Forced_HUD_Tier := HUD_Compact;  Refresh_Layout;
+               when Cmd_HUD_Tier_Standard => Forced_HUD_Tier := HUD_Standard; Refresh_Layout;
+               when Cmd_HUD_Tier_HiDPI    => Forced_HUD_Tier := HUD_HiDPI;    Refresh_Layout;
 
-         --  Krok Rysowania
+               when Cmd_Toggle_Top_View =>
+                  Top_View := (if Top_View = View_A then View_B else View_A);
+
+               when Cmd_Toggle_Bottom_View =>
+                  Bottom_View := (if Bottom_View = View_A then View_B else View_A);
+
+               when Cmd_Toggle_Font_Family =>
+                  Active_Font_ID := (if Active_Font_ID = 1 then 2 else 1);
+
+               when Cmd_None =>
+                  null;
+            end case;
+         end;
+
+         --  5. Renderowanie
          Standard.Raylib.BeginDrawing;
 
          declare
             Screen_W : constant int := Standard.Raylib.GetScreenWidth;
             Screen_H : constant int := Standard.Raylib.GetScreenHeight;
 
-            --  Obliczenie wycentrowanego wirtualnego obszaru gry
             Vp_X : constant int := (Screen_W - Virtual_W) / 2;
             Vp_Y : constant int := (Screen_H - Virtual_H) / 2;
 
-            Offset_X : constant C_float := C_float (Vp_X);
-            Offset_Y : constant C_float := C_float (Vp_Y);
+            Current_Font : constant Standard.Raylib.Font :=
+              (if Active_Font_ID = 1 then Font_Intel else Font_JetBrains);
 
-            Pos_Title : constant Standard.Raylib.Vector2 := (x => Offset_X + 40.0, y => Offset_Y + 40.0);
-            Pos_Mode  : constant Standard.Raylib.Vector2 := (x => Offset_X + 40.0, y => Offset_Y + 80.0);
-            Pos_Res   : constant Standard.Raylib.Vector2 := (x => Offset_X + 40.0, y => Offset_Y + 115.0);
-            Pos_Mon   : constant Standard.Raylib.Vector2 := (x => Offset_X + 40.0, y => Offset_Y + 150.0);
-            Pos_Fps   : constant Standard.Raylib.Vector2 := (x => Offset_X + 40.0, y => Offset_Y + 185.0);
-            Pos_Keys  : constant Standard.Raylib.Vector2 := (x => Offset_X + 40.0, y => Offset_Y + 230.0);
-            Pos_List  : constant Standard.Raylib.Vector2 := (x => Offset_X + 40.0, y => Offset_Y + 265.0);
-            Pos_Esc   : constant Standard.Raylib.Vector2 := (x => Offset_X + 40.0, y => Offset_Y + 440.0);
+            Font_Name : constant String :=
+              (if Active_Font_ID = 1 then "Intel One Mono" else "JetBrains Mono");
 
-            Mode_Name : constant String :=
-              (case Current_Mode is
-                  when Windowed              => "Windowed (Z ramka OS)",
-                  when Borderless            => "Borderless (Bezramkowe)",
-                  when Borderless_Fullscreen => "Borderless Fullscreen (Pulpit z pasami)");
+            Top_Color : constant Standard.Raylib.Color :=
+              (if Top_View = View_A then Color_Top_A else Color_Top_B);
+
+            Bottom_Color : constant Standard.Raylib.Color :=
+              (if Bottom_View = View_A then Color_Bottom_A else Color_Bottom_B);
          begin
             if Current_Mode = Borderless_Fullscreen then
-               --  Czyszczenie całego ekranu kolorem pasów obramowania (bordo)
                Standard.Raylib.ClearBackground (Border_Bars_Color);
-
-               --  Rysowanie wycentrowanego obszaru właściwego gry (grafit)
-               Standard.Raylib.DrawRectangle
-                 (Vp_X, Vp_Y, Virtual_W, Virtual_H, Game_Area_Color);
-
-               --  Ramka konturowa oddzielająca wirtualny ekran od pasów
-               Standard.Raylib.DrawRectangleLines
-                 (Vp_X, Vp_Y, Virtual_W, Virtual_H, Text_Gray);
             else
-               --  W trybie okienkowym tłem całego okna jest kolor gry
-               Standard.Raylib.ClearBackground (Game_Area_Color);
+               Standard.Raylib.ClearBackground (Color_Viewport);
             end if;
 
-            --  Prezentacja diagnostyki wewnątrz wycentrowanego Viewportu
-            Standard.Raylib.DrawTextEx
-              (Game_Font,
-               "GABYX OMNI-ENGINE // TEST ROZDZIELCZOSCI",
-               Pos_Title,
-               C_float (Font_Cfg.Size_Title),
-               C_float (Font_Cfg.Spacing),
-               Text_White);
+            --  A. GÓRNY PASEK (Top Toolbar)
+            Standard.Raylib.DrawRectangle
+              (Vp_X + int (Layout.Top_Bar_Rect.X),
+               Vp_Y + int (Layout.Top_Bar_Rect.Y),
+               int (Layout.Top_Bar_Rect.Width),
+               int (Layout.Top_Bar_Rect.Height),
+               Top_Color);
 
-            Standard.Raylib.DrawTextEx
-              (Game_Font,
-               "Tryb wyswietlania: " & Mode_Name,
-               Pos_Mode,
-               C_float (Font_Cfg.Size_Regular),
-               C_float (Font_Cfg.Spacing),
-               Text_Cyan);
+            --  B. VIEWPORT ŚWIATA (Środek - czarny)
+            Standard.Raylib.DrawRectangle
+              (Vp_X + int (Layout.Viewport_Rect.X),
+               Vp_Y + int (Layout.Viewport_Rect.Y),
+               int (Layout.Viewport_Rect.Width),
+               int (Layout.Viewport_Rect.Height),
+               Color_Viewport);
 
+            --  C. DOLNY PASEK (Bottom Dashboard)
+            Standard.Raylib.DrawRectangle
+              (Vp_X + int (Layout.Bottom_Bar_Rect.X),
+               Vp_Y + int (Layout.Bottom_Bar_Rect.Y),
+               int (Layout.Bottom_Bar_Rect.Width),
+               int (Layout.Bottom_Bar_Rect.Height),
+               Bottom_Color);
+
+            --  Ramka konturowa oddzielająca wirtualny Viewport
+            Standard.Raylib.DrawRectangleLines
+              (Vp_X, Vp_Y, Virtual_W, Virtual_H, Text_Gray);
+
+            --  TREŚĆ GÓRNEGO PASKA (Zależna od Top_View)
+            if Top_View = View_A then
+               Standard.Raylib.DrawTextEx
+                 (Current_Font,
+                  "GABYX // OKNO: " & Integer (Virtual_W)'Image & "x" & Integer (Virtual_H)'Image &
+                  " px | EKRAN: " & Integer (Screen_W)'Image & "x" & Integer (Screen_H)'Image &
+                  " px | FORMAT: " & (if Layout.Is_Ultra_Wide then "21:9 Ultra-Wide" else "Standard 16:x") &
+                  " [Ctrl+T: Widok Typografii]",
+                  (x => C_float (Vp_X + 20), y => C_float (Vp_Y + 8)),
+                  C_float (Font_Cfg.Size_Small),
+                  1.0,
+                  Text_White);
+            else
+               Standard.Raylib.DrawTextEx
+                 (Current_Font,
+                  "TYPOGRAFIA: " & Font_Name & " | PROFIL HUD: " & Layout.Active_Tier'Image &
+                  " (Gora: " & Integer (Layout.Top_Bar_Rect.Height)'Image & "px, Dol: " &
+                  Integer (Layout.Bottom_Bar_Rect.Height)'Image & "px) | FPS: " & Integer (FPS)'Image &
+                  " [Ctrl+T: Widok Okna]",
+                  (x => C_float (Vp_X + 20), y => C_float (Vp_Y + 8)),
+                  C_float (Font_Cfg.Size_Small),
+                  1.0,
+                  Text_Cyan);
+            end if;
+
+            --  TREŚĆ ŚRODKOWEGO VIEWPORTU (Informacja o stanie lochu)
             Standard.Raylib.DrawTextEx
-              (Game_Font,
-               "Wymiary okna: " & Integer (Screen_W)'Image & " x " & Integer (Screen_H)'Image &
-               " px (Viewport: " & Integer (Virtual_W)'Image & " x " & Integer (Virtual_H)'Image & " px)",
-               Pos_Res,
+              (Current_Font,
+               "OBSZAR VIEWPORTU SWIATA (CZYSTY CZARNY)" & Ada.Characters.Latin_1.LF &
+               "Wymiary bufora lochu: " & Integer (Layout.Viewport_Rect.Width)'Image & " x " &
+               Integer (Layout.Viewport_Rect.Height)'Image & " px" & Ada.Characters.Latin_1.LF &
+               "Gotowy na przyjecie siatki kafelkow i gracza @ w kolejnym kroku.",
+               (x => C_float (Vp_X + 40), y => C_float (Vp_Y + int (Layout.Viewport_Rect.Y) + 40)),
                C_float (Font_Cfg.Size_Regular),
-               C_float (Font_Cfg.Spacing),
+               1.0,
                Text_Gray);
 
-            Standard.Raylib.DrawTextEx
-              (Game_Font,
-               "Monitor glowny: " & Integer (Mon_W)'Image & " x " & Integer (Mon_H)'Image & " px",
-               Pos_Mon,
-               C_float (Font_Cfg.Size_Regular),
-               C_float (Font_Cfg.Spacing),
-               Text_Gray);
-
-            Standard.Raylib.DrawTextEx
-              (Game_Font,
-               "Docelowy klatkarz: " & Integer (FPS)'Image & " FPS (V-Sync: Aktywny)",
-               Pos_Fps,
-               C_float (Font_Cfg.Size_Regular),
-               C_float (Font_Cfg.Spacing),
-               Text_Gray);
-
-            Standard.Raylib.DrawTextEx
-              (Game_Font,
-               "STEROWANIE DIAGNOSTYCZNE:",
-               Pos_Keys,
-               C_float (Font_Cfg.Size_Regular),
-               C_float (Font_Cfg.Spacing),
-               Text_Gold);
-
-            Standard.Raylib.DrawTextEx
-              (Game_Font,
-               "[1] 1280x720  [2] 1440x900   [3] 1600x900   [4] 1920x1080  [5] 1920x1200" & Ada.Characters.Latin_1.LF &
-               "[6] 2560x1080 [7] 2560x1440  [8] 3440x1440  [9] 3840x2160" & Ada.Characters.Latin_1.LF &
-               "[B] Przelacz ramke okna (Windowed <-> Borderless)",
-               Pos_List,
-               C_float (Font_Cfg.Size_Small),
-               C_float (Font_Cfg.Spacing),
-               Text_White);
-
-            Standard.Raylib.DrawTextEx
-              (Game_Font,
-               "Nacisnij ESC lub zamknij okno, aby zakonczyc test.",
-               Pos_Esc,
-               C_float (Font_Cfg.Size_Regular),
-               C_float (Font_Cfg.Spacing),
-               Text_Gold);
+            --  TREŚĆ DOLNEGO PASKA (Zależna od Bottom_View)
+            if Bottom_View = View_A then
+               Standard.Raylib.DrawTextEx
+                 (Current_Font,
+                  "DOLNY HUD // WIDOK A: ROZDZIELCZOSCI [Skrot: Ctrl+B -> Widok Funkcyjny]" & Ada.Characters.Latin_1.LF &
+                  "[1] 1280x720  [2] 1440x900   [3] 1600x900   [4] 1920x1080  [5] 1920x1200" & Ada.Characters.Latin_1.LF &
+                  "[6] 2560x1080 [7] 2560x1440  [8] 3440x1440  [9] 3840x2160  [B] Przepnij ramke",
+                  (x => C_float (Vp_X + 20), y => C_float (Vp_Y + int (Layout.Bottom_Bar_Rect.Y) + 12)),
+                  C_float (Font_Cfg.Size_Small),
+                  1.0,
+                  Text_Gold);
+            else
+               Standard.Raylib.DrawTextEx
+                 (Current_Font,
+                  "DOLNY HUD // WIDOK B: SKROTY SYSTEMOWE [Skrot: Ctrl+B -> Widok Rozdzielczosci]" & Ada.Characters.Latin_1.LF &
+                  "[Ctrl+F] Zmien czcionke   [Ctrl+T] Przepnij Gorny HUD   [Ctrl+B] Przepnij Dolny HUD" & Ada.Characters.Latin_1.LF &
+                  "[Ctrl+1] Compact (32/96)  [Ctrl+2] Standard (40/120)    [Ctrl+3] HiDPI (80/240)  [Ctrl+0] Auto",
+                  (x => C_float (Vp_X + 20), y => C_float (Vp_Y + int (Layout.Bottom_Bar_Rect.Y) + 12)),
+                  C_float (Font_Cfg.Size_Small),
+                  1.0,
+                  Text_White);
+            end if;
 
          end;
 
          Standard.Raylib.EndDrawing;
       end loop;
 
-      --  6. Zwolnienie zasobów GPU i zamknięcie okna
-      Standard.Raylib.UnloadFont (Game_Font);
+      --  6. Zwolnienie zasobów
+      Standard.Raylib.UnloadFont (Font_Intel);
+      Standard.Raylib.UnloadFont (Font_JetBrains);
       Standard.Raylib.CloseWindow;
    end Run;
 

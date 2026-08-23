@@ -1,0 +1,84 @@
+# ============================================================================
+# PROJECT:         Gabyx: Ada Roguleike
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:
+# ----------------------------------------------------------------------------
+# PATH:            data/config/hud.toml
+# CREATED:         2026-08-23
+# ============================================================================
+
+
+# @formatter:off
+
+# ============================================================================
+# GABYX - KONFIGURACJA INTERFEJSU UŻYTKOWNIKA (HUD TOML)
+# ============================================================================
+
+[hud]
+# Domyślny profil: "auto" (dobierany do szerokości okna), "compact", "standard", "hidpi"
+active_tier           = "auto"
+
+# ----------------------------------------------------------------------------
+# 3 PROFILE WYMIARÓW I SKALOWANIA HUD-U
+# ----------------------------------------------------------------------------
+[tiers.compact]
+# Format małych ekranów (W < 1600 px)
+top_height            = 32
+bottom_height         = 96
+font_size             = 14
+
+[tiers.standard]
+# Format standardowy (1600 px <= W <= 2560 px)
+top_height            = 40
+bottom_height         = 120
+font_size             = 18
+
+[tiers.hidpi]
+# Format Ultra-DPI / 4K / 5K (W > 2560 px)
+top_height            = 80
+bottom_height         = 240
+font_size             = 24
+
+# ----------------------------------------------------------------------------
+# PALETA TŁA KONTENERÓW I STANY WIDOKÓW A/B (RGBA)
+# ----------------------------------------------------------------------------
+[colors.top_view_a]
+# Pasek górny - Widok A: Diagnostyka okna (stalowy granat: #1A222D)
+r                     = 26
+g                     = 34
+b                     = 45
+a                     = 255
+
+[colors.top_view_b]
+# Pasek górny - Widok B: Typografia i HUD (ciemne indygo: #1E1C2B)
+r                     = 30
+g                     = 28
+b                     = 43
+a                     = 255
+
+[colors.bottom_view_a]
+# Pasek dolny - Widok A: Skróty rozdzielczości (głęboki grafit: #161B22)
+r                     = 22
+g                     = 27
+b                     = 34
+a                     = 255
+
+[colors.bottom_view_b]
+# Pasek dolny - Widok B: Skróty HUD i czcionek (ciemny antracyt: #142023)
+r                     = 20
+g                     = 32
+b                     = 35
+a                     = 255
+
+[colors.viewport]
+# Środkowy obszar świata/lochu (bezwzględna czerń: #000000)
+r                     = 0
+g                     = 0
+b                     = 0
+a                     = 255
+
+# @formatter:on

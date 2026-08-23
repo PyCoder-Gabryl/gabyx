@@ -398,4 +398,50 @@ package body Gabyx.Config is
       return Config;
    end Load_Font_Configuration;
 
+--  ============================================================================
+--  KONTEKST ZMIANY W: src/config/gabyx-config.adb (na końcu pliku)
+--  ============================================================================
+
+   function Get_Default_HUD_Configuration return HUD_Configuration is
+      Config : HUD_Configuration;
+   begin
+      return Config;
+   end Get_Default_HUD_Configuration;
+
+   function Load_HUD_Configuration
+     (File_Path : String := Default_HUD_Config_Path) return HUD_Configuration
+   is
+      Config : HUD_Configuration := Get_Default_HUD_Configuration;
+      Result : constant TOML.Read_Result := TOML.File_IO.Load_File (File_Path);
+   begin
+      if not Result.Success then
+         Ada.Text_IO.Put_Line
+           ("[CONFIG] Nie odnaleziono pliku " & File_Path & " - uzyto konfiguracji HUD domyslnej.");
+         return Config;
+      end if;
+
+      declare
+         Root : constant TOML.TOML_Value := Result.Value;
+      begin
+         if Root.Kind = TOML.TOML_Table and then Root.Has ("hud") then
+            declare
+               HUD_Tab  : constant TOML.TOML_Value := Root.Get ("hud");
+               Tier_Str : constant String := Read_String (HUD_Tab, "active_tier", "auto");
+            begin
+               if Tier_Str = "compact" then
+                  Config.Active_Tier := HUD_Compact;
+               elsif Tier_Str = "standard" then
+                  Config.Active_Tier := HUD_Standard;
+               elsif Tier_Str = "hidpi" then
+                  Config.Active_Tier := HUD_HiDPI;
+               else
+                  Config.Active_Tier := HUD_Auto;
+               end if;
+            end;
+         end if;
+      end;
+
+      return Config;
+   end Load_HUD_Configuration;
+
 end Gabyx.Config;

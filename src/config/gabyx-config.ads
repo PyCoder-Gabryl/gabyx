@@ -92,4 +92,33 @@ package Gabyx.Config is
 
    function Get_Default_Font_Configuration return Font_Configuration;
 
+--  ============================================================================
+--  KONTEKST ZMIANY W: src/config/gabyx-config.ads
+--  ============================================================================
+
+   Default_HUD_Config_Path : constant String := "data/config/hud.toml";
+
+   type HUD_Tier_Dimensions is record
+      Top_Height    : Positive       := 32;
+      Bottom_Height : Positive       := 96;
+      Font_Size     : Font_Size_Type := 14;
+   end record;
+
+   type HUD_Configuration is record
+      Active_Tier        : HUD_Tier_Type       := HUD_Auto;
+      Compact_Tier       : HUD_Tier_Dimensions := (Top_Height => 32, Bottom_Height => 96,  Font_Size => 14);
+      Standard_Tier      : HUD_Tier_Dimensions := (Top_Height => 40, Bottom_Height => 120, Font_Size => 18);
+      HiDPI_Tier         : HUD_Tier_Dimensions := (Top_Height => 80, Bottom_Height => 240, Font_Size => 24);
+      Color_Top_View_A   : RGBA_Color          := (R => 26, G => 34, B => 45, A => 255);
+      Color_Top_View_B   : RGBA_Color          := (R => 30, G => 28, B => 43, A => 255);
+      Color_Bottom_View_A: RGBA_Color          := (R => 22, G => 27, B => 34, A => 255);
+      Color_Bottom_View_B: RGBA_Color          := (R => 20, G => 32, B => 35, A => 255);
+      Color_Viewport     : RGBA_Color          := (R => 0,  G => 0,  B => 0,  A => 255);
+   end record;
+
+   function Load_HUD_Configuration
+     (File_Path : String := Default_HUD_Config_Path) return HUD_Configuration;
+
+   function Get_Default_HUD_Configuration return HUD_Configuration;
+
 end Gabyx.Config;
