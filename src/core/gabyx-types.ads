@@ -32,10 +32,25 @@ is
 
    --  Dopuszczalne wartości klatkarza (0 oznacza automatyczny V-Sync)
    subtype Target_FPS_Type is Natural with
-      Static_Predicate => Target_FPS_Type in 0 | 30 | 60 | 75 | 120;
+      Static_Predicate => Target_FPS_Type in 0 | 30 | 60 | 75 | 120 | 144;
 
-   --  Dostępne indeksy predefiniowanych zestawów rozdzielczości
-   type Preset_ID is (Auto_Default, Preset_1, Preset_2, Preset_3, Preset_4);
+   --  Dostępne tryby wyświetlania okna
+   type Display_Mode_Type is (Windowed, Borderless, Borderless_Fullscreen);
+
+   --  Dostępne indeksy 8 predefiniowanych zestawów rozdzielczości
+   type Preset_ID is
+     (Auto_Default,
+      Preset_1,
+      Preset_2,
+      Preset_3,
+      Preset_4,
+      Preset_5,
+      Preset_6,
+      Preset_7,
+      Preset_8);
+
+   --  Bezpieczny zakres rozmiaru czcionki w pikselach
+   subtype Font_Size_Type is Positive range 8 .. 128;
 
    --  ============================================================================
    --  STRUKTURY KOLORÓW
@@ -52,6 +67,10 @@ is
 
    --  Domyślny kolor tła silnika (ciemny grafit: #12161A)
    Default_Background_Color : constant RGBA_Color :=
-      (R => 18, G => 22, B => 26, A => 255);
+     (R => 18, G => 22, B => 26, A => 255);
+
+   --  Domyślny kolor pasów centrujących do testów wizualnych (bordo: #5A1423)
+   Default_Border_Bars_Color : constant RGBA_Color :=
+     (R => 90, G => 20, B => 35, A => 255);
 
 end Gabyx.Types;

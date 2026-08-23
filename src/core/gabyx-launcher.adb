@@ -29,7 +29,10 @@ package body Gabyx.Launcher is
 
    procedure Run is
       App_Config : constant Gabyx.Config.Window_Configuration :=
-        Gabyx.Config.Load_Window_Configuration;
+         Gabyx.Config.Load_Window_Configuration;
+
+      Font_Config : constant Gabyx.Config.Font_Configuration :=
+         Gabyx.Config.Load_Font_Configuration;
 
       Choice         : Integer := 0;
       Exit_Requested : Boolean := False;
@@ -54,6 +57,12 @@ package body Gabyx.Launcher is
         ("[CONFIG] Fullscreen : " & App_Config.Fullscreen'Image);
       Ada.Text_IO.Put_Line
         ("[CONFIG] Target FPS : " & App_Config.Target_FPS'Image);
+      Ada.Text_IO.Put_Line
+        ("[CONFIG:FONTS]  Czcionka   : " & Ada.Strings.Unbounded.To_String (Font_Config.Family));
+      Ada.Text_IO.Put_Line
+        ("[CONFIG:FONTS]  Rozmiar UI : " & Font_Config.Size_Regular'Image & " px");
+      Ada.Text_IO.Put_Line
+        ("[CONFIG:FONTS]  Monospace  : " & Font_Config.Is_Monospace'Image);
 
       --  Główna pętla interaktywnego menu wyboru
       while not Exit_Requested loop
@@ -89,7 +98,7 @@ package body Gabyx.Launcher is
                   Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika Trendy_Terminal TUI...");
                when 4 =>
                   Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika Raylib 2D Engine...");
-                  Gabyx.Drivers.Raylib.Run (App_Config);
+                  Gabyx.Drivers.Raylib.Run (App_Config, Font_Config);
                when 5 =>
                   Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika SDL2 Engine...");
                when 6 =>

@@ -43,6 +43,13 @@ package body Gabyx.Config is
       Key     : String;
       Default : Integer) return Integer;
 
+   function Read_Float
+     (Table   : TOML.TOML_Value;
+      Key     : String;
+      Default : Float) return Float;
+
+   function Parse_Display_Mode (Mode_Str : String) return Display_Mode_Type;
+
    --  ============================================================================
    --  POMOCNICZE FUNKCJE WEWNĘTRZNE (BEZPIECZNY ODCZYT TOML)
    --  ============================================================================
@@ -101,6 +108,35 @@ package body Gabyx.Config is
       return Default;
    end Read_Integer;
 
+   function Read_Float
+     (Table   : TOML.TOML_Value;
+      Key     : String;
+      Default : Float) return Float
+   is
+   begin
+      if Table.Kind = TOML.TOML_Table and then Table.Has (Key) then
+         declare
+            Val : constant TOML.TOML_Value := Table.Get (Key);
+         begin
+            if Val.Kind = TOML.TOML_Integer then
+               return Float (Val.As_Integer);
+            end if;
+         end;
+      end if;
+      return Default;
+   end Read_Float;
+
+   function Parse_Display_Mode (Mode_Str : String) return Display_Mode_Type is
+   begin
+      if Mode_Str = "borderless" then
+         return Borderless;
+      elsif Mode_Str = "borderless_fullscreen" then
+         return Borderless_Fullscreen;
+      else
+         return Windowed;
+      end if;
+   end Parse_Display_Mode;
+
    --  ============================================================================
    --  IMPLEMENTACJA INTERFEJSU PUBLICZNEGO
    --  ============================================================================
@@ -131,20 +167,26 @@ package body Gabyx.Config is
             declare
                Window_Tab : constant TOML.TOML_Value := Root.Get ("window");
                Preset_Num : constant Integer := Read_Integer (Window_Tab, "active_preset", 0);
+               Mode_Raw   : constant String := Read_String (Window_Tab, "display_mode", "windowed");
             begin
                Config.Title := To_Unbounded_String
                  (Read_String (Window_Tab, "title", Default_Window_Title));
-               Config.Fullscreen    := Read_Boolean (Window_Tab, "fullscreen", False);
-               Config.Resizable     := Read_Boolean (Window_Tab, "resizable", False);
-               Config.Borderless    := Read_Boolean (Window_Tab, "borderless", False);
-               Config.High_DPI      := Read_Boolean (Window_Tab, "high_dpi", True);
-               Config.Always_On_Top := Read_Boolean (Window_Tab, "always_on_top", False);
+               Config.Display_Mode     := Parse_Display_Mode (Mode_Raw);
+               Config.Center_On_Screen := Read_Boolean (Window_Tab, "center_on_screen", True);
+               Config.Monitor_Index    := Natural (Read_Integer (Window_Tab, "monitor_index", 0));
+               Config.Resizable        := Read_Boolean (Window_Tab, "resizable", False);
+               Config.Always_On_Top    := Read_Boolean (Window_Tab, "always_on_top", False);
+               Config.High_DPI         := Read_Boolean (Window_Tab, "high_dpi", True);
 
                case Preset_Num is
                   when 1 => Config.Active_Preset := Preset_1;
                   when 2 => Config.Active_Preset := Preset_2;
                   when 3 => Config.Active_Preset := Preset_3;
                   when 4 => Config.Active_Preset := Preset_4;
+                  when 5 => Config.Active_Preset := Preset_5;
+                  when 6 => Config.Active_Preset := Preset_6;
+                  when 7 => Config.Active_Preset := Preset_7;
+                  when 8 => Config.Active_Preset := Preset_8;
                   when others => Config.Active_Preset := Auto_Default;
                end case;
             end;
@@ -160,7 +202,11 @@ package body Gabyx.Config is
                      when Preset_2     => "preset_2",
                      when Preset_3     => "preset_3",
                      when Preset_4     => "preset_4",
-                     when Auto_Default => "preset_3");
+                     when Preset_5     => "preset_5",
+                     when Preset_6     => "preset_6",
+                     when Preset_7     => "preset_7",
+                     when Preset_8     => "preset_8",
+                     when Auto_Default => "preset_1");
             begin
                if Presets_Tab.Kind = TOML.TOML_Table and then Presets_Tab.Has (Sub_Key) then
                   declare
@@ -189,7 +235,7 @@ package body Gabyx.Config is
                Config.Maintain_Aspect_Ratio :=
                  Read_Boolean (Gfx_Tab, "maintain_aspect_ratio", True);
 
-               if Raw_FPS in 0 | 30 | 60 | 75 | 120 then
+               if Raw_FPS in 0 | 30 | 60 | 75 | 120 | 144 then
                   Config.Target_FPS := Target_FPS_Type (Raw_FPS);
                else
                   Config.Target_FPS := 0;
@@ -221,9 +267,133 @@ package body Gabyx.Config is
             end;
          end if;
 
+         --  5. Sekcja [border_bars]
+         if Root.Kind = TOML.TOML_Table and then Root.Has ("border_bars") then
+            declare
+               Bars_Tab : constant TOML.TOML_Value := Root.Get ("border_bars");
+               Raw_R    : constant Integer := Read_Integer (Bars_Tab, "r", 90);
+               Raw_G    : constant Integer := Read_Integer (Bars_Tab, "g", 20);
+               Raw_B    : constant Integer := Read_Integer (Bars_Tab, "b", 35);
+               Raw_A    : constant Integer := Read_Integer (Bars_Tab, "a", 255);
+            begin
+               if Raw_R in Color_Component'Range then
+                  Config.Border_Bars_Color.R := Color_Component (Raw_R);
+               end if;
+               if Raw_G in Color_Component'Range then
+                  Config.Border_Bars_Color.G := Color_Component (Raw_G);
+               end if;
+               if Raw_B in Color_Component'Range then
+                  Config.Border_Bars_Color.B := Color_Component (Raw_B);
+               end if;
+               if Raw_A in Color_Component'Range then
+                  Config.Border_Bars_Color.A := Color_Component (Raw_A);
+               end if;
+            end;
+         end if;
+
       end;
 
       return Config;
    end Load_Window_Configuration;
+
+   function Get_Default_Font_Configuration return Font_Configuration is
+      Config : Font_Configuration;
+   begin
+      return Config;
+   end Get_Default_Font_Configuration;
+
+   function Load_Font_Configuration
+     (File_Path : String := Default_Fonts_Config_Path) return Font_Configuration
+   is
+      Config : Font_Configuration := Get_Default_Font_Configuration;
+      Result : constant TOML.Read_Result := TOML.File_IO.Load_File (File_Path);
+   begin
+      if not Result.Success then
+         Ada.Text_IO.Put_Line
+           ("[CONFIG] Nie odnaleziono pliku " & File_Path & " - uzyto czcionki domyslnej.");
+         return Config;
+      end if;
+
+      declare
+         Root : constant TOML.TOML_Value := Result.Value;
+      begin
+         --  1. Odczyt aktywnego presetu czcionek
+         declare
+            Fonts_Tab : constant TOML.TOML_Value :=
+              (if Root.Has ("fonts") then Root.Get ("fonts")
+               elsif Root.Has ("font") then Root.Get ("font")
+               else Root);
+
+            Preset_Choice : constant Integer :=
+              Read_Integer (Fonts_Tab, "active_preset", 1);
+
+            Sub_Key : constant String :=
+              (if Preset_Choice = 2 then "preset_2" else "preset_1");
+         begin
+            if Root.Kind = TOML.TOML_Table and then Root.Has ("presets") then
+               declare
+                  Presets_Tab : constant TOML.TOML_Value := Root.Get ("presets");
+               begin
+                  if Presets_Tab.Kind = TOML.TOML_Table and then Presets_Tab.Has (Sub_Key) then
+                     declare
+                        Font_Tab : constant TOML.TOML_Value := Presets_Tab.Get (Sub_Key);
+                     begin
+                        Config.Family := To_Unbounded_String
+                          (Read_String (Font_Tab, "family", Default_Font_Family));
+                        Config.Regular_Path := To_Unbounded_String
+                          (Read_String (Font_Tab, "regular_path", Default_Regular_Path));
+                        Config.Bold_Path := To_Unbounded_String
+                          (Read_String (Font_Tab, "bold_path", Default_Bold_Path));
+                        Config.Italic_Path := To_Unbounded_String
+                          (Read_String (Font_Tab, "italic_path", Default_Italic_Path));
+                        Config.Bold_Italic_Path := To_Unbounded_String
+                          (Read_String (Font_Tab, "bold_italic_path", Default_Bold_Italic_Path));
+                     end;
+                  end if;
+               end;
+            end if;
+         end;
+
+         --  2. Sekcja [sizes]
+         if Root.Kind = TOML.TOML_Table and then Root.Has ("sizes") then
+            declare
+               Sizes_Tab : constant TOML.TOML_Value := Root.Get ("sizes");
+               Raw_S     : constant Integer := Read_Integer (Sizes_Tab, "small", 14);
+               Raw_R     : constant Integer := Read_Integer (Sizes_Tab, "regular", 18);
+               Raw_T     : constant Integer := Read_Integer (Sizes_Tab, "title", 24);
+               Raw_L     : constant Integer := Read_Integer (Sizes_Tab, "large", 32);
+            begin
+               if Raw_S in Font_Size_Type'Range then
+                  Config.Size_Small := Font_Size_Type (Raw_S);
+               end if;
+               if Raw_R in Font_Size_Type'Range then
+                  Config.Size_Regular := Font_Size_Type (Raw_R);
+               end if;
+               if Raw_T in Font_Size_Type'Range then
+                  Config.Size_Title := Font_Size_Type (Raw_T);
+               end if;
+               if Raw_L in Font_Size_Type'Range then
+                  Config.Size_Large := Font_Size_Type (Raw_L);
+               end if;
+            end;
+         end if;
+
+         --  3. Sekcja [rendering]
+         if Root.Kind = TOML.TOML_Table and then Root.Has ("rendering") then
+            declare
+               Rend_Tab : constant TOML.TOML_Value := Root.Get ("rendering");
+            begin
+               Config.Spacing := Read_Float (Rend_Tab, "spacing", 1.0);
+               Config.Smooth_Filter :=
+                 Read_Boolean (Rend_Tab, "smooth_filter", True);
+               Config.Polish_Diacritics :=
+                 Read_Boolean (Rend_Tab, "polish_diacritics", True);
+            end;
+         end if;
+
+      end;
+
+      return Config;
+   end Load_Font_Configuration;
 
 end Gabyx.Config;

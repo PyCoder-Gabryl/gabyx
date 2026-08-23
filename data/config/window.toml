@@ -13,74 +13,105 @@
 
 # @formatter:off
 
+# ============================================================================
+# GABYX - KONFIGURACJA OKNA I EKRANU (TOML)
+# ============================================================================
+
 [window]
 title                 = "Gabyx - Roguelike RPG / City-Builder"
 
-# Wybór aktywnego zestawu rozdzielczości:
-# 0 = tryb domyślny (automatyczny wybór zestawu nr 3: 1280x720)
-# 1 = Zestaw 1 (800x450)
-# 2 = Zestaw 2 (1024x576)
-# 3 = Zestaw 3 (1280x720 - Rekomendowany / Standard HD)
-# 4 = Zestaw 4 (1920x1080 - Full HD)
+# Dostępne tryby wyświetlania:
+# "windowed"              - Klasyczne okno z ramką i belką OS, wycentrowane
+# "borderless"            - Okno o stałym rozmiarze bez ramki OS, wycentrowane
+# "borderless_fullscreen" - Pełny ekran pulpitu z centrowaniem i pasami obramowania
+display_mode          = "windowed"
+
+# Wybór aktywnego zestawu rozdzielczości przy starcie:
+# 0 = Automatyczny (domyślny: preset_1 - 1280x720)
+# 1..8 = Jawny wybór z sekcji [presets]
 active_preset         = 0
 
-# Tryb wyświetlania:
-# false = tryb okienkowy (stały rozmiar bez rozciągania)
-# true  = tryb pełnoekranowy (obraz wycentrowany w pionie i poziomie)
-fullscreen            = false
-
-# Blokada ręcznej zmiany rozmiaru okna myszą
-resizable             = false
-
-# Pozostałe flagi systemowe okna
-borderless            = false
-high_dpi              = true
+# Pozycjonowanie i zachowanie okna
+center_on_screen      = true
+monitor_index         = 0       # 0 = monitor główny
+resizable             = false   # Blokada ręcznej zmiany rozmiaru krawędziami
 always_on_top         = false
+high_dpi              = true    # Obsługa skalowania Apple Retina (HiDPI)
 
 # ----------------------------------------------------------------------------
-# 4 PREDEFINIOWANE ZESTAWY ROZDZIELCZOŚCI (PROPORCJE 16:9)
+# 8 PREDEFINIOWANYCH ZESTAWÓW ROZDZIELCZOŚCI (16:9, 16:10, 21:9)
 # ----------------------------------------------------------------------------
 [presets.preset_1]
-width                 = 800
-height                = 450
-
-[presets.preset_2]
-width                 = 1024
-height                = 576
-
-[presets.preset_3]
+name                  = "16:9 HD (Baza minimalna)"
 width                 = 1280
 height                = 720
+aspect_ratio          = "16:9"
 
-[presets.preset_4]
+[presets.preset_2]
+name                  = "16:10 WXGA (MacBook Air/Pro)"
+width                 = 1440
+height                = 900
+aspect_ratio          = "16:10"
+
+[presets.preset_3]
+name                  = "16:9 Full HD"
 width                 = 1920
 height                = 1080
+aspect_ratio          = "16:9"
+
+[presets.preset_4]
+name                  = "16:10 WUXGA"
+width                 = 1920
+height                = 1200
+aspect_ratio          = "16:10"
+
+[presets.preset_5]
+name                  = "21:9 UW-HD (Ultra-Wide Baza)"
+width                 = 2560
+height                = 1080
+aspect_ratio          = "21:9"
+
+[presets.preset_6]
+name                  = "16:9 QHD (2K)"
+width                 = 2560
+height                = 1440
+aspect_ratio          = "16:9"
+
+[presets.preset_7]
+name                  = "21:9 UW-QHD"
+width                 = 3440
+height                = 1440
+aspect_ratio          = "21:9"
+
+[presets.preset_8]
+name                  = "16:9 4K UHD"
+width                 = 3840
+height                = 2160
+aspect_ratio          = "16:9"
 
 # ----------------------------------------------------------------------------
-# SYNCHRONIZACJA I KLATKARZ (FPS)
+# SYNCHRONIZACJA I PŁYNNOŚĆ
 # ----------------------------------------------------------------------------
 [graphics]
-# Synchronizacja pionowa (Vertical Synchronization)
 vsync                 = true
-
-# Zachowanie proporcji przy pełnym ekranie (czarne pasy po bokach/górze)
+target_fps            = 0       # 0 = V-Sync (dopasowanie do ProMotion 120Hz / 60Hz)
 maintain_aspect_ratio = true
 
-# Dostępne limity klatkarza w grze
-available_fps         = [30, 60, 75, 120]
-
-# Wybrany klatkarz:
-# 0 = domyślny / automatyczny (synchronizacja z ekranem, np. 60 lub 120 FPS)
-# Wartości > 0 muszą znajdować się na liście available_fps
-target_fps            = 0
-
 # ----------------------------------------------------------------------------
-# KOLOR TŁA I PASÓW EKRANU (RGBA)
+# PALETA TŁA I PASÓW EKRANU (RGBA)
 # ----------------------------------------------------------------------------
 [background]
+# Tło głównego obszaru gry (ciemny grafit: #12161A)
 r                     = 18
 g                     = 22
 b                     = 26
 a                     = 255
 
-# @formatter:off
+[border_bars]
+# Kolor pasów obramowania do testów wizualnych (wyraziste bordo: #5A1423)
+r                     = 90
+g                     = 20
+b                     = 35
+a                     = 255
+
+# @formatter:on

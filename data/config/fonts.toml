@@ -1,0 +1,78 @@
+
+# ============================================================================
+# PROJECT:         Gabyx: Ada Roguleike
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:     GABYX – KONFIGURACJA CZCIONEK I TYPOGRAFII (TOML)
+#                  Definiuje ścieżki do plików czcionek (domyślnie JetBrains Mono),
+#                  predefiniowane rozmiary tekstu dla poszczególnych warstw UI,
+#                  odstępy między znakami oraz obsługę polskich znaków diakrytycznych.
+# ----------------------------------------------------------------------------
+# PATH:            data/config/fonts.toml
+# CREATED:         2026-08-22
+# ============================================================================
+
+# @formatter:off
+
+[fonts]
+# Wybór aktywnego zestawu czcionek:
+# 1 = JetBrains Mono Nerd Font
+# 2 = Intel One Mono Nerd Font (Domyślny / Aktywny)
+active_preset         = 1
+
+# Wymuszenie czcionki o stałej szerokości znaku (Monospace)
+is_monospace          = true
+
+# ----------------------------------------------------------------------------
+# ZESTAW 1: JETBRAINS MONO NERD FONT
+# ----------------------------------------------------------------------------
+[presets.preset_1]
+family                = "JetBrains Mono Nerd Font"
+regular_path          = "assets/fonts/jetbrains_mono/JetBrainsMonoNerdFont-Regular.ttf"
+bold_path             = "assets/fonts/jetbrains_mono/JetBrainsMonoNerdFont-Bold.ttf"
+italic_path           = "assets/fonts/jetbrains_mono/JetBrainsMonoNerdFont-Italic.ttf"
+bold_italic_path      = "assets/fonts/jetbrains_mono/JetBrainsMonoNerdFont-BoldItalic.ttf"
+
+# ----------------------------------------------------------------------------
+# ZESTAW 2: INTEL ONE MONO NERD FONT (AKTYWNY)
+# ----------------------------------------------------------------------------
+[presets.preset_2]
+family                = "Intel One Mono Nerd Font"
+regular_path          = "assets/fonts/intel_one_mono/IntoneMonoNerdFont-Regular.ttf"
+bold_path             = "assets/fonts/intel_one_mono/IntoneMonoNerdFont-Bold.ttf"
+italic_path           = "assets/fonts/intel_one_mono/IntoneMonoNerdFont-Italic.ttf"
+bold_italic_path      = "assets/fonts/intel_one_mono/IntoneMonoNerdFont-BoldItalic.ttf"
+
+# ----------------------------------------------------------------------------
+# PREDEFINIOWANE ROZMIARY CZCIONKI DLA WARSTW INTERFEJSU (W PIKSELACH)
+# ----------------------------------------------------------------------------
+[sizes]
+# Mały tekst pomocniczy / opisy przedmiotów w ekwipunku
+small                 = 14
+
+# Główny tekst gry / dialogi / logi wydarzeń
+regular               = 18
+
+# Nagłówki paneli / nazwy lokacji / tytuły menu
+title                 = 24
+
+# Główny nagłówek ekranu startowego
+large                 = 32
+
+# ----------------------------------------------------------------------------
+# PARAMETRY RENDEROWANIA I ODSTĘPÓW
+# ----------------------------------------------------------------------------
+[rendering]
+# Odstęp między znakami (kerning / letter spacing w pikselach)
+spacing               = 1.0
+
+# Wygładzanie krawędzi czcionki (Antyaliasing)
+smooth_filter         = true
+
+# Ładowanie rozszerzonego zestawu znaków UTF-8 (w tym polskich: ąćęłńóśźż / ĄĆĘŁŃÓŚŹŻ)
+polish_diacritics     = true
+
+# @formatter:on

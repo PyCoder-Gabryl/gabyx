@@ -20,8 +20,10 @@ package Gabyx.Drivers.Raylib is
    --  PUBLICZNY INTERFEJS STEROWNIKA RAYLIB
    --  ============================================================================
 
-   --  Uruchamia okno graficzne Raylib i pętlę renderowania na podstawie konfiguracji
-   procedure Run (Config : Gabyx.Config.Window_Configuration);
+   --  Uruchamia okno graficzne Raylib z konfiguracją okna i czcionek
+   procedure Run
+     (Config   : Gabyx.Config.Window_Configuration;
+      Font_Cfg : Gabyx.Config.Font_Configuration);
 
 end Gabyx.Drivers.Raylib;
 
