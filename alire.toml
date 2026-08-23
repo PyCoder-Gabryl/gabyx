@@ -27,7 +27,7 @@ Gabyx to klasyczna gra typu Roguelike i City-Builder pisana w języku Ada
 z wykorzystaniem najnowszych standardów Ada 2022 oraz formalnej weryfikacji SPARK.
 Projekt integruje silnik Raylib dla grafiki oraz obsługę formatu TOML dla konfiguracji.
 """
-version = "0.9.0"
+version = "0.10.0"
 
 authors = ["PyCoder Gabryl"]
 maintainers = ["PyCoder Gabryl <pycoder.gabryl@gmail.com>"]
