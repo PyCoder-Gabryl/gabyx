@@ -18,7 +18,8 @@
 with Ada.Text_IO;
 with Ada.Integer_Text_IO;
 with Ada.Strings.Unbounded;
-with Gabyx.Config;
+with Gabyx.Config.Window;
+with Gabyx.Config.Fonts;
 with Gabyx.Drivers.Raylib;
 
 package body Gabyx.Launcher is
@@ -28,11 +29,11 @@ package body Gabyx.Launcher is
    --  ============================================================================
 
    procedure Run is
-      App_Config : constant Gabyx.Config.Window_Configuration :=
-         Gabyx.Config.Load_Window_Configuration;
+      App_Config : constant Gabyx.Config.Window.Window_Configuration :=
+         Gabyx.Config.Window.Load_Configuration;
 
-      Font_Config : constant Gabyx.Config.Font_Configuration :=
-         Gabyx.Config.Load_Font_Configuration;
+      Font_Config : constant Gabyx.Config.Fonts.Font_Configuration :=
+         Gabyx.Config.Fonts.Load_Configuration;
 
       Choice         : Integer := 0;
       Exit_Requested : Boolean := False;
@@ -44,7 +45,7 @@ package body Gabyx.Launcher is
       Ada.Text_IO.Put_Line ("==================================================");
       Ada.Text_IO.New_Line;
 
-      --  Wypisanie parametrów okna pobranych z konfiguracji TOML
+      --  Wypisanie parametrów okona pobranych z konfiguracji TOML
       Ada.Text_IO.Put_Line
         ("[CONFIG] Tytul okna : " & Ada.Strings.Unbounded.To_String (App_Config.Title));
       Ada.Text_IO.Put_Line
