@@ -47,7 +47,8 @@ package body Gabyx.Drivers.Raylib is
       Layout          : Layout_Cache;
       Grid_Info       : Gabyx.UI.Grid.Grid_Metrics;
 
-      Zoom_Sizes : constant array (1 .. 5) of Positive := [30, 42, 48, 64, 96];
+      --  6 poziomów zoomu kafelków: 24, 32, 48, 64, 80, 96 px
+      Zoom_Sizes : constant array (1 .. 6) of Positive := [24, 32, 48, 64, 80, 96];
       Cur_Zoom   : Positive := 4; --  64 px domyślnie
 
       procedure Refresh_Layout is
@@ -78,25 +79,57 @@ package body Gabyx.Drivers.Raylib is
                when Cmd_Quit =>
                   exit;
 
-               when Cmd_Select_Preset_1 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (1); Refresh_Layout;
-               when Cmd_Select_Preset_2 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (2); Refresh_Layout;
-               when Cmd_Select_Preset_3 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (3); Refresh_Layout;
-               when Cmd_Select_Preset_4 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (4); Refresh_Layout;
-               when Cmd_Select_Preset_5 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (5); Refresh_Layout;
-               when Cmd_Select_Preset_6 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (6); Refresh_Layout;
-               when Cmd_Select_Preset_7 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (7); Refresh_Layout;
-               when Cmd_Select_Preset_8 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (8); Refresh_Layout;
-               when Cmd_Select_Preset_9 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (9); Refresh_Layout;
-               when Cmd_Toggle_Borderless => Gabyx.Drivers.Raylib.Window_Mgr.Toggle_Borderless;
+               when Cmd_Select_Preset_1 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (1);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_2 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (2);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_3 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (3);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_4 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (4);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_5 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (5);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_6 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (6);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_7 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (7);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_8 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (8);
+                  Refresh_Layout;
+               when Cmd_Select_Preset_9 =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (9);
+                  Refresh_Layout;
+               when Cmd_Toggle_Borderless =>
+                  Gabyx.Drivers.Raylib.Window_Mgr.Toggle_Borderless;
 
-               when Cmd_HUD_Tier_Auto     => Forced_HUD_Tier := HUD_Auto;     Refresh_Layout;
-               when Cmd_HUD_Tier_Compact  => Forced_HUD_Tier := HUD_Compact;  Refresh_Layout;
-               when Cmd_HUD_Tier_Standard => Forced_HUD_Tier := HUD_Standard; Refresh_Layout;
-               when Cmd_HUD_Tier_HiDPI    => Forced_HUD_Tier := HUD_HiDPI;    Refresh_Layout;
+               when Cmd_HUD_Tier_Auto =>
+                  Forced_HUD_Tier := HUD_Auto;
+                  Refresh_Layout;
+               when Cmd_HUD_Tier_Compact =>
+                  Forced_HUD_Tier := HUD_Compact;
+                  Refresh_Layout;
+               when Cmd_HUD_Tier_Standard =>
+                  Forced_HUD_Tier := HUD_Standard;
+                  Refresh_Layout;
+               when Cmd_HUD_Tier_HiDPI =>
+                  Forced_HUD_Tier := HUD_HiDPI;
+                  Refresh_Layout;
 
-               when Cmd_Toggle_Top_View   => Top_View := (if Top_View = View_A then View_B else View_A);
-               when Cmd_Toggle_Bottom_View=> Bottom_View := (if Bottom_View = View_A then View_B else View_A);
-               when Cmd_Toggle_Font_Family=> Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
+               when Cmd_Toggle_Top_View =>
+                  Top_View := (if Top_View = View_A then View_B else View_A);
+
+               when Cmd_Toggle_Bottom_View =>
+                  Bottom_View := (if Bottom_View = View_A then View_B else View_A);
+
+               when Cmd_Toggle_Font_Family =>
+                  Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
 
                --  Zarządzanie siatką kafelków
                when Cmd_Toggle_Grid =>
@@ -107,11 +140,24 @@ package body Gabyx.Drivers.Raylib is
                     (if Camera_Cfg.Active_Color_Index >= Camera_Cfg.Color_Count then 1
                      else Camera_Cfg.Active_Color_Index + 1);
 
-               when Cmd_Tile_Zoom_1 => Cur_Zoom := 1; Refresh_Layout;
-               when Cmd_Tile_Zoom_2 => Cur_Zoom := 2; Refresh_Layout;
-               when Cmd_Tile_Zoom_3 => Cur_Zoom := 3; Refresh_Layout;
-               when Cmd_Tile_Zoom_4 => Cur_Zoom := 4; Refresh_Layout;
-               when Cmd_Tile_Zoom_5 => Cur_Zoom := 5; Refresh_Layout;
+               when Cmd_Tile_Zoom_1 =>
+                  Cur_Zoom := 1;
+                  Refresh_Layout;
+               when Cmd_Tile_Zoom_2 =>
+                  Cur_Zoom := 2;
+                  Refresh_Layout;
+               when Cmd_Tile_Zoom_3 =>
+                  Cur_Zoom := 3;
+                  Refresh_Layout;
+               when Cmd_Tile_Zoom_4 =>
+                  Cur_Zoom := 4;
+                  Refresh_Layout;
+               when Cmd_Tile_Zoom_5 =>
+                  Cur_Zoom := 5;
+                  Refresh_Layout;
+               when Cmd_Tile_Zoom_6 =>
+                  Cur_Zoom := 6;
+                  Refresh_Layout;
 
                when Cmd_None =>
                   null;

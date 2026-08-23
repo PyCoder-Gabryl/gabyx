@@ -15,9 +15,6 @@
 
 with Interfaces.C;
 with Ada.Characters.Latin_1;
-with Gabyx.Types;
-with Gabyx.UI.Types;
-with Gabyx.UI.Grid;
 with Gabyx.UI.Panels;
 with Gabyx.Drivers.Raylib.Fonts;
 with Gabyx.Drivers.Raylib.Window_Mgr;
@@ -73,7 +70,7 @@ package body Gabyx.Drivers.Raylib.Renderer is
            (r => unsigned_char (HUD_Cfg.Color_Bottom_View_B.R),
             g => unsigned_char (HUD_Cfg.Color_Bottom_View_B.G),
             b => unsigned_char (HUD_Cfg.Color_Bottom_View_B.B),
-            a => unsigned_char (HUD_Cfg.Color_Bottom_View_B.A)));
+            a => unsigned_char (HUD_Cfg.Color_Bottom_View_A.A)));
 
       Color_Vp_Margin : constant Standard.Raylib.Color :=
         (r => unsigned_char (HUD_Cfg.Color_Viewport.R),
@@ -100,7 +97,6 @@ package body Gabyx.Drivers.Raylib.Renderer is
       Text_Cyan  : constant Standard.Raylib.Color := (r => 80,  g => 220, b => 240, a => 255);
       Text_Gray  : constant Standard.Raylib.Color := (r => 180, g => 180, b => 180, a => 255);
 
-      --  Współrzędne czarnego prostokąta siatki (z wycentrowaniem auto-paddingu)
       Grid_Origin_X : constant int := Vp_X + int (Grid_Info.Margin_X);
       Grid_Origin_Y : constant int := Vp_Y + int (Layout.Viewport_Rect.Y) + int (Grid_Info.Margin_Y);
       Grid_W        : constant int := int (Grid_Info.Grid_Width);
@@ -135,9 +131,8 @@ package body Gabyx.Drivers.Raylib.Renderer is
       Standard.Raylib.DrawRectangle
         (Grid_Origin_X, Grid_Origin_Y, Grid_W, Grid_H, Color_Black_Under_Grid);
 
-      --  4. RYSOWANIE LINII SIATKI (Gdy włączona)
+      --  4. RYSOWANIE LINII SIATKI
       if Grid_Visible then
-         --  Linie pionowe (kolumny)
          for Col in 0 .. Grid_Info.Columns loop
             declare
                Line_X : constant int := Grid_Origin_X + (int (Col) * Tile_Px);
@@ -146,7 +141,6 @@ package body Gabyx.Drivers.Raylib.Renderer is
             end;
          end loop;
 
-         --  Linie poziome (wiersze)
          for Row in 0 .. Grid_Info.Rows loop
             declare
                Line_Y : constant int := Grid_Origin_Y + (int (Row) * Tile_Px);
@@ -164,7 +158,7 @@ package body Gabyx.Drivers.Raylib.Renderer is
          int (Layout.Bottom_Bar_Rect.Height),
          Color_Bottom);
 
-      --  Kontury
+      --  Kontury Viewportu
       Standard.Raylib.DrawRectangleLines (Vp_X, Vp_Y, Virtual_W, Virtual_H, Text_Gray);
 
       --  TREŚĆ GÓRNEGO PASKA
@@ -210,7 +204,7 @@ package body Gabyx.Drivers.Raylib.Renderer is
          Standard.Raylib.DrawTextEx
            (Cur_Font,
             "SKROTY SIATKI: [S] Zmien kolor siatki  [Option+S] Wlacz/Wylacz siatke" & Ada.Characters.Latin_1.LF &
-            "[Option+5] 30px  [Option+6] 42px  [Option+7] 48px  [Option+8] 64px  [Option+9] 96px",
+            "[Option+4..9] Rozmiar kafelka: 24, 32, 48, 64, 80, 96 px",
             (x => C_float (Vp_X + 20), y => C_float (Vp_Y + int (Layout.Bottom_Bar_Rect.Y) + 12)),
             C_float (Font_Cfg.Size_Small),
             1.0,

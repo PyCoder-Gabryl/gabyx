@@ -42,8 +42,6 @@ package body Gabyx.Drivers.Raylib.Input is
       Key_Name : constant String :=
         (if Req_Alt then Binding_Str (Binding_Str'First + 4 .. Binding_Str'Last) else Binding_Str);
    begin
-      --  Rygor modyfikatorów: jeśli skrót wymaga Option, musi być wciśnięty wyłącznie Option.
-      --  Jeśli skrót jest pojedynczy, żaden modyfikator (ani Option, ani Command, ani Control) nie może być aktywny.
       if Req_Alt then
          if not Opt_Active then
             return False;
@@ -122,16 +120,20 @@ package body Gabyx.Drivers.Raylib.Input is
       if Opt_Down and then not (Cmd_Down or Ctrl_Down) then
          if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S)) then
             return Cmd_Toggle_Grid;
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then
+         --  6 poziomów zoomu siatki (24, 32, 48, 64, 80, 96 px)
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FOUR)) then
             return Cmd_Tile_Zoom_1;
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SIX)) then
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then
             return Cmd_Tile_Zoom_2;
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SEVEN)) then
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SIX)) then
             return Cmd_Tile_Zoom_3;
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_EIGHT)) then
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SEVEN)) then
             return Cmd_Tile_Zoom_4;
-         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_NINE)) then
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_EIGHT)) then
             return Cmd_Tile_Zoom_5;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_NINE)) then
+            return Cmd_Tile_Zoom_6;
+         --  Skalowanie HUD-u
          elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Auto), True, True) then
             return Cmd_HUD_Tier_Auto;
          elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Compact), True, True) then

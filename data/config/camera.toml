@@ -6,8 +6,8 @@
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
 # DESCRIPTION:     Konfiguracja kamery, poziomów zoomu oraz parametrów siatki.
-#                  Definiuje 5 predefiniowanych rozmiarów kafelka, martwą strefę,
-#                  widoczność siatki oraz dynamiczną paletę kolorów RGBA.
+#                  Definiuje 6 poziomów zoomu (24, 32, 48, 64, 80, 96 px), martwą
+#                  strefę, widoczność siatki oraz dynamiczną paletę kolorów RGBA.
 # ----------------------------------------------------------------------------
 # PATH:            data/config/camera.toml
 # CREATED:         2026-08-23
@@ -16,20 +16,19 @@
 
 # @formatter:off
 
+
 [zoom]
-# Domyślny i predefiniowane rozmiary kafelka w pikselach: [30, 42, 48, 64, 96]
+# 6 poziomów zoomu opartych na wielokrotnościach 8/16 px: [24, 32, 48, 64, 80, 96]
 default_tile_size     = 64
 active_zoom_index     = 4
 
 [grid]
-# Domyślny stan widoczności siatki przy starcie
 visible               = true
 active_color_index    = 1
 
 # ----------------------------------------------------------------------------
 # DYNAMICZNA PALETA KOLORÓW SIATKI (RGBA)
 # Możesz dopisywać kolejne kolory poniżej - silnik obsłuży je automatycznie!
-# Użycie przezroczystości (A ~ 90-150) zapewnia czytelność na każdym tle.
 # ----------------------------------------------------------------------------
 [[grid.colors]]
 name = "Szmaragdowa zielen CRT"

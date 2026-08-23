@@ -21,11 +21,11 @@ is
       Viewport_Height : Positive;
       Tile_Size       : Positive) return Grid_Metrics
    is
-      Metrics : Grid_Metrics;
-      Cols    : constant Positive := (if Viewport_Width >= Tile_Size then Viewport_Width / Tile_Size else 1);
-      Rws     : constant Positive := (if Viewport_Height >= Tile_Size then Viewport_Height / Tile_Size else 1);
-      G_Width : constant Positive := Cols * Tile_Size;
-      G_Height: constant Positive := Rws * Tile_Size;
+      Metrics  : Grid_Metrics;
+      Cols     : constant Positive := (if Viewport_Width >= Tile_Size then Viewport_Width / Tile_Size else 1);
+      Rws      : constant Positive := (if Viewport_Height >= Tile_Size then Viewport_Height / Tile_Size else 1);
+      G_Width  : constant Positive := Cols * Tile_Size;
+      G_Height : constant Positive := Rws * Tile_Size;
    begin
       Metrics.Columns     := Cols;
       Metrics.Rows        := Rws;
