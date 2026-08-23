@@ -27,18 +27,31 @@ package body Gabyx.Drivers.Raylib.Input is
      Gabyx.Config.Input.Load_Configuration;
 
    function Is_Key_Pressed
-     (Binding_Str   : String;
-      Option_Active : Boolean) return Boolean;
+     (Binding_Str  : String;
+      Opt_Active   : Boolean;
+      Any_Mod_Down : Boolean) return Boolean;
 
-   function Is_Key_Pressed (Binding_Str : String; Option_Active : Boolean) return Boolean is
+   function Is_Key_Pressed
+     (Binding_Str  : String;
+      Opt_Active   : Boolean;
+      Any_Mod_Down : Boolean) return Boolean
+   is
       Req_Alt : constant Boolean :=
         (Binding_Str'Length >= 4 and then Binding_Str (Binding_Str'First .. Binding_Str'First + 3) = "ALT+");
 
       Key_Name : constant String :=
         (if Req_Alt then Binding_Str (Binding_Str'First + 4 .. Binding_Str'Last) else Binding_Str);
    begin
-      if Req_Alt /= Option_Active then
-         return False;
+      --  Rygor modyfikatorów: jeśli skrót wymaga Option, musi być wciśnięty wyłącznie Option.
+      --  Jeśli skrót jest pojedynczy, żaden modyfikator (ani Option, ani Command, ani Control) nie może być aktywny.
+      if Req_Alt then
+         if not Opt_Active then
+            return False;
+         end if;
+      else
+         if Any_Mod_Down then
+            return False;
+         end if;
       end if;
 
       if Key_Name = "ESCAPE" or Key_Name = "ESC" then
@@ -55,16 +68,12 @@ package body Gabyx.Drivers.Raylib.Input is
          return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_F));
       elsif Key_Name = "B" then
          return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_B));
+      elsif Key_Name = "S" then
+         return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S));
       elsif Key_Name = "H" then
          return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_H));
       elsif Key_Name = "W" then
          return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_W));
-      elsif Key_Name = "S" then
-         return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S));
-      elsif Key_Name = "A" then
-         return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_A));
-      elsif Key_Name = "E" then
-         return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_E));
       elsif Key_Name = "0" then
          return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ZERO));
       elsif Key_Name = "1" then
@@ -91,46 +100,82 @@ package body Gabyx.Drivers.Raylib.Input is
    end Is_Key_Pressed;
 
    function Poll_Command return Gabyx.Commands.Game_Command is
-      Option_Down : constant Boolean :=
+      Opt_Down  : constant Boolean :=
         Boolean (Standard.Raylib.IsKeyDown (Standard.Raylib.KEY_LEFT_ALT))
         or Boolean (Standard.Raylib.IsKeyDown (Standard.Raylib.KEY_RIGHT_ALT));
+
+      Cmd_Down  : constant Boolean :=
+        Boolean (Standard.Raylib.IsKeyDown (Standard.Raylib.KEY_LEFT_SUPER))
+        or Boolean (Standard.Raylib.IsKeyDown (Standard.Raylib.KEY_RIGHT_SUPER));
+
+      Ctrl_Down : constant Boolean :=
+        Boolean (Standard.Raylib.IsKeyDown (Standard.Raylib.KEY_LEFT_CONTROL))
+        or Boolean (Standard.Raylib.IsKeyDown (Standard.Raylib.KEY_RIGHT_CONTROL));
+
+      Any_Mod   : constant Boolean := Opt_Down or Cmd_Down or Ctrl_Down;
    begin
-      if Is_Key_Pressed (To_String (Input_Cfg.Quit), Option_Down) then
+      if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ESCAPE)) then
          return Cmd_Quit;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Toggle_Borderless), Option_Down) then
-         return Cmd_Toggle_Borderless;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Toggle_Top_View), Option_Down) then
-         return Cmd_Toggle_Top_View;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Toggle_Bottom_View), Option_Down) then
-         return Cmd_Toggle_Bottom_View;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Toggle_Font_Family), Option_Down) then
-         return Cmd_Toggle_Font_Family;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Auto), Option_Down) then
-         return Cmd_HUD_Tier_Auto;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Compact), Option_Down) then
-         return Cmd_HUD_Tier_Compact;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Standard), Option_Down) then
-         return Cmd_HUD_Tier_Standard;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_HiDPI), Option_Down) then
-         return Cmd_HUD_Tier_HiDPI;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_1), Option_Down) then
-         return Cmd_Select_Preset_1;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_2), Option_Down) then
-         return Cmd_Select_Preset_2;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_3), Option_Down) then
-         return Cmd_Select_Preset_3;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_4), Option_Down) then
-         return Cmd_Select_Preset_4;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_5), Option_Down) then
-         return Cmd_Select_Preset_5;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_6), Option_Down) then
-         return Cmd_Select_Preset_6;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_7), Option_Down) then
-         return Cmd_Select_Preset_7;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_8), Option_Down) then
-         return Cmd_Select_Preset_8;
-      elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_9), Option_Down) then
-         return Cmd_Select_Preset_9;
+      end if;
+
+      --  1. Skróty z klawiszem OPTION (Alt na PC)
+      if Opt_Down and then not (Cmd_Down or Ctrl_Down) then
+         if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S)) then
+            return Cmd_Toggle_Grid;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then
+            return Cmd_Tile_Zoom_1;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SIX)) then
+            return Cmd_Tile_Zoom_2;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SEVEN)) then
+            return Cmd_Tile_Zoom_3;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_EIGHT)) then
+            return Cmd_Tile_Zoom_4;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_NINE)) then
+            return Cmd_Tile_Zoom_5;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Auto), True, True) then
+            return Cmd_HUD_Tier_Auto;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Compact), True, True) then
+            return Cmd_HUD_Tier_Compact;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Standard), True, True) then
+            return Cmd_HUD_Tier_Standard;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_HiDPI), True, True) then
+            return Cmd_HUD_Tier_HiDPI;
+         end if;
+      end if;
+
+      --  2. Skróty pojedyncze (tylko gdy brak jakiegokolwiek modyfikatora)
+      if not Any_Mod then
+         if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S)) then
+            return Cmd_Cycle_Grid_Color;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Toggle_Borderless), False, False) then
+            return Cmd_Toggle_Borderless;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Toggle_Top_View), False, False) then
+            return Cmd_Toggle_Top_View;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Toggle_Bottom_View), False, False) then
+            return Cmd_Toggle_Bottom_View;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Toggle_Font_Family), False, False) then
+            return Cmd_Toggle_Font_Family;
+
+         --  Presety rozdzielczości okna [1]..[9]
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_1), False, False) then
+            return Cmd_Select_Preset_1;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_2), False, False) then
+            return Cmd_Select_Preset_2;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_3), False, False) then
+            return Cmd_Select_Preset_3;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_4), False, False) then
+            return Cmd_Select_Preset_4;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_5), False, False) then
+            return Cmd_Select_Preset_5;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_6), False, False) then
+            return Cmd_Select_Preset_6;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_7), False, False) then
+            return Cmd_Select_Preset_7;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_8), False, False) then
+            return Cmd_Select_Preset_8;
+         elsif Is_Key_Pressed (To_String (Input_Cfg.Preset_9), False, False) then
+            return Cmd_Select_Preset_9;
+         end if;
       end if;
 
       return Cmd_None;

@@ -1,0 +1,73 @@
+# ============================================================================
+# PROJECT:         Gabyx: Ada Roguelike
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:     Konfiguracja kamery, poziomów zoomu oraz parametrów siatki.
+#                  Definiuje 5 predefiniowanych rozmiarów kafelka, martwą strefę,
+#                  widoczność siatki oraz dynamiczną paletę kolorów RGBA.
+# ----------------------------------------------------------------------------
+# PATH:            data/config/camera.toml
+# CREATED:         2026-08-23
+# ============================================================================
+
+
+# @formatter:off
+
+[zoom]
+# Domyślny i predefiniowane rozmiary kafelka w pikselach: [30, 42, 48, 64, 96]
+default_tile_size     = 64
+active_zoom_index     = 4
+
+[grid]
+# Domyślny stan widoczności siatki przy starcie
+visible               = true
+active_color_index    = 1
+
+# ----------------------------------------------------------------------------
+# DYNAMICZNA PALETA KOLORÓW SIATKI (RGBA)
+# Możesz dopisywać kolejne kolory poniżej - silnik obsłuży je automatycznie!
+# Użycie przezroczystości (A ~ 90-150) zapewnia czytelność na każdym tle.
+# ----------------------------------------------------------------------------
+[[grid.colors]]
+name = "Szmaragdowa zielen CRT"
+r = 46
+g = 204
+b = 113
+a = 140
+
+[[grid.colors]]
+name = "Bursztynowe zloto"
+r = 243
+g = 156
+b = 18
+a = 150
+
+[[grid.colors]]
+name = "Morski cyjan"
+r = 0
+g = 210
+b = 211
+a = 140
+
+[[grid.colors]]
+name = "Jaskrawa magenta"
+r = 255
+g = 107
+b = 129
+a = 140
+
+[[grid.colors]]
+name = "Subtelna stal"
+r = 223
+g = 230
+b = 233
+a = 90
+
+[camera]
+deadzone_tiles        = 4
+lerp_duration_ms      = 120
+
+# @formatter:on
