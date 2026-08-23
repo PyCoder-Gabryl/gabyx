@@ -5,25 +5,23 @@
 --  EMAIL:           pycoder.gabryl@gmail.com
 --  LICENSE:         Apache 2.0
 --  ----------------------------------------------------------------------------
---  DESCRIPTION:
+--  DESCRIPTION:     Główny punkt wejścia sterownika graficznego opartego na Raylib.
+--                   Orkiestruje cyklem życia okna, pętlą zdarzeń, synchronizacją
+--                   pamięci podręcznej układu (Layout Cache) oraz renderowaniem.
 --  ----------------------------------------------------------------------------
 --  PATH:            src/drivers/graphical/raylib/gabyx-drivers-raylib.ads
 --  CREATED:         2026-08-22
 --  ============================================================================
 
 
-with Gabyx.Config;
+with Gabyx.Config.Window;
+with Gabyx.Config.Fonts;
 
 package Gabyx.Drivers.Raylib is
 
-   --  ============================================================================
-   --  PUBLICZNY INTERFEJS STEROWNIKA RAYLIB
-   --  ============================================================================
-
-   --  Uruchamia okno graficzne Raylib z konfiguracją okna i czcionek
+   --  Uruchamia pętlę główną sterownika graficznego Raylib
    procedure Run
-     (Config   : Gabyx.Config.Window_Configuration;
-      Font_Cfg : Gabyx.Config.Font_Configuration);
+     (Config   : Gabyx.Config.Window.Window_Configuration;
+      Font_Cfg : Gabyx.Config.Fonts.Font_Configuration);
 
 end Gabyx.Drivers.Raylib;
-
