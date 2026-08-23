@@ -5,7 +5,10 @@
 # EMAIL:           pycoder.gabryl@gmail.com
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
-# DESCRIPTION:
+# DESCRIPTION:     Konfiguracja interfejsu uzytkownika (HUD) dla silnika Gabyx.
+#                  Definiuje 3 profile wymiarow paskow (Compact, Standard,
+#                  HiDPI), skale czcionek oraz palete kolorystyczna tla dla
+#                  poszczegolnych stanow i widokow paskow (Widok A / Widok B).
 # ----------------------------------------------------------------------------
 # PATH:            data/config/hud.toml
 # CREATED:         2026-08-23
@@ -47,38 +50,37 @@ font_size             = 24
 # PALETA TŁA KONTENERÓW I STANY WIDOKÓW A/B (RGBA)
 # ----------------------------------------------------------------------------
 [colors.top_view_a]
-# Pasek górny - Widok A: Diagnostyka okna (stalowy granat: #1A222D)
-r                     = 26
-g                     = 34
-b                     = 45
+# Pasek górny - Widok A: Stalowy błękitny łupek (#2A3441)
+r                     = 42
+g                     = 52
+b                     = 65
 a                     = 255
 
 [colors.top_view_b]
-# Pasek górny - Widok B: Typografia i HUD (ciemne indygo: #1E1C2B)
-r                     = 30
-g                     = 28
-b                     = 43
+# Pasek górny - Widok B: Średnie indygo (#343046)
+r                     = 52
+g                     = 48
+b                     = 70
 a                     = 255
 
 [colors.bottom_view_a]
-# Pasek dolny - Widok A: Skróty rozdzielczości (głęboki grafit: #161B22)
-r                     = 22
-g                     = 27
-b                     = 34
+# Pasek dolny - Widok A: Grafitowy łupek (#262C36)
+r                     = 38
+g                     = 44
+b                     = 54
 a                     = 255
 
 [colors.bottom_view_b]
-# Pasek dolny - Widok B: Skróty HUD i czcionek (ciemny antracyt: #142023)
-r                     = 20
-g                     = 32
-b                     = 35
+# Pasek dolny - Widok B: Ciemny morski antracyt (#203238)
+r                     = 32
+g                     = 50
+b                     = 56
 a                     = 255
 
 [colors.viewport]
-# Środkowy obszar świata/lochu (bezwzględna czerń: #000000)
-r                     = 0
-g                     = 0
-b                     = 0
+# Środkowy obszar Viewportu lochu: Wyraziste bordo (#5A1423)
+r                     = 90
+g                     = 20
+b                     = 35
 a                     = 255
-
 # @formatter:on

@@ -81,6 +81,13 @@ is
    --  Profile rozmiarów HUD-u
    type HUD_Tier_Type is (HUD_Auto, HUD_Compact, HUD_Standard, HUD_HiDPI);
 
+   --  Wymiary pasków dla danego profilu (Pure SPARK)
+   type HUD_Tier_Dimensions is record
+      Top_Height    : Positive       := 32;
+      Bottom_Height : Positive       := 96;
+      Font_Size     : Font_Size_Type := 14;
+   end record;
+
    --  Dwustanowe widoki pasków interfejsu
    type HUD_View_Type is (View_A, View_B);
 

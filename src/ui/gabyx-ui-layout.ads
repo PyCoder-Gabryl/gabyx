@@ -17,7 +17,6 @@
 
 
 with Gabyx.Types;
-with Gabyx.Config;
 
 package Gabyx.UI.Layout with
    SPARK_Mode => On,
@@ -26,16 +25,15 @@ is
 
    use Gabyx.Types;
 
-   --  Wylicza i buforuje geometrię 3 kontenerów na podstawie szerokości, wysokości i profilu
-   function Calculate_Layout
-     (Width       : Width_Type;
-      Height      : Height_Type;
-      Forced_Tier : HUD_Tier_Type;
-      HUD_Cfg     : Gabyx.Config.HUD_Configuration) return Layout_Cache;
-
    --  Zwraca efektywny profil HUD (rozwiązuje profil Auto na podstawie szerokości)
    function Resolve_Tier
      (Width       : Width_Type;
       Forced_Tier : HUD_Tier_Type) return HUD_Tier_Type;
+
+   --  Wylicza i buforuje geometrię 3 kontenerów na podstawie szerokości, wysokości i profilu
+   function Calculate_Layout
+     (Width       : Width_Type;
+      Height      : Height_Type;
+      Forced_Tier : HUD_Tier_Type) return Layout_Cache;
 
 end Gabyx.UI.Layout;

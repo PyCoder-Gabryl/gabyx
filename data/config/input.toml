@@ -1,0 +1,72 @@
+# ============================================================================
+# PROJECT:         Gabyx: Ada Roguelike
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:     Konfiguracja mapowania klawiatury i skrotow silnika Gabyx.
+#                  Pozwala na pelna personalizacje sterowania systemowego,
+#                  przelaczania widokow HUD-u, wyboru rozdzielczosci oraz
+#                  ruchu postaci bez koniecznosci rekompilacji kodu silnika.
+# ----------------------------------------------------------------------------
+# PATH:            data/config/input.toml
+# CREATED:         2026-08-23
+# ============================================================================
+
+# @formatter:off
+
+# ============================================================================
+# 🍎 SŁOWNIK SYMBOLI I KLAWISZY DLA MACOS / APPLE SILICON:
+# ----------------------------------------------------------------------------
+#  • ⌥ Option / Alt    -> W pliku uzywamy prefiksu: "ALT+"   (np. "ALT+1")
+#  • ⌘ Command / Super -> W pliku uzywamy prefiksu: "CMD+"   (np. "CMD+Q")
+#  • ⌃ Control         -> W pliku uzywamy prefiksu: "CTRL+"  (np. "CTRL+S")
+#  • ⇧ Shift           -> W pliku uzywamy prefiksu: "SHIFT+" (np. "SHIFT+W")
+#  • ⎋ Escape          -> "ESCAPE" lub "ESC"
+#  • ␣ Spacja          -> "SPACE"
+#  • ⇥ Tab             -> "TAB"
+#  • ⏎ Return / Enter  -> "ENTER"
+# ============================================================================
+
+[system]
+# Wyjscie z gry (⎋ Escape)
+quit                  = "ESCAPE"
+# Przelaczanie obramowania okna (Windowed <-> Borderless)
+toggle_borderless     = "B"
+
+[hud]
+# Przelaczanie widoku Gornego Paska (Widok A: Okno <-> Widok B: Typografia)
+toggle_top_view       = "G"
+# Przelaczanie widoku Dolnego Paska (Widok A: Presety <-> Widok B: Skroty)
+toggle_bottom_view    = "D"
+# Zmiana aktywnego kwartetu czcionek (Intel One Mono <-> JetBrains Mono)
+toggle_font_family    = "F"
+
+# Skalowanie HUD-u z klawiszem Option (⌥ Option + 0..3)
+tier_auto             = "ALT+0"
+tier_compact          = "ALT+1"
+tier_standard         = "ALT+2"
+tier_hidpi            = "ALT+3"
+
+[presets]
+# Wybor predefiniowanych rozdzielczosci okna
+preset_1              = "1"
+preset_2              = "2"
+preset_3              = "3"
+preset_4              = "4"
+preset_5              = "5"
+preset_6              = "6"
+preset_7              = "7"
+preset_8              = "8"
+preset_9              = "9"
+
+[gameplay]
+# Przygotowane pod kolejny krok: Dyskretny ruch bohatera w lochu (WSAD)
+move_north            = "W"
+move_south            = "S"
+move_west             = "A"
+move_east             = "E"
+action_wait           = "SPACE"
+
+# @formatter:on

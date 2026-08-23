@@ -12,13 +12,13 @@
 --  ============================================================================
 
 
-with Ada.Text_IO;
 with Ada.Characters.Latin_1;
 with Interfaces.C;
 with Ada.Strings.Unbounded;
 with Gabyx.Types;
 with Gabyx.Commands;
 with Gabyx.UI.Layout;
+with Gabyx.UI.Panels;
 with Gabyx.Drivers.Raylib.Input;
 with Raylib;
 
@@ -49,19 +49,6 @@ package body Gabyx.Drivers.Raylib is
          7 => (Width => 2560, Height => 1440),
          8 => (Width => 3440, Height => 1440),
          9 => (Width => 3840, Height => 2160)];
-
-      function Get_Preset_Name (Index : Positive) return String is
-        (case Index is
-            when 1 => "16:9 HD (Baza 1280x720)",
-            when 2 => "16:10 WXGA (Mac 1440x900)",
-            when 3 => "16:9 HD+ (1600x900)",
-            when 4 => "16:9 FHD (Full HD 1080p)",
-            when 5 => "16:10 WUXGA (1920x1200)",
-            when 6 => "21:9 UW-HD (Ultra-Wide)",
-            when 7 => "16:9 QHD (2K 2560x1440)",
-            when 8 => "21:9 UW-QHD (3440x1440)",
-            when 9 => "16:9 4K UHD (3840x2160)",
-            when others => "Nieznany Preset");
 
       --  Deklaracje wcześniejsze procedur lokalnych (wymóg stylu -gnatys)
       procedure Center_Window (Target_W, Target_H : int);
@@ -140,8 +127,7 @@ package body Gabyx.Drivers.Raylib is
          Layout := Gabyx.UI.Layout.Calculate_Layout
            (Width       => Width_Type (Virtual_W),
             Height      => Height_Type (Virtual_H),
-            Forced_Tier => Forced_HUD_Tier,
-            HUD_Cfg     => HUD_Cfg);
+            Forced_Tier => Forced_HUD_Tier);
       end Refresh_Layout;
 
       procedure Center_Window (Target_W, Target_H : int) is
@@ -220,7 +206,7 @@ package body Gabyx.Drivers.Raylib is
 
       Refresh_Layout;
 
-      --  4. Pętla główna
+      --  4. Pętla główna zdarzeń i poleceń
       while not Boolean (Standard.Raylib.WindowShouldClose) loop
          declare
             Cmd : constant Game_Command := Gabyx.Drivers.Raylib.Input.Poll_Command;
@@ -251,10 +237,18 @@ package body Gabyx.Drivers.Raylib is
                      Center_Window (Virtual_W, Virtual_H);
                   end if;
 
-               when Cmd_HUD_Tier_Auto     => Forced_HUD_Tier := HUD_Auto;     Refresh_Layout;
-               when Cmd_HUD_Tier_Compact  => Forced_HUD_Tier := HUD_Compact;  Refresh_Layout;
-               when Cmd_HUD_Tier_Standard => Forced_HUD_Tier := HUD_Standard; Refresh_Layout;
-               when Cmd_HUD_Tier_HiDPI    => Forced_HUD_Tier := HUD_HiDPI;    Refresh_Layout;
+               when Cmd_HUD_Tier_Auto =>
+                  Forced_HUD_Tier := HUD_Auto;
+                  Refresh_Layout;
+               when Cmd_HUD_Tier_Compact =>
+                  Forced_HUD_Tier := HUD_Compact;
+                  Refresh_Layout;
+               when Cmd_HUD_Tier_Standard =>
+                  Forced_HUD_Tier := HUD_Standard;
+                  Refresh_Layout;
+               when Cmd_HUD_Tier_HiDPI =>
+                  Forced_HUD_Tier := HUD_HiDPI;
+                  Refresh_Layout;
 
                when Cmd_Toggle_Top_View =>
                   Top_View := (if Top_View = View_A then View_B else View_A);
@@ -270,7 +264,7 @@ package body Gabyx.Drivers.Raylib is
             end case;
          end;
 
-         --  5. Renderowanie
+         --  5. Renderowanie kontenerów i widoków
          Standard.Raylib.BeginDrawing;
 
          declare
@@ -306,7 +300,7 @@ package body Gabyx.Drivers.Raylib is
                int (Layout.Top_Bar_Rect.Height),
                Top_Color);
 
-            --  B. VIEWPORT ŚWIATA (Środek - czarny)
+            --  B. VIEWPORT ŚWIATA (Środek - bordowy dla wyrazistości)
             Standard.Raylib.DrawRectangle
               (Vp_X + int (Layout.Viewport_Rect.X),
                Vp_Y + int (Layout.Viewport_Rect.Y),
@@ -326,72 +320,55 @@ package body Gabyx.Drivers.Raylib is
             Standard.Raylib.DrawRectangleLines
               (Vp_X, Vp_Y, Virtual_W, Virtual_H, Text_Gray);
 
-            --  TREŚĆ GÓRNEGO PASKA (Zależna od Top_View)
-            if Top_View = View_A then
-               Standard.Raylib.DrawTextEx
-                 (Current_Font,
-                  "GABYX // OKNO: " & Integer (Virtual_W)'Image & "x" & Integer (Virtual_H)'Image &
-                  " px | EKRAN: " & Integer (Screen_W)'Image & "x" & Integer (Screen_H)'Image &
-                  " px | FORMAT: " & (if Layout.Is_Ultra_Wide then "21:9 Ultra-Wide" else "Standard 16:x") &
-                  " [Ctrl+T: Widok Typografii]",
-                  (x => C_float (Vp_X + 20), y => C_float (Vp_Y + 8)),
-                  C_float (Font_Cfg.Size_Small),
-                  1.0,
-                  Text_White);
-            else
-               Standard.Raylib.DrawTextEx
-                 (Current_Font,
-                  "TYPOGRAFIA: " & Font_Name & " | PROFIL HUD: " & Layout.Active_Tier'Image &
-                  " (Gora: " & Integer (Layout.Top_Bar_Rect.Height)'Image & "px, Dol: " &
-                  Integer (Layout.Bottom_Bar_Rect.Height)'Image & "px) | FPS: " & Integer (FPS)'Image &
-                  " [Ctrl+T: Widok Okna]",
-                  (x => C_float (Vp_X + 20), y => C_float (Vp_Y + 8)),
-                  C_float (Font_Cfg.Size_Small),
-                  1.0,
-                  Text_Cyan);
-            end if;
-
-            --  TREŚĆ ŚRODKOWEGO VIEWPORTU (Informacja o stanie lochu)
+            --  TREŚĆ GÓRNEGO PASKA (Formatowana przez Gabyx.UI.Panels)
             Standard.Raylib.DrawTextEx
               (Current_Font,
-               "OBSZAR VIEWPORTU SWIATA (CZYSTY CZARNY)" & Ada.Characters.Latin_1.LF &
-               "Wymiary bufora lochu: " & Integer (Layout.Viewport_Rect.Width)'Image & " x " &
-               Integer (Layout.Viewport_Rect.Height)'Image & " px" & Ada.Characters.Latin_1.LF &
+               Gabyx.UI.Panels.Get_Top_Bar_Text
+                 (View          => Top_View,
+                  Virtual_W     => Positive (Virtual_W),
+                  Virtual_H     => Positive (Virtual_H),
+                  Screen_W      => Positive (Screen_W),
+                  Screen_H      => Positive (Screen_H),
+                  Is_Ultra_Wide => Layout.Is_Ultra_Wide,
+                  Active_Tier   => Layout.Active_Tier,
+                  Font_Family   => Font_Name,
+                  FPS           => Natural (FPS)),
+               (x => C_float (Vp_X + 20), y => C_float (Vp_Y + 8)),
+               C_float (Font_Cfg.Size_Small),
+               1.0,
+               (if Top_View = View_A then Text_White else Text_Cyan));
+
+            --  TREŚĆ ŚRODKOWEGO VIEWPORTU
+            Standard.Raylib.DrawTextEx
+              (Current_Font,
+               "OBSZAR VIEWPORTU SWIATA (BORDOWE TLO TESTOWE)" & Ada.Characters.Latin_1.LF &
+               "Wymiary bufora lochu: " & Layout.Viewport_Rect.Width'Image & " x " &
+               Layout.Viewport_Rect.Height'Image & " px" & Ada.Characters.Latin_1.LF &
                "Gotowy na przyjecie siatki kafelkow i gracza @ w kolejnym kroku.",
-               (x => C_float (Vp_X + 40), y => C_float (Vp_Y + int (Layout.Viewport_Rect.Y) + 40)),
+               (x => C_float (Vp_X + 40),
+                y => C_float (Vp_Y + int (Layout.Viewport_Rect.Y) + 40)),
                C_float (Font_Cfg.Size_Regular),
                1.0,
-               Text_Gray);
+               Text_White);
 
-            --  TREŚĆ DOLNEGO PASKA (Zależna od Bottom_View)
-            if Bottom_View = View_A then
-               Standard.Raylib.DrawTextEx
-                 (Current_Font,
-                  "DOLNY HUD // WIDOK A: ROZDZIELCZOSCI [Skrot: Ctrl+B -> Widok Funkcyjny]" & Ada.Characters.Latin_1.LF &
-                  "[1] 1280x720  [2] 1440x900   [3] 1600x900   [4] 1920x1080  [5] 1920x1200" & Ada.Characters.Latin_1.LF &
-                  "[6] 2560x1080 [7] 2560x1440  [8] 3440x1440  [9] 3840x2160  [B] Przepnij ramke",
-                  (x => C_float (Vp_X + 20), y => C_float (Vp_Y + int (Layout.Bottom_Bar_Rect.Y) + 12)),
-                  C_float (Font_Cfg.Size_Small),
-                  1.0,
-                  Text_Gold);
-            else
-               Standard.Raylib.DrawTextEx
-                 (Current_Font,
-                  "DOLNY HUD // WIDOK B: SKROTY SYSTEMOWE [Skrot: Ctrl+B -> Widok Rozdzielczosci]" & Ada.Characters.Latin_1.LF &
-                  "[Ctrl+F] Zmien czcionke   [Ctrl+T] Przepnij Gorny HUD   [Ctrl+B] Przepnij Dolny HUD" & Ada.Characters.Latin_1.LF &
-                  "[Ctrl+1] Compact (32/96)  [Ctrl+2] Standard (40/120)    [Ctrl+3] HiDPI (80/240)  [Ctrl+0] Auto",
-                  (x => C_float (Vp_X + 20), y => C_float (Vp_Y + int (Layout.Bottom_Bar_Rect.Y) + 12)),
-                  C_float (Font_Cfg.Size_Small),
-                  1.0,
-                  Text_White);
-            end if;
+            --  TREŚĆ DOLNEGO PASKA (Formatowana przez Gabyx.UI.Panels)
+            Standard.Raylib.DrawTextEx
+              (Current_Font,
+               Gabyx.UI.Panels.Get_Bottom_Bar_Text
+                 (View          => Bottom_View,
+                  Is_Ultra_Wide => Layout.Is_Ultra_Wide),
+               (x => C_float (Vp_X + 20),
+                y => C_float (Vp_Y + int (Layout.Bottom_Bar_Rect.Y) + 12)),
+               C_float (Font_Cfg.Size_Small),
+               1.0,
+               (if Bottom_View = View_A then Text_Gold else Text_White));
 
          end;
 
          Standard.Raylib.EndDrawing;
       end loop;
 
-      --  6. Zwolnienie zasobów
+      --  6. Zwolnienie zasobów GPU i zamknięcie okna
       Standard.Raylib.UnloadFont (Font_Intel);
       Standard.Raylib.UnloadFont (Font_JetBrains);
       Standard.Raylib.CloseWindow;

@@ -59,6 +59,7 @@ project Gabyx is
    Src_Dirs := ("src",
       "src/core/**",
       "src/config",
+      "src/ui",
       "src/logging",
       "src/drivers/abstract"
    );

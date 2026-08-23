@@ -14,6 +14,10 @@
 --  ============================================================================
 
 
+--  ============================================================================
+--  KONTEKST ZMIANY W: src/ui/gabyx-ui-layout.adb
+--  ============================================================================
+
 package body Gabyx.UI.Layout with
    SPARK_Mode => On
 is
@@ -39,35 +43,33 @@ is
    function Calculate_Layout
      (Width       : Width_Type;
       Height      : Height_Type;
-      Forced_Tier : HUD_Tier_Type;
-      HUD_Cfg     : Gabyx.Config.HUD_Configuration) return Layout_Cache
+      Forced_Tier : HUD_Tier_Type) return Layout_Cache                                --  [ZMIENIONE]
    is
-      Cache        : Layout_Cache;
-      Tier         : constant HUD_Tier_Type := Resolve_Tier (Width, Forced_Tier);
-      Top_H        : Natural := 32;
-      Bottom_H     : Natural := 96;
-      Viewport_H   : Natural;
-      Is_UW        : constant Boolean := (Float (Width) / Float (Height) >= 2.2);
+      Cache      : Layout_Cache;
+      Tier       : constant HUD_Tier_Type := Resolve_Tier (Width, Forced_Tier);
+      Top_H      : Natural := 32;
+      Bottom_H   : Natural := 96;
+      Viewport_H : Natural;
+      Is_UW      : constant Boolean := (Float (Width) / Float (Height) >= 2.2);
    begin
       case Tier is
          when HUD_Compact =>
-            Top_H    := HUD_Cfg.Compact_Tier.Top_Height;
-            Bottom_H := HUD_Cfg.Compact_Tier.Bottom_Height;
+            Top_H    := 32;
+            Bottom_H := 96;
          when HUD_Standard =>
-            Top_H    := HUD_Cfg.Standard_Tier.Top_Height;
-            Bottom_H := HUD_Cfg.Standard_Tier.Bottom_Height;
+            Top_H    := 40;
+            Bottom_H := 120;
          when HUD_HiDPI =>
-            Top_H    := HUD_Cfg.HiDPI_Tier.Top_Height;
-            Bottom_H := HUD_Cfg.HiDPI_Tier.Bottom_Height;
+            Top_H    := 80;
+            Bottom_H := 240;
          when HUD_Auto =>
-            Top_H    := HUD_Cfg.Standard_Tier.Top_Height;
-            Bottom_H := HUD_Cfg.Standard_Tier.Bottom_Height;
+            Top_H    := 40;
+            Bottom_H := 120;
       end case;
 
       if Height > (Top_H + Bottom_H + 100) then
          Viewport_H := Height - Top_H - Bottom_H;
       else
-         --  Awaryjna ochrona minimalnej wysokości Viewportu
          Top_H      := 24;
          Bottom_H   := 64;
          Viewport_H := Height - Top_H - Bottom_H;
