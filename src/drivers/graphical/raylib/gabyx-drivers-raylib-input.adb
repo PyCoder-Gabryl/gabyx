@@ -27,6 +27,11 @@ package body Gabyx.Drivers.Raylib.Input is
    Input_Cfg : constant Gabyx.Config.Input_Configuration :=
      Gabyx.Config.Load_Input_Configuration;
 
+   --  Wcześniejsza deklaracja funkcji sprawdzającej stan klawisza (wymóg -gnatys)
+   function Is_Key_Pressed
+     (Binding_Str   : String;
+      Option_Active : Boolean) return Boolean;
+
    --  Funkcja pomocnicza sprawdzająca, czy dany ciąg klawisza (np. "ALT+1", "G") został wciśnięty
    function Is_Key_Pressed (Binding_Str : String; Option_Active : Boolean) return Boolean is
       Req_Alt : constant Boolean :=
