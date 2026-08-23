@@ -39,7 +39,7 @@ always_on_top         = false
 high_dpi              = true    # Obsługa skalowania Apple Retina (HiDPI)
 
 # ----------------------------------------------------------------------------
-# 8 PREDEFINIOWANYCH ZESTAWÓW ROZDZIELCZOŚCI (16:9, 16:10, 21:9)
+# 9 PREDEFINIOWANYCH ZESTAWÓW ROZDZIELCZOŚCI (16:9, 16:10, 21:9)
 # ----------------------------------------------------------------------------
 [presets.preset_1]
 name                  = "16:9 HD (Baza minimalna)"
@@ -48,42 +48,48 @@ height                = 720
 aspect_ratio          = "16:9"
 
 [presets.preset_2]
-name                  = "16:10 WXGA (MacBook Air/Pro)"
+name                  = "16:10 WXGA (MacBook)"
 width                 = 1440
 height                = 900
 aspect_ratio          = "16:10"
 
 [presets.preset_3]
+name                  = "16:9 HD+ (Standard 1600x900)"
+width                 = 1600
+height                = 900
+aspect_ratio          = "16:9"
+
+[presets.preset_4]
 name                  = "16:9 Full HD"
 width                 = 1920
 height                = 1080
 aspect_ratio          = "16:9"
 
-[presets.preset_4]
+[presets.preset_5]
 name                  = "16:10 WUXGA"
 width                 = 1920
 height                = 1200
 aspect_ratio          = "16:10"
 
-[presets.preset_5]
+[presets.preset_6]
 name                  = "21:9 UW-HD (Ultra-Wide Baza)"
 width                 = 2560
 height                = 1080
 aspect_ratio          = "21:9"
 
-[presets.preset_6]
+[presets.preset_7]
 name                  = "16:9 QHD (2K)"
 width                 = 2560
 height                = 1440
 aspect_ratio          = "16:9"
 
-[presets.preset_7]
+[presets.preset_8]
 name                  = "21:9 UW-QHD"
 width                 = 3440
 height                = 1440
 aspect_ratio          = "21:9"
 
-[presets.preset_8]
+[presets.preset_9]
 name                  = "16:9 4K UHD"
 width                 = 3840
 height                = 2160

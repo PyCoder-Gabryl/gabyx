@@ -37,7 +37,7 @@ package body Gabyx.Launcher is
       Choice         : Integer := 0;
       Exit_Requested : Boolean := False;
    begin
-      --  Rysowanie ASCII nagłówka
+      --  Rysowanie nagłówka ASCII
       Ada.Text_IO.New_Line;
       Ada.Text_IO.Put_Line ("==================================================");
       Ada.Text_IO.Put_Line ("           GABYX OMNI-ENGINE STARTER             ");
@@ -54,7 +54,9 @@ package body Gabyx.Launcher is
       Ada.Text_IO.Put_Line
         ("[CONFIG] Preset     : " & App_Config.Active_Preset'Image);
       Ada.Text_IO.Put_Line
-        ("[CONFIG] Fullscreen : " & App_Config.Fullscreen'Image);
+        ("[CONFIG] Tryb okna  : " & App_Config.Display_Mode'Image);
+      Ada.Text_IO.Put_Line
+        ("[CONFIG] V-Sync     : " & App_Config.VSync'Image);
       Ada.Text_IO.Put_Line
         ("[CONFIG] Target FPS : " & App_Config.Target_FPS'Image);
       Ada.Text_IO.Put_Line

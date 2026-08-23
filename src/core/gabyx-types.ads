@@ -47,7 +47,8 @@ is
       Preset_5,
       Preset_6,
       Preset_7,
-      Preset_8);
+      Preset_8,
+      Preset_9);
 
    --  Bezpieczny zakres rozmiaru czcionki w pikselach
    subtype Font_Size_Type is Positive range 8 .. 128;

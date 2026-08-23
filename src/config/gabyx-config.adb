@@ -187,6 +187,7 @@ package body Gabyx.Config is
                   when 6 => Config.Active_Preset := Preset_6;
                   when 7 => Config.Active_Preset := Preset_7;
                   when 8 => Config.Active_Preset := Preset_8;
+                  when 9 => Config.Active_Preset := Preset_9;
                   when others => Config.Active_Preset := Auto_Default;
                end case;
             end;
@@ -206,6 +207,7 @@ package body Gabyx.Config is
                      when Preset_6     => "preset_6",
                      when Preset_7     => "preset_7",
                      when Preset_8     => "preset_8",
+                     when Preset_9     => "preset_9",
                      when Auto_Default => "preset_1");
             begin
                if Presets_Tab.Kind = TOML.TOML_Table and then Presets_Tab.Has (Sub_Key) then

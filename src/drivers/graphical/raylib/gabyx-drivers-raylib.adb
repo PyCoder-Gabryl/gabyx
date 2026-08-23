@@ -13,6 +13,7 @@
 
 
 with Ada.Text_IO;
+with Ada.Characters.Latin_1;
 with Interfaces.C;
 with Ada.Strings.Unbounded;
 with Gabyx.Types;
@@ -26,23 +27,43 @@ package body Gabyx.Drivers.Raylib is
    is
       use Interfaces.C;
       use Gabyx.Types;
+      use type Standard.Raylib.ConfigFlags;
 
-      --  Struktura opisująca predefiniowany zestaw rozdzielczości
-      type Preset_Info is record
+      --  Struktura wymiarów predefiniowanego zestawu rozdzielczości
+      type Preset_Dim is record
          Width  : int;
          Height : int;
-         Name   : String (1 .. 28);
       end record;
 
-      Presets_Table : constant array (1 .. 8) of Preset_Info :=
-        (1 => (Width => 1280, Height => 720,  Name => "16:9 HD (Baza 1280x720)     "),
-         2 => (Width => 1440, Height => 900,  Name => "16:10 WXGA (Mac 1440x900)   "),
-         3 => (Width => 1920, Height => 1080, Name => "16:9 FHD (Full HD 1080p)   "),
-         4 => (Width => 1920, Height => 1200, Name => "16:10 WUXGA (1920x1200)    "),
-         5 => (Width => 2560, Height => 1080, Name => "21:9 UW-HD (Ultra-Wide)    "),
-         6 => (Width => 2560, Height => 1440, Name => "16:9 QHD (2K 2560x1440)    "),
-         7 => (Width => 3440, Height => 1440, Name => "21:9 UW-QHD (3440x1440)    "),
-         8 => (Width => 3840, Height => 2160, Name => "16:9 4K UHD (3840x2160)    "));
+      --  Tablica wymiarów dla 9 presetów (składnia nawiasów kwadratowych Ada 2022)
+      Presets_Table : constant array (1 .. 9) of Preset_Dim :=
+        [1 => (Width => 1280, Height => 720),
+         2 => (Width => 1440, Height => 900),
+         3 => (Width => 1600, Height => 900),
+         4 => (Width => 1920, Height => 1080),
+         5 => (Width => 1920, Height => 1200),
+         6 => (Width => 2560, Height => 1080),
+         7 => (Width => 2560, Height => 1440),
+         8 => (Width => 3440, Height => 1440),
+         9 => (Width => 3840, Height => 2160)];
+
+      --  Funkcja pomocnicza zwracająca czytelną nazwę presetu
+      function Get_Preset_Name (Index : Positive) return String is
+        (case Index is
+            when 1 => "16:9 HD (Baza 1280x720)",
+            when 2 => "16:10 WXGA (Mac 1440x900)",
+            when 3 => "16:9 HD+ (1600x900)",
+            when 4 => "16:9 FHD (Full HD 1080p)",
+            when 5 => "16:10 WUXGA (1920x1200)",
+            when 6 => "21:9 UW-HD (Ultra-Wide)",
+            when 7 => "16:9 QHD (2K 2560x1440)",
+            when 8 => "21:9 UW-QHD (3440x1440)",
+            when 9 => "16:9 4K UHD (3840x2160)",
+            when others => "Nieznany Preset");
+
+      --  Deklaracje wcześniejsze procedur lokalnych (wymóg stylu -gnatys)
+      procedure Center_Window (Target_W, Target_H : int);
+      procedure Apply_Preset (Index : Positive);
 
       --  Stan bieżącego trybu okna i wirtualnego viewportu
       Current_Mode : Display_Mode_Type := Config.Display_Mode;
@@ -77,10 +98,10 @@ package body Gabyx.Drivers.Raylib is
         (if Config.Target_FPS > 0 then int (Config.Target_FPS) else 60);
 
       --  Uchwyt czcionki i zmienne monitora
-      Game_Font  : Standard.Raylib.Font;
-      Cur_Mon    : int := 0;
-      Mon_W      : int := 1920;
-      Mon_H      : int := 1080;
+      Game_Font : Standard.Raylib.Font;
+      Cur_Mon   : int := 0;
+      Mon_W     : int := 1920;
+      Mon_H     : int := 1080;
 
       --  Procedura centrowania okna na monitorze
       procedure Center_Window (Target_W, Target_H : int) is
@@ -100,7 +121,7 @@ package body Gabyx.Drivers.Raylib is
             Virtual_W := Req_W;
             Virtual_H := Req_H;
             Ada.Text_IO.Put_Line
-              ("[PRESET] Zmieniono wirtualny Viewport na: " & Presets_Table (Index).Name);
+              ("[PRESET] Zmieniono wirtualny Viewport na: " & Get_Preset_Name (Index));
          else
             --  W trybie okienkowym sprawdzamy czy okno mieści się na monitorze
             if Req_W <= Mon_W and then Req_H <= Mon_H then
@@ -109,10 +130,10 @@ package body Gabyx.Drivers.Raylib is
                Standard.Raylib.SetWindowSize (Virtual_W, Virtual_H);
                Center_Window (Virtual_W, Virtual_H);
                Ada.Text_IO.Put_Line
-                 ("[PRESET] Zmieniono rozmiar okna na: " & Presets_Table (Index).Name);
+                 ("[PRESET] Zmieniono rozmiar okna na: " & Get_Preset_Name (Index));
             else
                Ada.Text_IO.Put_Line
-                 ("[OSTRZEZENIE] Rozdzielczosc " & Presets_Table (Index).Name &
+                 ("[OSTRZEZENIE] Rozdzielczosc " & Get_Preset_Name (Index) &
                   " przekracza wymiary monitora (" & Integer (Mon_W)'Image & "x" &
                   Integer (Mon_H)'Image & ")!");
             end if;
@@ -133,7 +154,7 @@ package body Gabyx.Drivers.Raylib is
          Standard.Raylib.SetConfigFlags (Standard.Raylib.FLAG_WINDOW_UNDECORATED);
       elsif Current_Mode = Borderless_Fullscreen then
          Standard.Raylib.SetConfigFlags
-           (Standard.Raylib.FLAG_WINDOW_UNDECORATED + Standard.Raylib.FLAG_WINDOW_TOPMOST);
+           (Standard.Raylib.FLAG_WINDOW_UNDECORATED or Standard.Raylib.FLAG_WINDOW_TOPMOST);
       end if;
 
       --  2. Inicjalizacja bazowego okna
@@ -174,7 +195,7 @@ package body Gabyx.Drivers.Raylib is
       --  5. Główna pętla renderowania i testów interaktywnych
       while not Boolean (Standard.Raylib.WindowShouldClose) loop
 
-         --  Obsługa klawiszy wyboru rozdzielczości [1]..[8]
+         --  Obsługa klawiszy wyboru rozdzielczości [1]..[9]
          if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ONE)) then
             Apply_Preset (1);
          elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_TWO)) then
@@ -191,6 +212,8 @@ package body Gabyx.Drivers.Raylib is
             Apply_Preset (7);
          elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_EIGHT)) then
             Apply_Preset (8);
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_NINE)) then
+            Apply_Preset (9);
          end if;
 
          --  Obsługa klawisza [B] - Przełączanie ramki okna
@@ -307,8 +330,8 @@ package body Gabyx.Drivers.Raylib is
 
             Standard.Raylib.DrawTextEx
               (Game_Font,
-               "[1] 1280x720  [2] 1440x900   [3] 1920x1080  [4] 1920x1200" & ASCII.LF &
-               "[5] 2560x1080 [6] 2560x1440  [7] 3440x1440  [8] 3840x2160" & ASCII.LF &
+               "[1] 1280x720  [2] 1440x900   [3] 1600x900   [4] 1920x1080  [5] 1920x1200" & Ada.Characters.Latin_1.LF &
+               "[6] 2560x1080 [7] 2560x1440  [8] 3440x1440  [9] 3840x2160" & Ada.Characters.Latin_1.LF &
                "[B] Przelacz ramke okna (Windowed <-> Borderless)",
                Pos_List,
                C_float (Font_Cfg.Size_Small),
