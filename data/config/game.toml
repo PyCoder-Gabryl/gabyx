@@ -17,7 +17,7 @@
 # @formatter:off
 
 [app]
-splash_duration_sec   = 5.0     # Czas trwania ekranu Splash (0.0 = natychmiastowe menu)
+splash_duration_sec   = 7.0     # Czas trwania ekranu Splash (0.0 = natychmiastowe menu)
 language              = "pl"    # Kod języka i18n ("pl", "en", "de")
 dev_mode              = true    # Tryb deweloperski (nakładki diagnostyczne)
 

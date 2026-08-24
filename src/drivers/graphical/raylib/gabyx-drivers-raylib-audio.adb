@@ -14,13 +14,14 @@
 
 
 with Interfaces.C;
-with Gabyx.Types;
+with Ada.Numerics;
+with Ada.Numerics.Elementary_Functions;
 with Raylib;
 
 package body Gabyx.Drivers.Raylib.Audio is
 
    use Interfaces.C;
-   use Gabyx.Types;
+   use Ada.Numerics.Elementary_Functions;
 
    Audio_Ready  : Boolean := False;
    Sound_Move   : Standard.Raylib.Sound;
@@ -30,16 +31,20 @@ package body Gabyx.Drivers.Raylib.Audio is
    Move_Samples   : aliased Sample_Array_Short := [others => 0];
    Select_Samples : aliased Sample_Array_Short := [others => 0];
 
+   --  Wcześniejsza deklaracja procedury wewnętrznej (wymóg stylu -gnatys)
+   procedure Synthesize_Sounds;
+
    procedure Synthesize_Sounds is
       Wave_Move   : Standard.Raylib.Wave;
       Wave_Select : Standard.Raylib.Wave;
+      Two_Pi      : constant Float := 2.0 * Ada.Numerics.Pi;
    begin
       --  Synteza dźwięku przesunięcia (880 Hz, 0.04s, 44100 Hz PCM)
       for I in Move_Samples'Range loop
          declare
             T   : constant Float := Float (I) / 44100.0;
             Env : constant Float := 1.0 - (Float (I) / Float (Move_Samples'Length));
-            Val : constant Float := Float'Sin (2.0 * 3.14159 * 880.0 * T) * Env * 16000.0;
+            Val : constant Float := Sin (Two_Pi * 880.0 * T) * Env * 16000.0;
          begin
             Move_Samples (I) := short (Val);
          end;
@@ -58,7 +63,7 @@ package body Gabyx.Drivers.Raylib.Audio is
             T    : constant Float := Float (I) / 44100.0;
             Freq : constant Float := (if I < Select_Samples'Length / 2 then 587.33 else 880.0);
             Env  : constant Float := 1.0 - (Float (I) / Float (Select_Samples'Length));
-            Val  : constant Float := Float'Sin (2.0 * 3.14159 * Freq * T) * Env * 20000.0;
+            Val  : constant Float := Sin (Two_Pi * Freq * T) * Env * 20000.0;
          begin
             Select_Samples (I) := short (Val);
          end;

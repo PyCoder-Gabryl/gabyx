@@ -19,11 +19,12 @@ with Raylib;
 package body Gabyx.Drivers.Raylib.Menu is
 
    use Interfaces.C;
+   use Gabyx.UI.Menu;
 
    procedure Render
      (State    : in out Gabyx.UI.Menu.Menu_State;
       Font_Cfg : Gabyx.Config.Fonts.Font_Configuration;
-      Selected : out Boolean)
+      Selected : in out Boolean)
    is
       Screen_W : constant int := Standard.Raylib.GetScreenWidth;
       Screen_H : constant int := Standard.Raylib.GetScreenHeight;
@@ -31,7 +32,8 @@ package body Gabyx.Drivers.Raylib.Menu is
 
       Mouse_X  : constant int := Standard.Raylib.GetMouseX;
       Mouse_Y  : constant int := Standard.Raylib.GetMouseY;
-      LMB_Down : constant Boolean := Boolean (Standard.Raylib.IsMouseButtonPressed (Standard.Raylib.MOUSE_BUTTON_LEFT));
+      LMB_Down : constant Boolean :=
+        Boolean (Standard.Raylib.IsMouseButtonPressed (Standard.Raylib.MOUSE_BUTTON_LEFT));
 
       Center_X : constant C_float := C_float (Screen_W / 2);
       Menu_Y   : constant C_float := C_float (Screen_H / 2) - 100.0;
@@ -44,8 +46,6 @@ package body Gabyx.Drivers.Raylib.Menu is
       Border_Color   : constant Standard.Raylib.Color := (r => 60,  g => 75,  b => 95,  a => 255);
       Footer_Color   : constant Standard.Raylib.Color := (r => 140, g => 140, b => 140, a => 255);
    begin
-      Selected := False;
-
       Standard.Raylib.BeginDrawing;
       Standard.Raylib.ClearBackground (Bg_Color);
 
@@ -113,8 +113,8 @@ package body Gabyx.Drivers.Raylib.Menu is
       --  Pasek dolny ze skrótami
       Standard.Raylib.DrawTextEx
         (Cur_Font,
-         "[Strzalki / W/S] Nawigacja   [Enter / Spacja / Mysz] Wybor   [ESC] Wyjscie",
-         (x => Center_X - 280.0, y => C_float (Screen_H - 40)),
+         "[1..8 / Strzalki / W/S] Wybor   [Enter / Spacja / Mysz] Zatwierdz   [ESC] Wyjscie",
+         (x => Center_X - 310.0, y => C_float (Screen_H - 40)),
          C_float (Font_Cfg.Size_Small),
          1.0,
          Footer_Color);

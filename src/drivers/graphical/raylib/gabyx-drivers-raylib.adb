@@ -105,9 +105,38 @@ package body Gabyx.Drivers.Raylib is
             when State_Main_Menu =>
                declare
                   Action_Triggered : Boolean := False;
+
+                  --  Wcześniejsza deklaracja procedury lokalnej (wymóg stylu -gnatys)
+                  procedure Try_Select_Direct (Item : Menu_Item_ID);
+
+                  procedure Try_Select_Direct (Item : Menu_Item_ID) is
+                  begin
+                     if Gabyx.UI.Menu.Is_Item_Enabled (Menu_Data, Item) then
+                        Menu_Data.Selected_Item := Item;
+                        Action_Triggered := True;
+                     end if;
+                  end Try_Select_Direct;
                begin
-                  --  Obsługa klawiatury w menu
-                  if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_DOWN))
+                  --  Bezpośredni wybór klawiszami numerycznymi 1..8
+                  if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ONE)) then
+                     Try_Select_Direct (Item_New_Game);
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_TWO)) then
+                     Try_Select_Direct (Item_Continue);
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_THREE)) then
+                     Try_Select_Direct (Item_Save_Game);
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FOUR)) then
+                     Try_Select_Direct (Item_Load_Game);
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then
+                     Try_Select_Direct (Item_Settings);
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SIX)) then
+                     Try_Select_Direct (Item_Help);
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SEVEN)) then
+                     Try_Select_Direct (Item_About);
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_EIGHT)) then
+                     Try_Select_Direct (Item_Quit);
+
+                  --  Nawigacja strzałkami / W / S
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_DOWN))
                      or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S))
                   then
                      Gabyx.UI.Menu.Select_Next (Menu_Data);
@@ -120,12 +149,14 @@ package body Gabyx.Drivers.Raylib is
                   elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ENTER))
                      or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SPACE))
                   then
-                     Action_Triggered := True;
+                     if Gabyx.UI.Menu.Is_Item_Enabled (Menu_Data, Menu_Data.Selected_Item) then
+                        Action_Triggered := True;
+                     end if;
                   elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ESCAPE)) then
                      Gabyx.State_Machine.Set_State (State_Quit);
                   end if;
 
-                  --  Renderowanie i obsługa kliknięć myszy
+                  --  Renderowanie i obsługa kursora myszy
                   Gabyx.Drivers.Raylib.Menu.Render (Menu_Data, Font_Cfg, Action_Triggered);
 
                   if Action_Triggered then
@@ -151,7 +182,6 @@ package body Gabyx.Drivers.Raylib is
                begin
                   case Cmd is
                      when Cmd_Quit =>
-                        --  Klawisz ESC powraca do Menu Głównego z aktywną sesją (Zapisz staje się aktywne!)
                         Gabyx.State_Machine.Set_State (State_Main_Menu);
 
                      when Cmd_Select_Preset_1 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (1); Refresh_Layout;
@@ -171,8 +201,8 @@ package body Gabyx.Drivers.Raylib is
                      when Cmd_HUD_Tier_HiDPI    => Forced_HUD_Tier := HUD_HiDPI;    Refresh_Layout;
 
                      when Cmd_Toggle_Top_View   => Top_View := (if Top_View = View_A then View_B else View_A);
-                     when Cmd_Toggle_Bottom_View=> Bottom_View := (if Bottom_View = View_A then View_B else View_A);
-                     when Cmd_Toggle_Font_Family=> Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
+                     when Cmd_Toggle_Bottom_View => Bottom_View := (if Bottom_View = View_A then View_B else View_A);
+                     when Cmd_Toggle_Font_Family => Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
 
                      when Cmd_Toggle_Grid =>
                         Camera_Cfg.Grid_Visible := not Camera_Cfg.Grid_Visible;

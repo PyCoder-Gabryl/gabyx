@@ -19,10 +19,10 @@ with Gabyx.Config.Fonts;
 
 package Gabyx.Drivers.Raylib.Menu is
 
-   --  Renderuje ekran Menu Głównego oraz sprawdza interakcję kursora myszy
+   --  Renderuje Menu Główne, obsługuje hover myszy i aktywuje flagę Selected
    procedure Render
      (State    : in out Gabyx.UI.Menu.Menu_State;
       Font_Cfg : Gabyx.Config.Fonts.Font_Configuration;
-      Selected : out Boolean);
+      Selected : in out Boolean);
 
 end Gabyx.Drivers.Raylib.Menu;
