@@ -19,16 +19,8 @@ with Gabyx.Config.Fonts;
 
 package Gabyx.Drivers.Raylib.Splash is
 
-   --  Inicjalizuje parametry ekranu Splash z pliku game.toml
    procedure Initialize (Game_Cfg : Gabyx.Config.Game.Game_Configuration);
 
-   --  Aktualizuje licznik czasu i sprawdza przejście do Menu Głównego
-   procedure Update;
-
-   --  Renderuje grafikę i animację ekranu Splash
-   procedure Render (Font_Cfg : Gabyx.Config.Fonts.Font_Configuration);
-
-   --  Zwraca True, gdy prezentacja Splash dobiegła końca
-   function Is_Finished return Boolean;
+   procedure Process_Frame (Font_Cfg : Gabyx.Config.Fonts.Font_Configuration);
 
 end Gabyx.Drivers.Raylib.Splash;

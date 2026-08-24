@@ -78,6 +78,9 @@ package body Gabyx.Drivers.Raylib.Window_Mgr is
       Standard.Raylib.InitWindow (Virtual_W, Virtual_H, Title_Str);
       Standard.Raylib.SetTargetFPS (FPS);
 
+      --  Wyłączenie domyślnego zamykania aplikacji klawiszem ESC w bibliotece Raylib
+      Standard.Raylib.SetExitKey (Standard.Raylib.KeyboardKey'Val (0));
+
       Cur_Mon := Standard.Raylib.GetCurrentMonitor;
       Mon_W   := Standard.Raylib.GetMonitorWidth (Cur_Mon);
       Mon_H   := Standard.Raylib.GetMonitorHeight (Cur_Mon);

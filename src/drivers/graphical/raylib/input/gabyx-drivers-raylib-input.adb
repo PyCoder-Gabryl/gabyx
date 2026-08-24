@@ -70,6 +70,8 @@ package body Gabyx.Drivers.Raylib.Input is
          return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S));
       elsif Key_Name = "H" then
          return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_H));
+      elsif Key_Name = "O" then
+         return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_O));
       elsif Key_Name = "W" then
          return Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_W));
       elsif Key_Name = "0" then
@@ -120,7 +122,6 @@ package body Gabyx.Drivers.Raylib.Input is
       if Opt_Down and then not (Cmd_Down or Ctrl_Down) then
          if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S)) then
             return Cmd_Toggle_Grid;
-         --  6 poziomów zoomu siatki (24, 32, 48, 64, 80, 96 px)
          elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FOUR)) then
             return Cmd_Tile_Zoom_1;
          elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then
@@ -133,7 +134,6 @@ package body Gabyx.Drivers.Raylib.Input is
             return Cmd_Tile_Zoom_5;
          elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_NINE)) then
             return Cmd_Tile_Zoom_6;
-         --  Skalowanie HUD-u
          elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Auto), True, True) then
             return Cmd_HUD_Tier_Auto;
          elsif Is_Key_Pressed (To_String (Input_Cfg.Tier_Compact), True, True) then
@@ -145,9 +145,12 @@ package body Gabyx.Drivers.Raylib.Input is
          end if;
       end if;
 
-      --  2. Skróty pojedyncze (tylko gdy brak jakiegokolwiek modyfikatora)
+      --  2. Skróty pojedyncze
       if not Any_Mod then
-         if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S)) then
+         --  Klawisz [O] - Otwarcie Ustawień
+         if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_O)) then
+            return Cmd_Open_Settings;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S)) then
             return Cmd_Cycle_Grid_Color;
          elsif Is_Key_Pressed (To_String (Input_Cfg.Toggle_Borderless), False, False) then
             return Cmd_Toggle_Borderless;

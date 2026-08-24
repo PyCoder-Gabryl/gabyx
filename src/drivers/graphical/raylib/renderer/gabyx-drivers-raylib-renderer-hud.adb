@@ -15,6 +15,7 @@
 with Interfaces.C;
 with Ada.Characters.Latin_1;
 with Gabyx.Types;
+with Gabyx.UI.Types;
 with Gabyx.UI.Panels;
 with Gabyx.Drivers.Raylib.Fonts;
 with Raylib;
@@ -23,6 +24,7 @@ package body Gabyx.Drivers.Raylib.Renderer.HUD is
 
    use Interfaces.C;
    use Gabyx.Types;
+   use Gabyx.UI.Types;
 
    procedure Draw
      (Layout    : Gabyx.UI.Types.Layout_Cache;
@@ -42,7 +44,7 @@ package body Gabyx.Drivers.Raylib.Renderer.HUD is
       FPS_Val    : constant Natural := (if Win_Cfg.Target_FPS > 0 then Natural (Win_Cfg.Target_FPS) else 60);
 
       Top_Col : constant Standard.Raylib.Color :=
-        (if Top_View = Gabyx.UI.Types.View_A then
+        (if Top_View = View_A then
            (r => unsigned_char (HUD_Cfg.Color_Top_View_A.R),
             g => unsigned_char (HUD_Cfg.Color_Top_View_A.G),
             b => unsigned_char (HUD_Cfg.Color_Top_View_A.B),
@@ -54,7 +56,7 @@ package body Gabyx.Drivers.Raylib.Renderer.HUD is
             a => unsigned_char (HUD_Cfg.Color_Top_View_B.A)));
 
       Bot_Col : constant Standard.Raylib.Color :=
-        (if Bot_View = Gabyx.UI.Types.View_A then
+        (if Bot_View = View_A then
            (r => unsigned_char (HUD_Cfg.Color_Bottom_View_A.R),
             g => unsigned_char (HUD_Cfg.Color_Bottom_View_A.G),
             b => unsigned_char (HUD_Cfg.Color_Bottom_View_A.B),
@@ -63,7 +65,7 @@ package body Gabyx.Drivers.Raylib.Renderer.HUD is
            (r => unsigned_char (HUD_Cfg.Color_Bottom_View_B.R),
             g => unsigned_char (HUD_Cfg.Color_Bottom_View_B.G),
             b => unsigned_char (HUD_Cfg.Color_Bottom_View_B.B),
-            a => unsigned_char (HUD_Cfg.Color_Bottom_View_B.A)));
+            a => unsigned_char (HUD_Cfg.Color_Bottom_View_A.A)));
 
       Text_White : constant Standard.Raylib.Color := (r => 245, g => 245, b => 245, a => 255);
       Text_Gold  : constant Standard.Raylib.Color := (r => 255, g => 203, b => 0,   a => 255);
@@ -77,7 +79,7 @@ package body Gabyx.Drivers.Raylib.Renderer.HUD is
          int (Layout.Top_Bar_Rect.Height),
          Top_Col);
 
-      if Top_View = Gabyx.UI.Types.View_A then
+      if Top_View = View_A then
          Standard.Raylib.DrawTextEx
            (Cur_Font,
             Gabyx.UI.Panels.Get_Top_Bar_Text
@@ -114,7 +116,7 @@ package body Gabyx.Drivers.Raylib.Renderer.HUD is
          int (Layout.Bottom_Bar_Rect.Height),
          Bot_Col);
 
-      if Bot_View = Gabyx.UI.Types.View_A then
+      if Bot_View = View_A then
          Standard.Raylib.DrawTextEx
            (Cur_Font,
             Gabyx.UI.Panels.Get_Bottom_Bar_Text (View => Bot_View, Is_Ultra_Wide => Layout.Is_Ultra_Wide),

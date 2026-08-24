@@ -13,7 +13,6 @@
 # CREATED:         2026-08-24
 # ============================================================================
 
-
 # @formatter:off
 
 [backgrounds]
@@ -28,7 +27,7 @@ pane_right      = { r = 14, g = 17, b = 20, a = 255 }
 
 [accents]
 # Złoty akcent aktywnych elementów (#FFCB00)
-gold            = { r = 255, g => 203, b = 0, a = 255 }
+gold            = { r = 255, g = 203, b = 0, a = 255 }
 # Cyjanowy akcent nagłówków i zaznaczeń (#50DCF0)
 cyan            = { r = 80, g = 220, b = 240, a = 255 }
 # Bordowy odcień marginesów Viewportu (#5A1423)

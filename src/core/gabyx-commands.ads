@@ -50,6 +50,8 @@ is
       Cmd_Tile_Zoom_4,
       Cmd_Tile_Zoom_5,
       Cmd_Tile_Zoom_6,
+      --  Otwarcie Ustawień i wyjście
+      Cmd_Open_Settings,
       Cmd_Quit);
 
 end Gabyx.Commands;

@@ -14,16 +14,15 @@
 --  ============================================================================
 
 
-with Gabyx.UI.Settings;
+with Gabyx.Types;
 with Gabyx.Config.Fonts;
 
 package Gabyx.Drivers.Raylib.Settings is
 
-   --  Renderuje dwupanelowe okno Ustawień, sprawdza mysz oraz flagę zamknięcia
-   procedure Render
-     (State          : in out Gabyx.UI.Settings.Settings_State;
-      Font_Cfg       : Gabyx.Config.Fonts.Font_Configuration;
-      Close_Clicked  : out Boolean;
-      Option_Changed : out Boolean);
+   use Gabyx.Types;
+
+   procedure Open_From (Caller : App_State);
+
+   procedure Process_Frame (Font_Cfg : Gabyx.Config.Fonts.Font_Configuration);
 
 end Gabyx.Drivers.Raylib.Settings;

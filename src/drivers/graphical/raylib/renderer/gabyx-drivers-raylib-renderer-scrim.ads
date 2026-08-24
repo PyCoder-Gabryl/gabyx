@@ -19,7 +19,6 @@ package Gabyx.Drivers.Raylib.Renderer.Scrim is
 
    use Gabyx.Types;
 
-   --  Rysuje pełnoekranową półprzezroczystą kurtynę przyciemniającą tło gry
    procedure Draw (Alpha : Color_Component := 190);
 
 end Gabyx.Drivers.Raylib.Renderer.Scrim;

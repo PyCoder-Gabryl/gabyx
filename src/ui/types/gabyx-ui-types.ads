@@ -17,51 +17,25 @@
 
 with Gabyx.Types;
 
-package Gabyx.UI.Types with
+package Gabyx.UI.Theme with
    SPARK_Mode => On,
    Pure
 is
 
    use Gabyx.Types;
 
-   --  ============================================================================
-   --  PROFILE I WYMIARY PASKÓW HUD
-   --  ============================================================================
+   Color_App_Dark    : constant RGBA_Color := (R => 18,  G => 22,  B => 26,  A => 255);
+   Color_Header_Dark : constant RGBA_Color := (R => 26,  G => 34,  B => 45,  A => 255);
+   Color_Pane_Left   : constant RGBA_Color := (R => 22,  G => 27,  B => 34,  A => 255);
+   Color_Pane_Right  : constant RGBA_Color := (R => 14,  G => 17,  B => 20,  A => 255);
 
-   --  Profile rozmiarów HUD-u
-   type HUD_Tier_Type is (HUD_Auto, HUD_Compact, HUD_Standard, HUD_HiDPI);
+   Color_Gold        : constant RGBA_Color := (R => 255, G => 203, B => 0,   A => 255);
+   Color_Cyan        : constant RGBA_Color := (R => 80,  G => 220, B => 240, A => 255);
+   Color_Crimson     : constant RGBA_Color := (R => 90,  G => 20,  B => 35,  A => 255);
+   Color_Border      : constant RGBA_Color := (R => 60,  G => 75,  B => 95,  A => 255);
 
-   --  Wymiary pasków dla danego profilu (Pure SPARK)
-   type HUD_Tier_Dimensions is record
-      Top_Height    : Positive       := 32;
-      Bottom_Height : Positive       := 96;
-      Font_Size     : Font_Size_Type := 14;
-   end record;
+   Color_Text_White  : constant RGBA_Color := (R => 245, G => 245, B => 245, A => 255);
+   Color_Text_Gray   : constant RGBA_Color := (R => 170, G => 170, B => 170, A => 255);
+   Color_Text_Muted  : constant RGBA_Color := (R => 120, G => 120, B => 120, A => 255);
 
-   --  Dwustanowe widoki pasków interfejsu
-   type HUD_View_Type is (View_A, View_B);
-
-   --  ============================================================================
-   --  GEOMETRIA KONTENERÓW I PAMIĘĆ PODRĘCZNA (LAYOUT CACHE)
-   --  ============================================================================
-
-   --  Generyczna struktura prostokąta dla kontenerów UI (100% SPARK)
-   type UI_Rectangle is record
-      X      : Integer := 0;
-      Y      : Integer := 0;
-      Width  : Integer := 0;
-      Height : Integer := 0;
-   end record;
-
-   --  Pamięć podręczna przeliczonej geometrii (Layout Cache)
-   type Layout_Cache is record
-      Screen_Width    : Width_Type    := 1280;
-      Screen_Height   : Height_Type   := 720;
-      Active_Tier     : HUD_Tier_Type := HUD_Compact;
-      Is_Ultra_Wide   : Boolean       := False;
-      Top_Bar_Rect    : UI_Rectangle  := (X => 0, Y => 0, Width => 1280, Height => 32);
-      Viewport_Rect   : UI_Rectangle  := (X => 0, Y => 32, Width => 1280, Height => 592);
-      Bottom_Bar_Rect : UI_Rectangle  := (X => 0, Y => 624, Width => 1280, Height => 96);
-   end record;
-
-end Gabyx.UI.Types;
+end Gabyx.UI.Theme;

@@ -14,15 +14,14 @@
 --  ============================================================================
 
 
-with Gabyx.UI.Menu;
 with Gabyx.Config.Fonts;
 
 package Gabyx.Drivers.Raylib.Menu is
 
-   --  Renderuje Menu Główne, obsługuje hover myszy i aktywuje flagę Selected
-   procedure Render
-     (State    : in out Gabyx.UI.Menu.Menu_State;
-      Font_Cfg : Gabyx.Config.Fonts.Font_Configuration;
-      Selected : in out Boolean);
+   procedure Initialize;
+
+   procedure Process_Frame (Font_Cfg : Gabyx.Config.Fonts.Font_Configuration);
+
+   procedure Set_Active_Game (Active : Boolean);
 
 end Gabyx.Drivers.Raylib.Menu;
