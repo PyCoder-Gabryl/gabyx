@@ -20,6 +20,7 @@ with Gabyx.UI.Types;
 with Gabyx.UI.Layout;
 with Gabyx.UI.Grid;
 with Gabyx.UI.Menu;
+with Gabyx.UI.Settings;
 with Gabyx.Config.HUD;
 with Gabyx.Config.Audio;
 with Gabyx.Config.Game;
@@ -31,6 +32,7 @@ with Gabyx.Drivers.Raylib.Input;
 with Gabyx.Drivers.Raylib.Splash;
 with Gabyx.Drivers.Raylib.Audio;
 with Gabyx.Drivers.Raylib.Menu;
+with Gabyx.Drivers.Raylib.Settings;
 with Raylib;
 
 package body Gabyx.Drivers.Raylib is
@@ -40,6 +42,7 @@ package body Gabyx.Drivers.Raylib is
    use Gabyx.State_Machine;
    use Gabyx.UI.Types;
    use Gabyx.UI.Menu;
+   use Gabyx.UI.Settings;
 
    procedure Run
      (Config   : Gabyx.Config.Window.Window_Configuration;
@@ -61,7 +64,8 @@ package body Gabyx.Drivers.Raylib is
       Zoom_Sizes : constant array (1 .. 6) of Positive := [24, 32, 48, 64, 80, 96];
       Cur_Zoom   : Positive := 4;
 
-      Menu_Data : Gabyx.UI.Menu.Menu_State;
+      Menu_Data     : Gabyx.UI.Menu.Menu_State;
+      Settings_Data : Gabyx.UI.Settings.Settings_State;
 
       procedure Refresh_Layout is
       begin
@@ -106,9 +110,7 @@ package body Gabyx.Drivers.Raylib is
                declare
                   Action_Triggered : Boolean := False;
 
-                  --  Wcześniejsza deklaracja procedury lokalnej (wymóg stylu -gnatys)
                   procedure Try_Select_Direct (Item : Menu_Item_ID);
-
                   procedure Try_Select_Direct (Item : Menu_Item_ID) is
                   begin
                      if Gabyx.UI.Menu.Is_Item_Enabled (Menu_Data, Item) then
@@ -117,7 +119,6 @@ package body Gabyx.Drivers.Raylib is
                      end if;
                   end Try_Select_Direct;
                begin
-                  --  Bezpośredni wybór klawiszami numerycznymi 1..8
                   if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ONE)) then
                      Try_Select_Direct (Item_New_Game);
                   elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_TWO)) then
@@ -134,8 +135,6 @@ package body Gabyx.Drivers.Raylib is
                      Try_Select_Direct (Item_About);
                   elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_EIGHT)) then
                      Try_Select_Direct (Item_Quit);
-
-                  --  Nawigacja strzałkami / W / S
                   elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_DOWN))
                      or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S))
                   then
@@ -156,7 +155,6 @@ package body Gabyx.Drivers.Raylib is
                      Gabyx.State_Machine.Set_State (State_Quit);
                   end if;
 
-                  --  Renderowanie i obsługa kursora myszy
                   Gabyx.Drivers.Raylib.Menu.Render (Menu_Data, Font_Cfg, Action_Triggered);
 
                   if Action_Triggered then
@@ -166,6 +164,8 @@ package body Gabyx.Drivers.Raylib is
                            Menu_Data.Has_Active_Game := True;
                            Gabyx.State_Machine.Set_State (State_In_Game);
                         when Item_Settings =>
+                           Settings_Data.Previous_State := State_Main_Menu;
+                           Gabyx.Drivers.Raylib.Audio.Play_Settings_Open;
                            Gabyx.State_Machine.Set_State (State_Settings);
                         when Item_Quit =>
                            Gabyx.State_Machine.Set_State (State_Quit);
@@ -175,8 +175,61 @@ package body Gabyx.Drivers.Raylib is
                   end if;
                end;
 
-            --  STAN C: Główna gra (Loch, Viewport, Siatka)
-            when State_In_Game | State_Settings =>
+            --  STAN C: Dwupanelowe okno Ustawień (1000x600 px)
+            when State_Settings =>
+               declare
+                  Close_Req      : Boolean := False;
+                  Option_Changed : Boolean := False;
+               begin
+                  if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ESCAPE)) then
+                     Close_Req := True;
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_DOWN))
+                     or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S))
+                  then
+                     Gabyx.UI.Settings.Select_Next (Settings_Data);
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_UP))
+                     or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_W))
+                  then
+                     Gabyx.UI.Settings.Select_Prev (Settings_Data);
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ONE)) then
+                     Settings_Data.Selected_Category := Cat_Window;
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_TWO)) then
+                     Settings_Data.Selected_Category := Cat_Graphics;
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_THREE)) then
+                     Settings_Data.Selected_Category := Cat_Fonts;
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FOUR)) then
+                     Settings_Data.Selected_Category := Cat_HUD;
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then
+                     Settings_Data.Selected_Category := Cat_Camera_Grid;
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SIX)) then
+                     Settings_Data.Selected_Category := Cat_Audio;
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SEVEN)) then
+                     Settings_Data.Selected_Category := Cat_Input;
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  end if;
+
+                  Gabyx.Drivers.Raylib.Settings.Render (Settings_Data, Font_Cfg, Close_Req, Option_Changed);
+
+                  if Option_Changed then
+                     Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+                  end if;
+
+                  if Close_Req then
+                     Gabyx.Drivers.Raylib.Audio.Play_Menu_Select;
+                     Gabyx.State_Machine.Set_State (Settings_Data.Previous_State);
+                  end if;
+               end;
+
+            --  STAN D: Główna gra (Loch, Viewport, Siatka)
+            when State_In_Game =>
                declare
                   Cmd : constant Game_Command := Gabyx.Drivers.Raylib.Input.Poll_Command;
                begin
@@ -201,8 +254,8 @@ package body Gabyx.Drivers.Raylib is
                      when Cmd_HUD_Tier_HiDPI    => Forced_HUD_Tier := HUD_HiDPI;    Refresh_Layout;
 
                      when Cmd_Toggle_Top_View   => Top_View := (if Top_View = View_A then View_B else View_A);
-                     when Cmd_Toggle_Bottom_View => Bottom_View := (if Bottom_View = View_A then View_B else View_A);
-                     when Cmd_Toggle_Font_Family => Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
+                     when Cmd_Toggle_Bottom_View=> Bottom_View := (if Bottom_View = View_A then View_B else View_A);
+                     when Cmd_Toggle_Font_Family=> Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
 
                      when Cmd_Toggle_Grid =>
                         Camera_Cfg.Grid_Visible := not Camera_Cfg.Grid_Visible;
@@ -224,7 +277,6 @@ package body Gabyx.Drivers.Raylib is
                   end case;
                end;
 
-               --  Renderowanie klatki gry
                Gabyx.Drivers.Raylib.Renderer.Render_Frame
                  (Layout       => Layout,
                   Grid_Info    => Grid_Info,
@@ -241,7 +293,7 @@ package body Gabyx.Drivers.Raylib is
          end case;
       end loop;
 
-      --  3. Bezpieczne zwolnienie zasobów
+      --  3. Zwolnienie zasobów
       Gabyx.Drivers.Raylib.Audio.Close;
       Gabyx.Drivers.Raylib.Fonts.Unload_All;
       Gabyx.Drivers.Raylib.Window_Mgr.Close;

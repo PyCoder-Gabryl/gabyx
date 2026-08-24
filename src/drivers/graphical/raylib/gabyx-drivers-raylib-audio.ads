@@ -18,16 +18,16 @@ with Gabyx.Config.Audio;
 
 package Gabyx.Drivers.Raylib.Audio is
 
-   --  Inicjalizuje urządzenie audio oraz syntetyzuje efekty w pamięci RAM
    procedure Initialize (Audio_Cfg : Gabyx.Config.Audio.Audio_Configuration);
 
-   --  Odtwarza krótki syntetyczny dźwięk nawigacji po menu (blip)
+   --  Dźwięki Menu Głównego
    procedure Play_Menu_Move;
-
-   --  Odtwarza syntetyczny dźwięk zatwierdzenia wyboru (chime)
    procedure Play_Menu_Select;
 
-   --  Zamyka podsystem audio i zwalnia zasoby
+   --  Dedykowane dźwięki panelu Ustawień (niższe tony i miękkie przejścia)
+   procedure Play_Settings_Open;
+   procedure Play_Settings_Move;
+
    procedure Close;
 
 end Gabyx.Drivers.Raylib.Audio;
