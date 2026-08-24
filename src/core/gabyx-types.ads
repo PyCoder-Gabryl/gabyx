@@ -32,7 +32,10 @@ is
 
    --  Dopuszczalne wartości klatkarza (0 oznacza automatyczny V-Sync)
    subtype Target_FPS_Type is Natural with
-      Static_Predicate => Target_FPS_Type in 0 | 30 | 60 | 75 | 120 | 144;
+      Static_Predicate => Target_FPS_Type in 0 | 30 | 60 | 75 | 100 | 120 | 144 | 165;
+
+   --  Zakres głośności (0 - 100%)
+   subtype Volume_Level is Natural range 0 .. 100;
 
    --  Dostępne tryby wyświetlania okna
    type Display_Mode_Type is (Windowed, Borderless, Borderless_Fullscreen);

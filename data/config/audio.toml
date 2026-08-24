@@ -1,0 +1,29 @@
+# ============================================================================
+# PROJECT:         Gabyx: Ada Roguelike
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:     Konfiguracja systemu audio, poziomów głośności i efektów.
+#                  Definiuje głośność główną, muzykę, efekty dźwiękowe UI/gry
+#                  oraz flagę wyciszenia z gwarancją bezpiecznego braku plików.
+# ----------------------------------------------------------------------------
+# PATH:            data/config/audio.toml
+# CREATED:         2026-08-24
+# ============================================================================
+
+
+# @formatter:off
+
+[volume]
+master                = 80      # Głośność główna (0 - 100)
+music                 = 70      # Głośność muzyki w tle (0 - 100)
+sfx                   = 90      # Głośność efektów dźwiękowych i UI (0 - 100)
+ambient               = 60      # Głośność tła otoczenia lochu (0 - 100)
+muted                 = false   # Wyciszenie całkowite (Mute)
+
+[sfx]
+ui_clicks_enabled     = true    # Efekty dźwiękowe kliknięć w menu i panelu opcji
+
+# @formatter:on

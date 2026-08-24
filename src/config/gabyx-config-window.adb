@@ -129,7 +129,7 @@ package body Gabyx.Config.Window is
             begin
                Config.VSync := Read_Boolean (Gfx_Tab, "vsync", True);
                Config.Maintain_Aspect_Ratio := Read_Boolean (Gfx_Tab, "maintain_aspect_ratio", True);
-               if Raw_FPS in 0 | 30 | 60 | 75 | 120 | 144 then
+               if Raw_FPS in 0 | 30 | 60 | 75 | 100 | 120 | 144 | 165 then
                   Config.Target_FPS := Target_FPS_Type (Raw_FPS);
                end if;
             end;
