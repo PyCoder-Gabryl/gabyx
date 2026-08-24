@@ -29,6 +29,13 @@ package body Gabyx.Launcher is
    --  ============================================================================
 
    procedure Run is
+      --  -------------------------------------------------------------------------
+      --  FLAGA SZYBKIEGO STARTU (DIRECT LAUNCH BYPASS)
+      --  True  -> Uruchamia natychmiast główny sterownik Raylib z pominięciem menu TUI
+      --  False -> Prezentuje terminalowe menu wyboru sterownika Omni-Engine
+      --  -------------------------------------------------------------------------
+      Direct_Launch_Raylib : constant Boolean := True;
+
       App_Config : constant Gabyx.Config.Window.Window_Configuration :=
          Gabyx.Config.Window.Load_Configuration;
 
@@ -38,14 +45,14 @@ package body Gabyx.Launcher is
       Choice         : Integer := 0;
       Exit_Requested : Boolean := False;
    begin
-      --  Rysowanie nagłówka ASCII
+      --  Rysowanie nagłówka diagnostycznego ASCII
       Ada.Text_IO.New_Line;
       Ada.Text_IO.Put_Line ("==================================================");
       Ada.Text_IO.Put_Line ("           GABYX OMNI-ENGINE STARTER             ");
       Ada.Text_IO.Put_Line ("==================================================");
       Ada.Text_IO.New_Line;
 
-      --  Wypisanie parametrów okona pobranych z konfiguracji TOML
+      --  Wypisanie parametrów okna pobranych z konfiguracji TOML
       Ada.Text_IO.Put_Line
         ("[CONFIG] Tytul okna : " & Ada.Strings.Unbounded.To_String (App_Config.Title));
       Ada.Text_IO.Put_Line
@@ -67,7 +74,19 @@ package body Gabyx.Launcher is
       Ada.Text_IO.Put_Line
         ("[CONFIG:FONTS]  Monospace  : " & Font_Config.Is_Monospace'Image);
 
-      --  Główna pętla interaktywnego menu wyboru
+      --  -------------------------------------------------------------------------
+      --  BEZPOŚREDNIE URUCHOMIENIE STEROWNIKA RAYLIB
+      --  -------------------------------------------------------------------------
+      if Direct_Launch_Raylib then
+         Ada.Text_IO.New_Line;
+         Ada.Text_IO.Put_Line ("[INFO] Szybki start aktywny: Uruchamianie sterownika Raylib...");
+         Gabyx.Drivers.Raylib.Run (App_Config, Font_Config);
+         return;
+      end if;
+
+      --  -------------------------------------------------------------------------
+      --  GŁÓWNA PĘTLA INTERAKTYWNEGO MENU WYBORU (OMNI-ENGINE TUI)
+      --  -------------------------------------------------------------------------
       while not Exit_Requested loop
          Ada.Text_IO.New_Line;
          Ada.Text_IO.Put_Line ("--------------------------------------------------");
