@@ -21,7 +21,7 @@ package body Gabyx.Drivers.Raylib.Splash is
 
    use Interfaces.C;
 
-   Duration_Sec : Float   := 1.0;
+   Duration_Sec : Float   := 3.0;
    Elapsed_Time : Float   := 0.0;
    Finished     : Boolean := False;
 
@@ -33,7 +33,7 @@ package body Gabyx.Drivers.Raylib.Splash is
    end Initialize;
 
    procedure Update is
-      Delta : constant Float := Float (Standard.Raylib.GetFrameTime);
+      Frame_Delta : constant Float := Float (Standard.Raylib.GetFrameTime);
       Skip  : constant Boolean :=
         Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SPACE))
         or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ENTER))
@@ -43,7 +43,7 @@ package body Gabyx.Drivers.Raylib.Splash is
          return;
       end if;
 
-      Elapsed_Time := Elapsed_Time + Delta;
+      Elapsed_Time := Elapsed_Time + Frame_Delta;
 
       if Skip or else Elapsed_Time >= Duration_Sec then
          Finished := True;

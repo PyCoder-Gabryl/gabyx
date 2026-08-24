@@ -12,7 +12,6 @@
 --  CREATED:         2026-08-23
 --  ============================================================================
 
-
 package body Gabyx.Config.Helpers is
 
    use type TOML.Any_Value_Kind;
@@ -81,12 +80,17 @@ package body Gabyx.Config.Helpers is
          declare
             Val : constant TOML.TOML_Value := Table.Get (Key);
          begin
-            if Val.Kind = TOML.TOML_Integer then
+            if Val.Kind = TOML.TOML_Float then
+               return Float (Val.As_Float.Value);
+            elsif Val.Kind = TOML.TOML_Integer then
                return Float (Val.As_Integer);
             end if;
          end;
       end if;
       return Default;
+   exception
+      when others =>
+         return Default;
    end Read_Float;
 
 end Gabyx.Config.Helpers;
