@@ -17,6 +17,7 @@ with Interfaces.C;
 with Gabyx.State_Machine;
 with Gabyx.Types;
 with Gabyx.Drivers.Raylib.Fonts;
+with Gabyx.Drivers.Raylib.Menu;
 with Raylib;
 
 package body Gabyx.Drivers.Raylib.Splash is
@@ -24,15 +25,13 @@ package body Gabyx.Drivers.Raylib.Splash is
    use Interfaces.C;
    use Gabyx.Types;
 
-   Duration_Sec : Float   := 1.0;
-   Elapsed_Time : Float   := 0.0;
-   Finished     : Boolean := False;
+   Duration_Sec : Float := 1.0;
+   Elapsed_Time : Float := 0.0;
 
    procedure Initialize (Game_Cfg : Gabyx.Config.Game.Game_Configuration) is
    begin
       Duration_Sec := Game_Cfg.Splash_Duration_Sec;
       Elapsed_Time := 0.0;
-      Finished     := (Duration_Sec <= 0.0);
    end Initialize;
 
    procedure Process_Frame (Font_Cfg : Gabyx.Config.Fonts.Font_Configuration) is
@@ -59,8 +58,8 @@ package body Gabyx.Drivers.Raylib.Splash is
    begin
       Elapsed_Time := Elapsed_Time + Frame_Delta;
 
-      if Skip or else Elapsed_Time >= Duration_Sec then
-         Finished := True;
+      if Skip or else (Duration_Sec <= 0.0) or else (Elapsed_Time >= Duration_Sec) then
+         Gabyx.Drivers.Raylib.Menu.Initialize;
          Gabyx.State_Machine.Set_State (State_Main_Menu);
          return;
       end if;
@@ -69,20 +68,36 @@ package body Gabyx.Drivers.Raylib.Splash is
       Standard.Raylib.ClearBackground ((r => 18, g => 22, b => 26, a => 255));
 
       Standard.Raylib.DrawTextEx
-        (Cur_Font, "G A B Y X", (x => Center_X - 110.0, y => Center_Y - 80.0),
-         C_float (Font_Cfg.Size_Large) * 1.5, 2.0, (r => 255, g => 203, b => 0, a => Alpha_Byte));
+        (Cur_Font,
+         "G A B Y X",
+         (x => Center_X - 110.0, y => Center_Y - 80.0),
+         C_float (Font_Cfg.Size_Large) * 1.5,
+         2.0,
+         (r => 255, g => 203, b => 0, a => Alpha_Byte));
 
       Standard.Raylib.DrawTextEx
-        (Cur_Font, "ROGUELIKE RPG & CITY-BUILDER", (x => Center_X - 160.0, y => Center_Y - 15.0),
-         C_float (Font_Cfg.Size_Regular), 1.0, (r => 245, g => 245, b => 245, a => Alpha_Byte));
+        (Cur_Font,
+         "ROGUELIKE RPG & CITY-BUILDER",
+         (x => Center_X - 160.0, y => Center_Y - 15.0),
+         C_float (Font_Cfg.Size_Regular),
+         1.0,
+         (r => 245, g => 245, b => 245, a => Alpha_Byte));
 
       Standard.Raylib.DrawTextEx
-        (Cur_Font, "Powered by Ada 2022, SPARK & Raylib (Omni-Engine)", (x => Center_X - 220.0, y => Center_Y + 25.0),
-         C_float (Font_Cfg.Size_Small), 1.0, (r => 80, g => 220, b => 240, a => Alpha_Byte));
+        (Cur_Font,
+         "Powered by Ada 2022, SPARK & Raylib (Omni-Engine)",
+         (x => Center_X - 220.0, y => Center_Y + 25.0),
+         C_float (Font_Cfg.Size_Small),
+         1.0,
+         (r => 80, g => 220, b => 240, a => Alpha_Byte));
 
       Standard.Raylib.DrawTextEx
-        (Cur_Font, "[Nacisnij SPACJE, aby pominac]", (x => Center_X - 130.0, y => Center_Y + 120.0),
-         C_float (Font_Cfg.Size_Small), 1.0, (r => 140, g => 140, b => 140, a => Alpha_Byte));
+        (Cur_Font,
+         "[Nacisnij SPACJE, aby pominac]",
+         (x => Center_X - 130.0, y => Center_Y + 120.0),
+         C_float (Font_Cfg.Size_Small),
+         1.0,
+         (r => 140, g => 140, b => 140, a => Alpha_Byte));
 
       Standard.Raylib.EndDrawing;
    end Process_Frame;

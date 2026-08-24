@@ -14,8 +14,6 @@
 
 with Interfaces.C;
 with Ada.Characters.Latin_1;
-with Gabyx.Types;
-with Gabyx.UI.Types;
 with Gabyx.UI.Panels;
 with Gabyx.Drivers.Raylib.Fonts;
 with Raylib;
@@ -23,7 +21,6 @@ with Raylib;
 package body Gabyx.Drivers.Raylib.Renderer.HUD is
 
    use Interfaces.C;
-   use Gabyx.Types;
    use Gabyx.UI.Types;
 
    procedure Draw

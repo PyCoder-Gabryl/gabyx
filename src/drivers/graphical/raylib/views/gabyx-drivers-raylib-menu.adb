@@ -27,16 +27,22 @@ package body Gabyx.Drivers.Raylib.Menu is
    use Gabyx.Types;
    use Gabyx.UI.Menu;
 
-   Menu_Data : Gabyx.UI.Menu.Menu_State;
+   Menu_Data           : Gabyx.UI.Menu.Menu_State;
+   First_Frame_In_Menu : Boolean := True;
 
    procedure Initialize is
    begin
       Menu_Data := (Selected_Item => Item_New_Game, Has_Save_File => False, Has_Active_Game => False);
+      First_Frame_In_Menu := True;
    end Initialize;
 
    procedure Set_Active_Game (Active : Boolean) is
    begin
       Menu_Data.Has_Active_Game := Active;
+      if Active then
+         Menu_Data.Selected_Item := Item_Continue;
+      end if;
+      First_Frame_In_Menu := True;
    end Set_Active_Game;
 
    procedure Process_Frame (Font_Cfg : Gabyx.Config.Fonts.Font_Configuration) is
@@ -62,34 +68,53 @@ package body Gabyx.Drivers.Raylib.Menu is
       Center_X : constant C_float := C_float (Screen_W / 2);
       Menu_Y   : constant C_float := C_float (Screen_H / 2) - 100.0;
    begin
-      --  1. Wejście z klawiatury
-      if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ONE)) then Try_Select (Item_New_Game);
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_TWO)) then Try_Select (Item_Continue);
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_THREE)) then Try_Select (Item_Save_Game);
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FOUR)) then Try_Select (Item_Load_Game);
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then Try_Select (Item_Settings);
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SIX)) then Try_Select (Item_Help);
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SEVEN)) then Try_Select (Item_About);
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_EIGHT)) then Try_Select (Item_Quit);
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_DOWN))
-         or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S))
-      then
-         Select_Next (Menu_Data);
-         Gabyx.Drivers.Raylib.Audio.Play_Menu_Move;
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_UP))
-         or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_W))
-      then
-         Select_Prev (Menu_Data);
-         Gabyx.Drivers.Raylib.Audio.Play_Menu_Move;
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ENTER))
-         or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SPACE))
-      then
-         if Is_Item_Enabled (Menu_Data, Menu_Data.Selected_Item) then
-            Action_Triggered := True;
+      --  1. W pierwszej klatce po wejściu do menu czyścimy bufor
+      --  i nie czytamy klawiszy (ochrona przed Spacją ze Splashu)
+      if First_Frame_In_Menu then
+         First_Frame_In_Menu := False;
+      else
+         --  Obsługa klawiatury
+         if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ONE)) then
+            Try_Select (Item_New_Game);
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_TWO)) then
+            Try_Select (Item_Continue);
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_THREE)) then
+            Try_Select (Item_Save_Game);
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FOUR)) then
+            Try_Select (Item_Load_Game);
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then
+            Try_Select (Item_Settings);
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SIX)) then
+            Try_Select (Item_Help);
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SEVEN)) then
+            Try_Select (Item_About);
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_EIGHT)) then
+            Try_Select (Item_Quit);
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_DOWN))
+            or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_S))
+         then
+            Select_Next (Menu_Data);
+            Gabyx.Drivers.Raylib.Audio.Play_Menu_Move;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_UP))
+            or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_W))
+         then
+            Select_Prev (Menu_Data);
+            Gabyx.Drivers.Raylib.Audio.Play_Menu_Move;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ENTER))
+            or Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SPACE))
+         then
+            if Is_Item_Enabled (Menu_Data, Menu_Data.Selected_Item) then
+               Action_Triggered := True;
+            end if;
+         elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ESCAPE)) then
+            if Menu_Data.Has_Active_Game then
+               Gabyx.State_Machine.Set_State (State_In_Game);
+               return;
+            else
+               Menu_Data.Selected_Item := Item_Quit;
+               Gabyx.Drivers.Raylib.Audio.Play_Menu_Move;
+            end if;
          end if;
-      elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ESCAPE)) then
-         Gabyx.State_Machine.Set_State (State_Quit);
-         return;
       end if;
 
       --  2. Renderowanie i obsługa myszy
@@ -97,11 +122,26 @@ package body Gabyx.Drivers.Raylib.Menu is
       Standard.Raylib.ClearBackground ((r => 18, g => 22, b => 26, a => 255));
 
       Standard.Raylib.DrawTextEx
-        (Cur_Font, "G A B Y X", (x => Center_X - 110.0, y => Menu_Y - 90.0),
-         C_float (Font_Cfg.Size_Large) * 1.4, 2.0, (r => 255, g => 203, b => 0, a => 255));
+        (Cur_Font,
+         "G A B Y X",
+         (x => Center_X - 110.0, y => Menu_Y - 90.0),
+         C_float (Font_Cfg.Size_Large) * 1.4,
+         2.0,
+         (r => 255, g => 203, b => 0, a => 255));
 
-      Standard.Raylib.DrawRectangle (int (Center_X - 210.0), int (Menu_Y - 20.0), 420, 340, (r => 26, g => 34, b => 45, a => 255));
-      Standard.Raylib.DrawRectangleLines (int (Center_X - 210.0), int (Menu_Y - 20.0), 420, 340, (r => 60, g => 75, b => 95, a => 255));
+      Standard.Raylib.DrawRectangle
+        (int (Center_X - 210.0),
+         int (Menu_Y - 20.0),
+         420,
+         340,
+         (r => 26, g => 34, b => 45, a => 255));
+
+      Standard.Raylib.DrawRectangleLines
+        (int (Center_X - 210.0),
+         int (Menu_Y - 20.0),
+         420,
+         340,
+         (r => 60, g => 75, b => 95, a => 255));
 
       for Item in Menu_Item_ID loop
          declare
@@ -122,22 +162,37 @@ package body Gabyx.Drivers.Raylib.Menu is
               (if not Is_Enabled then (r => 90, g => 95, b => 105, a => 255)
                elsif Is_Chosen or Is_Hovered then (r => 255, g => 203, b => 0, a => 255)
                else (r => 245, g => 245, b => 245, a => 255));
-            Label      : constant String := (if Is_Chosen then "> " else "  ") & Get_Item_Label (Item) & (if Is_Chosen then " <" else "");
+
+            Prefix     : constant String := (if Is_Chosen then "> " else "  ");
+            Suffix     : constant String := (if Is_Chosen then " <" else "");
+            Label      : constant String := Prefix & Get_Item_Label (Item) & Suffix;
          begin
             if Is_Hovered and then Is_Enabled then
-               if not Is_Chosen then Menu_Data.Selected_Item := Item; end if;
-               if LMB_Down then Action_Triggered := True; end if;
+               if not Is_Chosen then
+                  Menu_Data.Selected_Item := Item;
+               end if;
+               if LMB_Down then
+                  Action_Triggered := True;
+               end if;
             end if;
 
             Standard.Raylib.DrawTextEx
-              (Cur_Font, Label, (x => Center_X - 180.0, y => Item_Y),
-               C_float (Font_Cfg.Size_Regular), 1.0, Text_Col);
+              (Cur_Font,
+               Label,
+               (x => Center_X - 180.0, y => Item_Y),
+               C_float (Font_Cfg.Size_Regular),
+               1.0,
+               Text_Col);
          end;
       end loop;
 
       Standard.Raylib.DrawTextEx
-        (Cur_Font, "[1..8 / Strzalki / W/S] Wybor   [Enter / Spacja / Mysz] Zatwierdz   [ESC] Wyjscie",
-         (x => Center_X - 310.0, y => C_float (Screen_H - 40)), C_float (Font_Cfg.Size_Small), 1.0, (r => 140, g => 140, b => 140, a => 255));
+        (Cur_Font,
+         "[1..8 / Strzalki / W/S] Wybor   [Enter / Spacja / Mysz] Zatwierdz   [ESC] Wyjscie",
+         (x => Center_X - 310.0, y => C_float (Screen_H - 40)),
+         C_float (Font_Cfg.Size_Small),
+         1.0,
+         (r => 140, g => 140, b => 140, a => 255));
 
       Standard.Raylib.EndDrawing;
 
@@ -147,6 +202,8 @@ package body Gabyx.Drivers.Raylib.Menu is
          case Menu_Data.Selected_Item is
             when Item_New_Game =>
                Menu_Data.Has_Active_Game := True;
+               Gabyx.State_Machine.Set_State (State_In_Game);
+            when Item_Continue =>
                Gabyx.State_Machine.Set_State (State_In_Game);
             when Item_Settings =>
                Gabyx.Drivers.Raylib.Settings.Open_From (State_Main_Menu);

@@ -31,7 +31,6 @@ with Raylib;
 package body Gabyx.Drivers.Raylib is
 
    use Gabyx.Types;
-   use Gabyx.State_Machine;
 
    procedure Run
      (Config   : Gabyx.Config.Window.Window_Configuration;

@@ -22,7 +22,6 @@ is
 
    use Gabyx.Types;
 
-   --  Centralne stałe semantyczne motywu graficznego (Pure SPARK)
    Color_App_Dark    : constant RGBA_Color := (R => 18,  G => 22,  B => 26,  A => 255);
    Color_Header_Dark : constant RGBA_Color := (R => 26,  G => 34,  B => 45,  A => 255);
    Color_Pane_Left   : constant RGBA_Color := (R => 22,  G => 27,  B => 34,  A => 255);

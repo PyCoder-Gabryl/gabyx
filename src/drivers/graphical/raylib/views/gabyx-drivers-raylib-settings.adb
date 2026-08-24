@@ -63,19 +63,26 @@ package body Gabyx.Drivers.Raylib.Settings is
          Select_Prev (Settings_Data);
          Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
       elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ONE)) then
-         Settings_Data.Selected_Category := Cat_Window; Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+         Settings_Data.Selected_Category := Cat_Window;
+         Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
       elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_TWO)) then
-         Settings_Data.Selected_Category := Cat_Graphics; Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+         Settings_Data.Selected_Category := Cat_Graphics;
+         Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
       elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_THREE)) then
-         Settings_Data.Selected_Category := Cat_Fonts; Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+         Settings_Data.Selected_Category := Cat_Fonts;
+         Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
       elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FOUR)) then
-         Settings_Data.Selected_Category := Cat_HUD; Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+         Settings_Data.Selected_Category := Cat_HUD;
+         Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
       elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_FIVE)) then
-         Settings_Data.Selected_Category := Cat_Camera_Grid; Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+         Settings_Data.Selected_Category := Cat_Camera_Grid;
+         Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
       elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SIX)) then
-         Settings_Data.Selected_Category := Cat_Audio; Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+         Settings_Data.Selected_Category := Cat_Audio;
+         Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
       elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_SEVEN)) then
-         Settings_Data.Selected_Category := Cat_Input; Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
+         Settings_Data.Selected_Category := Cat_Input;
+         Gabyx.Drivers.Raylib.Audio.Play_Settings_Move;
       end if;
 
       --  2. Renderowanie okna i obsługa myszy
@@ -83,28 +90,51 @@ package body Gabyx.Drivers.Raylib.Settings is
       Standard.Raylib.DrawRectangle (0, 0, Screen_W, Screen_H, (r => 0, g => 0, b => 0, a => 190));
       Standard.Raylib.DrawRectangle (Dlg_X, Dlg_Y, Dlg_W, Dlg_H, (r => 18, g => 22, b => 26, a => 255));
       Standard.Raylib.DrawRectangleLines (Dlg_X, Dlg_Y, Dlg_W, Dlg_H, (r => 60, g => 75, b => 95, a => 255));
-      Standard.Raylib.DrawRectangleLines (Dlg_X + 2, Dlg_Y + 2, Dlg_W - 4, Dlg_H - 4, (r => 60, g => 75, b => 95, a => 255));
+      Standard.Raylib.DrawRectangleLines
+         (Dlg_X + 2, Dlg_Y + 2, Dlg_W - 4, Dlg_H - 4, (r => 60, g => 75, b => 95, a => 255));
 
       Standard.Raylib.DrawRectangle (Dlg_X + 2, Dlg_Y + 2, Dlg_W - 4, 48, (r => 26, g => 34, b => 45, a => 255));
       Standard.Raylib.DrawLine (Dlg_X, Dlg_Y + 50, Dlg_X + Dlg_W, Dlg_Y + 50, (r => 255, g => 203, b => 0, a => 255));
 
       Standard.Raylib.DrawTextEx
-        (Cur_Font, "USTAWIENIA SILNIKA GABYX (SETTINGS)", (x => C_float (Dlg_X + 24), y => C_float (Dlg_Y + 14)),
-         C_float (Font_Cfg.Size_Title), 1.0, (r => 255, g => 203, b => 0, a => 255));
+        (Cur_Font,
+         "USTAWIENIA SILNIKA GABYX (SETTINGS)",
+         (x => C_float (Dlg_X + 24), y => C_float (Dlg_Y + 14)),
+         C_float (Font_Cfg.Size_Title),
+         1.0,
+         (r => 255, g => 203, b => 0, a => 255));
 
+      --  Przycisk [X] Wróć
       declare
-         Btn_X : constant int := Dlg_X + Dlg_W - 160;
-         Btn_Y : constant int := Dlg_Y + 10;
-         Btn_H : constant Boolean := (Mouse_X >= Btn_X and then Mouse_X <= Btn_X + 140 and then Mouse_Y >= Btn_Y and then Mouse_Y <= Btn_Y + 30);
+         Btn_X       : constant int := Dlg_X + Dlg_W - 160;
+         Btn_Y       : constant int := Dlg_Y + 10;
+         Btn_W       : constant int := 140;
+         Btn_H       : constant int := 30;
+         Btn_Hovered : constant Boolean :=
+           (Mouse_X >= Btn_X and then Mouse_X <= Btn_X + Btn_W and then
+            Mouse_Y >= Btn_Y and then Mouse_Y <= Btn_Y + Btn_H);
+         Btn_Color   : constant Standard.Raylib.Color :=
+           (if Btn_Hovered then (r => 255, g => 203, b => 0, a => 255)
+            else (r => 245, g => 245, b => 245, a => 255));
       begin
-         if Btn_H then
-            Standard.Raylib.DrawRectangle (Btn_X, Btn_Y, 140, 30, (r => 38, g => 50, b => 65, a => 255));
-            if LMB_Down then Close_Req := True; end if;
+         if Btn_Hovered then
+            Standard.Raylib.DrawRectangle (Btn_X, Btn_Y, Btn_W, Btn_H, (r => 38, g => 50, b => 65, a => 255));
+            if LMB_Down then
+               Close_Req := True;
+            end if;
          end if;
-         Standard.Raylib.DrawRectangleLines (Btn_X, Btn_Y, 140, 30, (r => 60, g => 75, b => 95, a => 255));
-         Standard.Raylib.DrawTextEx (Cur_Font, "[X] WROC (ESC)", (x => C_float (Btn_X + 15), y => C_float (Btn_Y + 6)), C_float (Font_Cfg.Size_Small), 1.0, (if Btn_H then (r => 255, g => 203, b => 0, a => 255) else (r => 245, g => 245, b => 245, a => 255)));
+
+         Standard.Raylib.DrawRectangleLines (Btn_X, Btn_Y, Btn_W, Btn_H, (r => 60, g => 75, b => 95, a => 255));
+         Standard.Raylib.DrawTextEx
+           (Cur_Font,
+            "[X] WROC (ESC)",
+            (x => C_float (Btn_X + 15), y => C_float (Btn_Y + 6)),
+            C_float (Font_Cfg.Size_Small),
+            1.0,
+            Btn_Color);
       end;
 
+      --  Lewy panel kategorii
       Standard.Raylib.DrawRectangle (Dlg_X + 10, Dlg_Y + 60, 300, 485, (r => 22, g => 27, b => 34, a => 255));
       Standard.Raylib.DrawRectangleLines (Dlg_X + 10, Dlg_Y + 60, 300, 485, (r => 60, g => 75, b => 95, a => 255));
 
@@ -113,9 +143,19 @@ package body Gabyx.Drivers.Raylib.Settings is
             Idx    : constant Integer := Settings_Category_ID'Pos (Cat);
             Row_Y  : constant int := Dlg_Y + 70 + int (Idx * 54);
             Is_Act : constant Boolean := (Settings_Data.Selected_Category = Cat);
-            Is_Hov : constant Boolean := (Mouse_X >= Dlg_X + 20 and then Mouse_X <= Dlg_X + 300 and then Mouse_Y >= Row_Y and then Mouse_Y <= Row_Y + 44);
-            Bg     : constant Standard.Raylib.Color := (if Is_Act then (r => 38, g => 50, b => 65, a => 255) elsif Is_Hov then (r => 26, g => 34, b => 45, a => 255) else (r => 22, g => 27, b => 34, a => 255));
-            Txt    : constant Standard.Raylib.Color := (if Is_Act then (r => 255, g => 203, b => 0, a => 255) elsif Is_Hov then (r => 80, g => 220, b => 240, a => 255) else (r => 245, g => 245, b => 245, a => 255));
+            Is_Hov : constant Boolean :=
+              (Mouse_X >= Dlg_X + 20 and then Mouse_X <= Dlg_X + 300 and then
+               Mouse_Y >= Row_Y and then Mouse_Y <= Row_Y + 44);
+
+            Bg     : constant Standard.Raylib.Color :=
+              (if Is_Act then (r => 38, g => 50, b => 65, a => 255)
+               elsif Is_Hov then (r => 26, g => 34, b => 45, a => 255)
+               else (r => 22, g => 27, b => 34, a => 255));
+
+            Txt    : constant Standard.Raylib.Color :=
+              (if Is_Act then (r => 255, g => 203, b => 0, a => 255)
+               elsif Is_Hov then (r => 80, g => 220, b => 240, a => 255)
+               else (r => 245, g => 245, b => 245, a => 255));
          begin
             if Is_Hov and then LMB_Down and then not Is_Act then
                Settings_Data.Selected_Category := Cat;
@@ -123,26 +163,61 @@ package body Gabyx.Drivers.Raylib.Settings is
             end if;
 
             Standard.Raylib.DrawRectangle (Dlg_X + 20, Row_Y, 280, 44, Bg);
-            if Is_Act then Standard.Raylib.DrawRectangleLines (Dlg_X + 20, Row_Y, 280, 44, (r => 255, g => 203, b => 0, a => 255)); end if;
-            Standard.Raylib.DrawTextEx (Cur_Font, (if Is_Act then "> " else "  ") & Get_Category_Name (Cat), (x => C_float (Dlg_X + 35), y => C_float (Row_Y + 12)), C_float (Font_Cfg.Size_Regular), 1.0, Txt);
+            if Is_Act then
+               Standard.Raylib.DrawRectangleLines (Dlg_X + 20, Row_Y, 280, 44, (r => 255, g => 203, b => 0, a => 255));
+            end if;
+
+            Standard.Raylib.DrawTextEx
+              (Cur_Font,
+               (if Is_Act then "> " else "  ") & Get_Category_Name (Cat),
+               (x => C_float (Dlg_X + 35), y => C_float (Row_Y + 12)),
+               C_float (Font_Cfg.Size_Regular),
+               1.0,
+               Txt);
          end;
       end loop;
 
+      --  Prawy panel szczegółów
       Standard.Raylib.DrawRectangle (Dlg_X + 320, Dlg_Y + 60, 670, 485, (r => 14, g => 17, b => 20, a => 255));
       Standard.Raylib.DrawRectangleLines (Dlg_X + 320, Dlg_Y + 60, 670, 485, (r => 60, g => 75, b => 95, a => 255));
 
-      Standard.Raylib.DrawTextEx (Cur_Font, "KATEGORIA: " & Get_Category_Name (Settings_Data.Selected_Category), (x => C_float (Dlg_X + 340), y => C_float (Dlg_Y + 80)), C_float (Font_Cfg.Size_Title), 1.0, (r => 80, g => 220, b => 240, a => 255));
-      Standard.Raylib.DrawTextEx (Cur_Font, Get_Category_Description (Settings_Data.Selected_Category), (x => C_float (Dlg_X + 340), y => C_float (Dlg_Y + 115)), C_float (Font_Cfg.Size_Small), 1.0, (r => 170, g => 170, b => 170, a => 255));
-      Standard.Raylib.DrawLine (Dlg_X + 340, Dlg_Y + 140, Dlg_X + 960, Dlg_Y + 140, (r => 60, g => 75, b => 95, a => 255));
+      Standard.Raylib.DrawTextEx
+        (Cur_Font,
+         "KATEGORIA: " & Get_Category_Name (Settings_Data.Selected_Category),
+         (x => C_float (Dlg_X + 340), y => C_float (Dlg_Y + 80)),
+         C_float (Font_Cfg.Size_Title),
+         1.0,
+         (r => 80, g => 220, b => 240, a => 255));
 
+      Standard.Raylib.DrawTextEx
+        (Cur_Font,
+         Get_Category_Description (Settings_Data.Selected_Category),
+         (x => C_float (Dlg_X + 340), y => C_float (Dlg_Y + 115)),
+         C_float (Font_Cfg.Size_Small),
+         1.0,
+         (r => 170, g => 170, b => 170, a => 255));
+
+      Standard.Raylib.DrawLine
+         (Dlg_X + 340, Dlg_Y + 140, Dlg_X + 960, Dlg_Y + 140, (r => 60, g => 75, b => 95, a => 255));
       Standard.Raylib.DrawRectangleLines (Dlg_X + 340, Dlg_Y + 160, 630, 365, (r => 26, g => 34, b => 45, a => 255));
-      Standard.Raylib.DrawTextEx
-        (Cur_Font, "[SZCZEGOLOWE KONTROLKI OPCJI ZOSTANA ZAINICJOWANE W KROKU 5]" & Ada.Characters.Latin_1.LF & "Ten obszar pomiesci suwaki, przelaczniki radiowe i listy wyboru." & Ada.Characters.Latin_1.LF & "Uzyj strzalek GORA/DOL lub cyfr [1..7], aby przelaczac kategorie.",
-         (x => C_float (Dlg_X + 360), y => C_float (Dlg_Y + 220)), C_float (Font_Cfg.Size_Regular), 1.0, (r => 120, g => 120, b => 120, a => 255));
 
       Standard.Raylib.DrawTextEx
-        (Cur_Font, "[1..7 / Strzalki / W/S] Wybierz kategorie   [Mysz] Kliknij   [ESC] Wroc",
-         (x => C_float (Dlg_X + 24), y => C_float (Dlg_Y + Dlg_H - 30)), C_float (Font_Cfg.Size_Small), 1.0, (r => 120, g => 120, b => 120, a => 255));
+        (Cur_Font,
+         "[SZCZEGOLOWE KONTROLKI OPCJI ZOSTANA ZAINICJOWANE W KROKU 5]" & Ada.Characters.Latin_1.LF &
+         "Ten obszar pomiesci suwaki, przelaczniki radiowe i listy wyboru." & Ada.Characters.Latin_1.LF &
+         "Uzyj strzalek GORA/DOL lub cyfr [1..7], aby przelaczac kategorie.",
+         (x => C_float (Dlg_X + 360), y => C_float (Dlg_Y + 220)),
+         C_float (Font_Cfg.Size_Regular),
+         1.0,
+         (r => 120, g => 120, b => 120, a => 255));
+
+      Standard.Raylib.DrawTextEx
+        (Cur_Font,
+         "[1..7 / Strzalki / W/S] Wybierz kategorie   [Mysz] Kliknij   [ESC] Wroc",
+         (x => C_float (Dlg_X + 24), y => C_float (Dlg_Y + Dlg_H - 30)),
+         C_float (Font_Cfg.Size_Small),
+         1.0,
+         (r => 120, g => 120, b => 120, a => 255));
 
       Standard.Raylib.EndDrawing;
 

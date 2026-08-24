@@ -24,6 +24,7 @@ with Gabyx.Drivers.Raylib.Window_Mgr;
 with Gabyx.Drivers.Raylib.Fonts;
 with Gabyx.Drivers.Raylib.Input;
 with Gabyx.Drivers.Raylib.Settings;
+with Gabyx.Drivers.Raylib.Menu;
 with Gabyx.Drivers.Raylib.Renderer.Grid;
 with Gabyx.Drivers.Raylib.Renderer.HUD;
 with Raylib;
@@ -83,22 +84,17 @@ package body Gabyx.Drivers.Raylib.Renderer is
 
       Vp_X : constant Integer := Integer ((Screen_W - Virtual_W) / 2);
       Vp_Y : constant Integer := Integer ((Screen_H - Virtual_H) / 2);
-
-      Border_Color : constant Standard.Raylib.Color :=
-        (r => unsigned_char (Win_Cfg.Border_Bars_Color.R),
-         g => unsigned_char (Win_Cfg.Border_Bars_Color.G),
-         b => unsigned_char (Win_Cfg.Border_Bars_Color.B),
-         a => unsigned_char (Win_Cfg.Border_Bars_Color.A));
    begin
       --  1. Obsługa poleceń gry
       case Cmd is
          when Cmd_Quit =>
+            --  ESC w grze powraca do Menu Głównego z aktywną sesją gry
+            Gabyx.Drivers.Raylib.Menu.Set_Active_Game (True);
             Gabyx.State_Machine.Set_State (State_Main_Menu);
-            return;
+
          when Cmd_Open_Settings =>
             Gabyx.Drivers.Raylib.Settings.Open_From (State_In_Game);
             Gabyx.State_Machine.Set_State (State_Settings);
-            return;
 
          when Cmd_Select_Preset_1 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (1); Refresh_Layout;
          when Cmd_Select_Preset_2 => Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (2); Refresh_Layout;
@@ -123,7 +119,8 @@ package body Gabyx.Drivers.Raylib.Renderer is
          when Cmd_Toggle_Grid => Camera_Cfg.Grid_Visible := not Camera_Cfg.Grid_Visible;
          when Cmd_Cycle_Grid_Color =>
             Camera_Cfg.Active_Color_Index :=
-              (if Camera_Cfg.Active_Color_Index >= Camera_Cfg.Color_Count then 1 else Camera_Cfg.Active_Color_Index + 1);
+              (if Camera_Cfg.Active_Color_Index >=
+               Camera_Cfg.Color_Count then 1 else Camera_Cfg.Active_Color_Index + 1);
 
          when Cmd_Tile_Zoom_1 => Cur_Zoom := 1; Refresh_Layout;
          when Cmd_Tile_Zoom_2 => Cur_Zoom := 2; Refresh_Layout;
@@ -139,7 +136,11 @@ package body Gabyx.Drivers.Raylib.Renderer is
       Standard.Raylib.BeginDrawing;
 
       if Gabyx.Drivers.Raylib.Window_Mgr.Get_Display_Mode = Borderless_Fullscreen then
-         Standard.Raylib.ClearBackground (Border_Color);
+         Standard.Raylib.ClearBackground
+           ((r => unsigned_char (Win_Cfg.Border_Bars_Color.R),
+             g => unsigned_char (Win_Cfg.Border_Bars_Color.G),
+             b => unsigned_char (Win_Cfg.Border_Bars_Color.B),
+             a => unsigned_char (Win_Cfg.Border_Bars_Color.A)));
       end if;
 
       Gabyx.Drivers.Raylib.Renderer.Grid.Draw
@@ -162,7 +163,8 @@ package body Gabyx.Drivers.Raylib.Renderer is
          Vp_X      => Vp_X,
          Vp_Y      => Vp_Y);
 
-      Standard.Raylib.DrawRectangleLines (int (Vp_X), int (Vp_Y), Virtual_W, Virtual_H, (r => 180, g => 180, b => 180, a => 255));
+      Standard.Raylib.DrawRectangleLines
+         (int (Vp_X), int (Vp_Y), Virtual_W, Virtual_H, (r => 180, g => 180, b => 180, a => 255));
 
       Standard.Raylib.EndDrawing;
    end Process_Game_Frame;

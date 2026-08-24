@@ -25,10 +25,12 @@ is
       case Item is
          when Item_New_Game | Item_Settings | Item_Help | Item_About | Item_Quit =>
             return True;
-         when Item_Continue | Item_Load_Game =>
-            return State.Has_Save_File;
+         when Item_Continue =>
+            return State.Has_Active_Game or else State.Has_Save_File;
          when Item_Save_Game =>
             return State.Has_Active_Game;
+         when Item_Load_Game =>
+            return State.Has_Save_File;
       end case;
    end Is_Item_Enabled;
 
