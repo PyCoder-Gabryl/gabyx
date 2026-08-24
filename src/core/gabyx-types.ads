@@ -34,6 +34,14 @@ is
    subtype Target_FPS_Type is Natural with
       Static_Predicate => Target_FPS_Type in 0 | 30 | 60 | 75 | 100 | 120 | 144 | 165;
 
+      --  Stany globalne cyklu życia aplikacji (Pure SPARK)
+   type App_State is
+     (State_Splash,
+      State_Main_Menu,
+      State_In_Game,
+      State_Settings,
+      State_Quit);
+
    --  Zakres głośności (0 - 100%)
    subtype Volume_Level is Natural range 0 .. 100;
 

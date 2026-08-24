@@ -13,7 +13,7 @@
 
 
 with Interfaces.C;
-with Gabyx.UI.Settings;
+with Ada.Characters.Latin_1;
 with Gabyx.Drivers.Raylib.Fonts;
 with Raylib;
 
@@ -113,7 +113,7 @@ package body Gabyx.Drivers.Raylib.Settings is
       for Cat in Settings_Category_ID loop
          declare
             Idx      : constant Integer := Settings_Category_ID'Pos (Cat);
-            Row_Y    : constant int := Dlg_Y + 70 + (Idx * 54);
+            Row_Y    : constant int := Dlg_Y + 70 + int (Idx * 54);
             Row_W    : constant int := 280;
             Row_H    : constant int := 44;
             Row_X    : constant int := Dlg_X + 20;

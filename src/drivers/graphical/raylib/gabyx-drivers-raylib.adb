@@ -39,7 +39,6 @@ package body Gabyx.Drivers.Raylib is
 
    use Gabyx.Types;
    use Gabyx.Commands;
-   use Gabyx.State_Machine;
    use Gabyx.UI.Types;
    use Gabyx.UI.Menu;
    use Gabyx.UI.Settings;
@@ -253,9 +252,12 @@ package body Gabyx.Drivers.Raylib is
                      when Cmd_HUD_Tier_Standard => Forced_HUD_Tier := HUD_Standard; Refresh_Layout;
                      when Cmd_HUD_Tier_HiDPI    => Forced_HUD_Tier := HUD_HiDPI;    Refresh_Layout;
 
-                     when Cmd_Toggle_Top_View   => Top_View := (if Top_View = View_A then View_B else View_A);
-                     when Cmd_Toggle_Bottom_View=> Bottom_View := (if Bottom_View = View_A then View_B else View_A);
-                     when Cmd_Toggle_Font_Family=> Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
+                     when Cmd_Toggle_Top_View   =>
+                        Top_View := (if Top_View = View_A then View_B else View_A);
+                     when Cmd_Toggle_Bottom_View =>
+                        Bottom_View := (if Bottom_View = View_A then View_B else View_A);
+                     when Cmd_Toggle_Font_Family =>
+                        Gabyx.Drivers.Raylib.Fonts.Toggle_Font;
 
                      when Cmd_Toggle_Grid =>
                         Camera_Cfg.Grid_Visible := not Camera_Cfg.Grid_Visible;

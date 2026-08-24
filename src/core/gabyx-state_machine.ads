@@ -14,17 +14,13 @@
 --  ============================================================================
 
 
+with Gabyx.Types;
+
 package Gabyx.State_Machine with
    SPARK_Mode => On
 is
 
-   --  Dostępne stany globalne silnika
-   type App_State is
-     (State_Splash,
-      State_Main_Menu,
-      State_In_Game,
-      State_Settings,
-      State_Quit);
+   use Gabyx.Types;
 
    --  Zmienia bieżący stan aplikacji
    procedure Set_State (New_State : App_State);

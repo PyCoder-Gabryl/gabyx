@@ -14,12 +14,14 @@
 --  ============================================================================
 
 
-with Gabyx.State_Machine;
+with Gabyx.Types;
 
 package Gabyx.UI.Settings with
    SPARK_Mode => On,
    Pure
 is
+
+   use Gabyx.Types;
 
    --  7 kategorii ustawień odpowiadających domenom silnika
    type Settings_Category_ID is
@@ -32,8 +34,8 @@ is
       Cat_Input);
 
    type Settings_State is record
-      Selected_Category : Settings_Category_ID        := Cat_Window;
-      Previous_State    : Gabyx.State_Machine.App_State := Gabyx.State_Machine.State_Main_Menu;
+      Selected_Category : Settings_Category_ID := Cat_Window;
+      Previous_State    : App_State            := State_Main_Menu;
    end record;
 
    --  Przechodzi do kolejnej kategorii w dół
