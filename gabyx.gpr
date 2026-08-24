@@ -58,24 +58,24 @@ project Gabyx is
    --  Dynamiczne budowanie listy katalogów źródłowych
    Src_Dirs := ("src",
       "src/core/**",
-      "src/config",
-      "src/ui",
-      "src/logging",
-      "src/drivers/abstract"
+      "src/config/**",
+      "src/ui/**",
+      "src/logging/**",
+      "src/drivers/abstract/**"
    );
 
    case Mode is
       when "graphical" =>
          case Gfx_Driver is
-            when "raylib" => Src_Dirs := Src_Dirs & ("src/drivers/graphical/raylib");
-            when "sdl"    => Src_Dirs := Src_Dirs & ("src/drivers/graphical/sdl");
-            when "gtk"    => Src_Dirs := Src_Dirs & ("src/drivers/graphical/gtk");
+            when "raylib" => Src_Dirs := Src_Dirs & ("src/drivers/graphical/raylib/**");
+            when "sdl"    => Src_Dirs := Src_Dirs & ("src/drivers/graphical/sdl/**");
+            when "gtk"    => Src_Dirs := Src_Dirs & ("src/drivers/graphical/gtk/**");
          end case;
       when "terminal" =>
          case Term_Driver is
-            when "ansi"    => Src_Dirs := Src_Dirs & ("src/drivers/terminal/ansi");
-            when "ncurses" => Src_Dirs := Src_Dirs & ("src/drivers/terminal/ncurses");
-            when "trendy"  => Src_Dirs := Src_Dirs & ("src/drivers/terminal/trendy");
+            when "ansi"    => Src_Dirs := Src_Dirs & ("src/drivers/terminal/ansi/**");
+            when "ncurses" => Src_Dirs := Src_Dirs & ("src/drivers/terminal/ncurses/**");
+            when "trendy"  => Src_Dirs := Src_Dirs & ("src/drivers/terminal/trendy/**");
          end case;
    end case;
 

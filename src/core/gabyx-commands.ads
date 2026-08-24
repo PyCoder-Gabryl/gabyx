@@ -10,7 +10,7 @@
 --                   który izoluje sterowniki wejścia (Raylib, TUI) od
 --                   właściwej logiki zarządzania oknem, siatką i interfejsem.
 --  ----------------------------------------------------------------------------
---  PATH:            src/config/gabyx-commands.ads
+--  PATH:            src/core/gabyx-commands.ads
 --  CREATED:         2026-08-23
 --  ============================================================================
 
