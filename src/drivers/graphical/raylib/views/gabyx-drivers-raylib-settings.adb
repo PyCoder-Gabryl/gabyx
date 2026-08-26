@@ -5,7 +5,8 @@
 --  EMAIL:           pycoder.gabryl@gmail.com
 --  LICENSE:         Apache 2.0
 --  ----------------------------------------------------------------------------
---  DESCRIPTION:     Implementacja widoku Ustawień Raylib z układem Master-Detail (1000x600 px).
+--  DESCRIPTION:     Główny koordynator widoku Ustawień Raylib. Integruje wszystkie 7 zakładek
+--                   domenowych z obsługą nawigacji, pamięcią powrotu i natychmiastowym aplikowaniem.
 --  ----------------------------------------------------------------------------
 --  PATH:            src/drivers/graphical/raylib/views/gabyx-drivers-raylib-settings.adb
 --  CREATED:         2026-08-24
@@ -13,29 +14,37 @@
 
 
 with Interfaces.C;
-with Ada.Characters.Latin_1;
-with Gabyx.Types;
 with Gabyx.State_Machine;
-with Gabyx.UI.Settings;
 with Gabyx.Config.Audio;
+with Gabyx.Config.Camera;
+with Gabyx.Config.Window;
+with Gabyx.Config.HUD;
+with Gabyx.Config.Input;
 with Gabyx.Drivers.Raylib.Fonts;
 with Gabyx.Drivers.Raylib.Audio;
 with Gabyx.Drivers.Raylib.Window_Mgr;
 with Gabyx.Drivers.Raylib.Renderer;
-with Gabyx.Drivers.Raylib.Settings.Pane_Audio;
 with Gabyx.Drivers.Raylib.Settings.Pane_Window;
+with Gabyx.Drivers.Raylib.Settings.Pane_Graphics;
+with Gabyx.Drivers.Raylib.Settings.Pane_Fonts;
+with Gabyx.Drivers.Raylib.Settings.Pane_HUD;
+with Gabyx.Drivers.Raylib.Settings.Pane_Camera;
+with Gabyx.Drivers.Raylib.Settings.Pane_Audio;
+with Gabyx.Drivers.Raylib.Settings.Pane_Input;
 with Raylib;
 
 package body Gabyx.Drivers.Raylib.Settings is
 
    use Interfaces.C;
-   use Gabyx.Types;
-   use Gabyx.UI.Settings;
 
    Settings_Data : Gabyx.UI.Settings.Settings_State;
-   Audio_Cfg     : Gabyx.Config.Audio.Audio_Configuration := Gabyx.Config.Audio.Load_Configuration;
 
-   --  Kopie robocze parametrów ekranu
+   Audio_Cfg  : Gabyx.Config.Audio.Audio_Configuration   := Gabyx.Config.Audio.Load_Configuration;
+   Camera_Cfg : Gabyx.Config.Camera.Camera_Configuration := Gabyx.Config.Camera.Load_Configuration;
+   Win_Cfg    : Gabyx.Config.Window.Window_Configuration := Gabyx.Config.Window.Load_Configuration;
+   HUD_Cfg    : Gabyx.Config.HUD.HUD_Configuration       := Gabyx.Config.HUD.Load_Configuration;
+   Input_Cfg  : Gabyx.Config.Input.Input_Configuration   := Gabyx.Config.Input.Load_Configuration;
+
    Staged_Preset   : Positive := 4;
    Staged_Mode_Idx : Positive := 1;
    Staged_Center   : Boolean  := True;
@@ -48,7 +57,7 @@ package body Gabyx.Drivers.Raylib.Settings is
       Gabyx.Drivers.Raylib.Audio.Play_Settings_Open;
    end Open_From;
 
-   procedure Process_Frame (Font_Cfg : Gabyx.Config.Fonts.Font_Configuration) is
+   procedure Process_Frame (Font_Cfg : in out Gabyx.Config.Fonts.Font_Configuration) is
       Close_Req      : Boolean := False;
       Apply_Screen   : Boolean := False;
       Option_Changed : Boolean := False;
@@ -66,7 +75,7 @@ package body Gabyx.Drivers.Raylib.Settings is
       Dlg_X : constant int := (Screen_W - Dlg_W) / 2;
       Dlg_Y : constant int := (Screen_H - Dlg_H) / 2;
    begin
-      --  1. Wejście z klawiatury
+      --  1. Nawigacja klawiaturą
       if Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_ESCAPE)) then
          Close_Req := True;
       elsif Boolean (Standard.Raylib.IsKeyPressed (Standard.Raylib.KEY_DOWN))
@@ -115,15 +124,18 @@ package body Gabyx.Drivers.Raylib.Settings is
          Btn_Y       : constant int := Dlg_Y + 10;
          Btn_Hovered : constant Boolean :=
            (Mouse_X >= Btn_X and then Mouse_X <= Btn_X + 140 and then Mouse_Y >= Btn_Y and then Mouse_Y <= Btn_Y + 30);
+         Btn_Color   : constant Standard.Raylib.Color :=
+           (if Btn_Hovered then (r => 255, g => 203, b => 0, a => 255) else (r => 245, g => 245, b => 245, a => 255));
       begin
          if Btn_Hovered then
             Standard.Raylib.DrawRectangle (Btn_X, Btn_Y, 140, 30, (r => 38, g => 50, b => 65, a => 255));
             if LMB_Down then Close_Req := True; end if;
          end if;
+
          Standard.Raylib.DrawRectangleLines (Btn_X, Btn_Y, 140, 30, (r => 60, g => 75, b => 95, a => 255));
          Standard.Raylib.DrawTextEx
            (Cur_Font, "[X] WROC (ESC)", (x => C_float (Btn_X + 15), y => C_float (Btn_Y + 6)),
-            C_float (Font_Cfg.Size_Small), 1.0, (if Btn_Hovered then (r => 255, g => 203, b => 0, a => 255) else (r => 245, g => 245, b => 245, a => 255)));
+            C_float (Font_Cfg.Size_Small), 1.0, Btn_Color);
       end;
 
       --  Lewy panel kategorii
@@ -136,14 +148,13 @@ package body Gabyx.Drivers.Raylib.Settings is
             Row_Y    : constant int := Dlg_Y + 70 + int (Idx * 54);
             Is_Act   : constant Boolean := (Settings_Data.Selected_Category = Cat);
             Is_Hover : constant Boolean :=
-              (Mouse_X >= Dlg_X + 20 and then Mouse_X <= Dlg_X + 300 and then
-               Mouse_Y >= Row_Y and then Mouse_Y <= Row_Y + 44);
+              (Mouse_X >= Dlg_X + 20 and then Mouse_X <= Dlg_X + 300 and then Mouse_Y >= Row_Y and then Mouse_Y <= Row_Y + 44);
 
-            Bg       : constant Standard.Raylib.Color :=
+            Bg  : constant Standard.Raylib.Color :=
               (if Is_Act then (r => 38, g => 50, b => 65, a => 255)
                elsif Is_Hover then (r => 26, g => 34, b => 45, a => 255)
                else (r => 22, g => 27, b => 34, a => 255));
-            Txt      : constant Standard.Raylib.Color :=
+            Txt : constant Standard.Raylib.Color :=
               (if Is_Act then (r => 255, g => 203, b => 0, a => 255)
                elsif Is_Hover then (r => 80, g => 220, b => 240, a => 255)
                else (r => 245, g => 245, b => 245, a => 255));
@@ -154,8 +165,13 @@ package body Gabyx.Drivers.Raylib.Settings is
             end if;
 
             Standard.Raylib.DrawRectangle (Dlg_X + 20, Row_Y, 280, 44, Bg);
-            if Is_Act then Standard.Raylib.DrawRectangleLines (Dlg_X + 20, Row_Y, 280, 44, (r => 255, g => 203, b => 0, a => 255)); end if;
-            Standard.Raylib.DrawTextEx (Cur_Font, (if Is_Act then "> " else "  ") & Get_Category_Name (Cat), (x => C_float (Dlg_X + 35), y => C_float (Row_Y + 12)), C_float (Font_Cfg.Size_Regular), 1.0, Txt);
+            if Is_Act then
+               Standard.Raylib.DrawRectangleLines (Dlg_X + 20, Row_Y, 280, 44, (r => 255, g => 203, b => 0, a => 255));
+            end if;
+
+            Standard.Raylib.DrawTextEx
+              (Cur_Font, (if Is_Act then "> " else "  ") & Get_Category_Name (Cat),
+               (x => C_float (Dlg_X + 35), y => C_float (Row_Y + 12)), C_float (Font_Cfg.Size_Regular), 1.0, Txt);
          end;
       end loop;
 
@@ -171,7 +187,7 @@ package body Gabyx.Drivers.Raylib.Settings is
          (x => C_float (Dlg_X + 340), y => C_float (Dlg_Y + 115)), C_float (Font_Cfg.Size_Small), 1.0, (r => 170, g => 170, b => 170, a => 255));
       Standard.Raylib.DrawLine (Dlg_X + 340, Dlg_Y + 140, Dlg_X + 960, Dlg_Y + 140, (r => 60, g => 75, b => 95, a => 255));
 
-      --  Renderowanie aktywnej zawartości
+      --  Wywołanie wyspecjalizowanego panelu
       case Settings_Data.Selected_Category is
          when Cat_Window =>
             Gabyx.Drivers.Raylib.Settings.Pane_Window.Render_Pane
@@ -188,27 +204,67 @@ package body Gabyx.Drivers.Raylib.Settings is
                Apply_Clicked   => Apply_Screen,
                Changed         => Option_Changed);
 
+         when Cat_Graphics =>
+            Gabyx.Drivers.Raylib.Settings.Pane_Graphics.Render_Pane
+              (Pane_X   => Integer (Dlg_X + 340),
+               Pane_Y   => Integer (Dlg_Y + 155),
+               Pane_W   => 630,
+               Pane_H   => 330,
+               Win_Cfg  => Win_Cfg,
+               Font_Cfg => Font_Cfg,
+               Changed  => Option_Changed);
+
+         when Cat_Fonts =>
+            Gabyx.Drivers.Raylib.Settings.Pane_Fonts.Render_Pane
+              (Pane_X   => Integer (Dlg_X + 340),
+               Pane_Y   => Integer (Dlg_Y + 155),
+               Pane_W   => 630,
+               Pane_H   => 330,
+               Font_Cfg => Font_Cfg,
+               Changed  => Option_Changed);
+
+         when Cat_HUD =>
+            Gabyx.Drivers.Raylib.Settings.Pane_HUD.Render_Pane
+              (Pane_X   => Integer (Dlg_X + 340),
+               Pane_Y   => Integer (Dlg_Y + 155),
+               Pane_W   => 630,
+               Pane_H   => 330,
+               HUD_Cfg  => HUD_Cfg,
+               Font_Cfg => Font_Cfg,
+               Changed  => Option_Changed);
+
+         when Cat_Camera_Grid =>
+            Gabyx.Drivers.Raylib.Settings.Pane_Camera.Render_Pane
+              (Pane_X     => Integer (Dlg_X + 340),
+               Pane_Y     => Integer (Dlg_Y + 155),
+               Pane_W     => 630,
+               Pane_H     => 330,
+               Camera_Cfg => Camera_Cfg,
+               Font_Cfg   => Font_Cfg,
+               Changed    => Option_Changed);
+
          when Cat_Audio =>
             Gabyx.Drivers.Raylib.Settings.Pane_Audio.Render_Pane
               (Pane_X    => Integer (Dlg_X + 340),
-               Pane_Y    => Integer (Dlg_Y + 160),
+               Pane_Y    => Integer (Dlg_Y + 155),
                Pane_W    => 630,
-               Pane_H    => 365,
+               Pane_H    => 330,
                Audio_Cfg => Audio_Cfg,
                Font_Cfg  => Font_Cfg,
                Changed   => Option_Changed);
 
-         when others =>
-            Standard.Raylib.DrawRectangleLines (Dlg_X + 340, Dlg_Y + 160, 630, 365, (r => 26, g => 34, b => 45, a => 255));
-            Standard.Raylib.DrawTextEx
-              (Cur_Font,
-               "[KONTROLKI DLA TEJ KATEGORII ZOSTANA DODANE W KOLEJNYM KROKU]" & Ada.Characters.Latin_1.LF &
-               "Wybierz '1. EKRAN & OKNO' lub '6. DZWIEK & AUDIO', aby testowac kontrolki.",
-               (x => C_float (Dlg_X + 360), y => C_float (Dlg_Y + 220)),
-               C_float (Font_Cfg.Size_Regular), 1.0, (r => 120, g => 120, b => 120, a => 255));
+         when Cat_Input =>
+            Gabyx.Drivers.Raylib.Settings.Pane_Input.Render_Pane
+              (Pane_X    => Integer (Dlg_X + 340),
+               Pane_Y    => Integer (Dlg_Y + 155),
+               Pane_W    => 630,
+               Pane_H    => 330,
+               Input_Cfg => Input_Cfg,
+               Font_Cfg  => Font_Cfg,
+               Changed   => Option_Changed);
       end case;
 
-      --  Aplikowanie zmian ekranu po kliknięciu Zastosuj
+      --  Zastosowanie zmian ekranu
       if Apply_Screen then
          Gabyx.Drivers.Raylib.Window_Mgr.Apply_Preset (Staged_Preset);
          if Staged_Mode_Idx = 2 then
@@ -223,13 +279,13 @@ package body Gabyx.Drivers.Raylib.Settings is
       --  Pasek dolny
       Standard.Raylib.DrawTextEx
         (Cur_Font,
-         "[1..7 / Strzalki / W/S] Wybierz kategorie   [Mysz] Zmien kontrolki / Zastosuj   [ESC] Wroc",
+         "[1..7 / Strzalki / W/S] Wybierz kategorie   [Mysz] Kontrolki / Zastosuj   [ESC] Wroc",
          (x => C_float (Dlg_X + 24), y => C_float (Dlg_Y + Dlg_H - 30)),
          C_float (Font_Cfg.Size_Small), 1.0, (r => 120, g => 120, b => 120, a => 255));
 
       Standard.Raylib.EndDrawing;
 
-      --  3. Powrót do poprzedniego stanu
+      --  3. Powrót
       if Close_Req then
          Gabyx.Drivers.Raylib.Audio.Play_Menu_Select;
          Gabyx.State_Machine.Set_State (Settings_Data.Previous_State);

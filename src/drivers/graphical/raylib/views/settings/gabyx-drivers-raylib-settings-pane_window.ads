@@ -14,14 +14,9 @@
 --  ============================================================================
 
 
-with Gabyx.Types;
-with Gabyx.UI.Types;
 with Gabyx.Config.Fonts;
 
 package Gabyx.Drivers.Raylib.Settings.Pane_Window is
-
-   use Gabyx.Types;
-   use Gabyx.UI.Types;
 
    procedure Render_Pane
      (Pane_X          : Integer;
