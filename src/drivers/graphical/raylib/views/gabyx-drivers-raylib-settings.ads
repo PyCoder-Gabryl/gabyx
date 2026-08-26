@@ -21,8 +21,10 @@ package Gabyx.Drivers.Raylib.Settings is
 
    use Gabyx.Types;
 
+   --  Otwiera panel ustawień zapamiętując stan wywołujący (Menu lub Gra)
    procedure Open_From (Caller : App_State);
 
-   procedure Process_Frame (Font_Cfg : Gabyx.Config.Fonts.Font_Configuration);
+   --  Przetwarza klatkę Ustawień: obsługuje 7 zakładek, mysz, klawiaturę i powrót przez ESC
+   procedure Process_Frame (Font_Cfg : in out Gabyx.Config.Fonts.Font_Configuration);
 
 end Gabyx.Drivers.Raylib.Settings;

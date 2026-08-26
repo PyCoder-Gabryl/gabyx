@@ -12,6 +12,8 @@
 --  ============================================================================
 
 
+with Interfaces.C;
+with Ada.Characters.Latin_1;
 with Gabyx.UI.Types;
 with Gabyx.Drivers.Raylib.Fonts;
 with Gabyx.Drivers.Raylib.Widgets;
@@ -19,6 +21,7 @@ with Raylib;
 
 package body Gabyx.Drivers.Raylib.Settings.Pane_HUD is
 
+   use Interfaces.C;
    use Gabyx.UI.Types;
 
    procedure Render_Pane
@@ -81,13 +84,13 @@ package body Gabyx.Drivers.Raylib.Settings.Pane_HUD is
 
       Standard.Raylib.DrawTextEx
         (Cur_Font,
-         "• Format 16:9 / 16:10:" & Ada.Characters.Latin_1.LF &
-         "  Dolny pasek wyswietla naprzemiennie Widok A (Bohater) lub Widok B (Dziennik)." & Ada.Characters.Latin_1.LF &
-         "  Skrot [D] przelacza aktywny blok ze zmiana odcienia tla." & Ada.Characters.Latin_1.LF & Ada.Characters.Latin_1.LF &
-         "• Format 21:9 Ultra-Wide:" & Ada.Characters.Latin_1.LF &
-         "  Wszystkie 3 bloki (Swiat | Bohater | Dziennik) rozsuwaja sie w jednym rzedzie!",
-         (x => Float (Pane_X + 18), y => Float (Pane_Y + 140)),
-         F_Size, 1.0, (r => 180, g => 180, b => 180, a => 255));
+         "* Format 16:9 / 16:10:" & Ada.Characters.Latin_1.LF &
+         "  Dolny pasek wyswietla naprzemiennie Widok A lub Widok B." & Ada.Characters.Latin_1.LF &
+         "  Skrot [D] przelacza aktywny blok ze zmiana tla." & Ada.Characters.Latin_1.LF & Ada.Characters.Latin_1.LF &
+         "* Format 21:9 Ultra-Wide:" & Ada.Characters.Latin_1.LF &
+         "  Wszystkie 3 bloki (Swiat | Bohater | Dziennik) rozsuwaja sie w rzedzie!",
+         (x => C_float (Pane_X + 18), y => C_float (Pane_Y + 140)),
+         C_float (F_Size), 1.0, (r => 180, g => 180, b => 180, a => 255));
    end Render_Pane;
 
 end Gabyx.Drivers.Raylib.Settings.Pane_HUD;

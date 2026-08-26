@@ -18,12 +18,14 @@ with Raylib;
 
 package body Gabyx.Drivers.Raylib.Settings.Pane_Camera is
 
-   Color_Names : constant array (1 .. 5) of String (1 .. 22) :=
-     [1 => "Szmaragdowa zielen CRT",
-      2 => "Bursztynowe zloto     ",
-      3 => "Morski cyjan          ",
-      4 => "Jaskrawa magenta      ",
-      5 => "Subtelna stal         "];
+   function Get_Color_Name (Index : Positive) return String is
+     (case Index is
+         when 1 => "Szmaragdowa zielen CRT",
+         when 2 => "Bursztynowe zloto",
+         when 3 => "Morski cyjan",
+         when 4 => "Jaskrawa magenta",
+         when 5 => "Subtelna stal",
+         when others => "Dozwolony Kolor");
 
    procedure Render_Pane
      (Pane_X     : Integer;
@@ -66,22 +68,24 @@ package body Gabyx.Drivers.Raylib.Settings.Pane_Camera is
       Gabyx.Drivers.Raylib.Widgets.Draw_Cycle_Selector
         (X => Pane_X + 15, Y => Pane_Y + 75, W => Pane_W - 30,
          Label => "Kolor linii siatki:",
-         Value_Text => Color_Names (Camera_Cfg.Active_Color_Index),
+         Value_Text => Get_Color_Name (Camera_Cfg.Active_Color_Index),
          Font => Cur_Font, Font_Size => F_Size,
          Prev_Clicked => Prev_C, Next_Clicked => Next_C);
 
       if Prev_C then
-         Camera_Cfg.Active_Color_Index := (if Camera_Cfg.Active_Color_Index = 1 then 5 else Camera_Cfg.Active_Color_Index - 1);
+         Camera_Cfg.Active_Color_Index :=
+           (if Camera_Cfg.Active_Color_Index = 1 then 5 else Camera_Cfg.Active_Color_Index - 1);
          Changed := True;
       elsif Next_C then
-         Camera_Cfg.Active_Color_Index := (if Camera_Cfg.Active_Color_Index = 5 then 1 else Camera_Cfg.Active_Color_Index + 1);
+         Camera_Cfg.Active_Color_Index :=
+           (if Camera_Cfg.Active_Color_Index = 5 then 1 else Camera_Cfg.Active_Color_Index + 1);
          Changed := True;
       end if;
 
       --  2. Kinematyka Kamery
       Gabyx.Drivers.Raylib.Widgets.Draw_Section_Box
         (X => Pane_X, Y => Pane_Y + 140, W => Pane_W, H => 135,
-         Title => "KINEMATYKA KAMERY I PŁYNNOSC",
+         Title => "KINEMATYKA KAMERY I PLYNNOSC",
          Font => Cur_Font, Font_Size => F_Size);
 
       Gabyx.Drivers.Raylib.Widgets.Draw_Slider

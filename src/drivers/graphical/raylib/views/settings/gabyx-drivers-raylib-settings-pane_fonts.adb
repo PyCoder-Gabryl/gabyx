@@ -12,16 +12,11 @@
 --  ============================================================================
 
 
-with Ada.Strings.Unbounded;
-with Gabyx.Types;
 with Gabyx.Drivers.Raylib.Fonts;
 with Gabyx.Drivers.Raylib.Widgets;
 with Raylib;
 
 package body Gabyx.Drivers.Raylib.Settings.Pane_Fonts is
-
-   use Ada.Strings.Unbounded;
-   use Gabyx.Types;
 
    procedure Render_Pane
      (Pane_X   : Integer;

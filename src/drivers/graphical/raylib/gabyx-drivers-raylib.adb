@@ -36,14 +36,15 @@ package body Gabyx.Drivers.Raylib is
      (Config   : Gabyx.Config.Window.Window_Configuration;
       Font_Cfg : Gabyx.Config.Fonts.Font_Configuration)
    is
-      Game_Cfg   : constant Gabyx.Config.Game.Game_Configuration   := Gabyx.Config.Game.Load_Configuration;
-      HUD_Cfg    : constant Gabyx.Config.HUD.HUD_Configuration     := Gabyx.Config.HUD.Load_Configuration;
-      Audio_Cfg  : constant Gabyx.Config.Audio.Audio_Configuration := Gabyx.Config.Audio.Load_Configuration;
+      Current_Font_Cfg : Gabyx.Config.Fonts.Font_Configuration       := Font_Cfg;
+      Game_Cfg   : constant Gabyx.Config.Game.Game_Configuration     := Gabyx.Config.Game.Load_Configuration;
+      HUD_Cfg    : constant Gabyx.Config.HUD.HUD_Configuration       := Gabyx.Config.HUD.Load_Configuration;
+      Audio_Cfg  : constant Gabyx.Config.Audio.Audio_Configuration   := Gabyx.Config.Audio.Load_Configuration;
       Camera_Cfg : constant Gabyx.Config.Camera.Camera_Configuration := Gabyx.Config.Camera.Load_Configuration;
    begin
       --  1. Inicjalizacja podsystemów
       Gabyx.Drivers.Raylib.Window_Mgr.Initialize (Config);
-      Gabyx.Drivers.Raylib.Fonts.Load_All (Font_Cfg);
+      Gabyx.Drivers.Raylib.Fonts.Load_All (Current_Font_Cfg);
       Gabyx.Drivers.Raylib.Audio.Initialize (Audio_Cfg);
       Gabyx.Drivers.Raylib.Splash.Initialize (Game_Cfg);
       Gabyx.Drivers.Raylib.Menu.Initialize;
@@ -56,10 +57,10 @@ package body Gabyx.Drivers.Raylib is
          and then not Gabyx.State_Machine.Is_In_State (State_Quit)
       loop
          case Gabyx.State_Machine.Get_State is
-            when State_Splash    => Gabyx.Drivers.Raylib.Splash.Process_Frame (Font_Cfg);
-            when State_Main_Menu => Gabyx.Drivers.Raylib.Menu.Process_Frame (Font_Cfg);
-            when State_Settings  => Gabyx.Drivers.Raylib.Settings.Process_Frame (Font_Cfg);
-            when State_In_Game   => Gabyx.Drivers.Raylib.Renderer.Process_Game_Frame (Config, Font_Cfg);
+            when State_Splash    => Gabyx.Drivers.Raylib.Splash.Process_Frame (Current_Font_Cfg);
+            when State_Main_Menu => Gabyx.Drivers.Raylib.Menu.Process_Frame (Current_Font_Cfg);
+            when State_Settings  => Gabyx.Drivers.Raylib.Settings.Process_Frame (Current_Font_Cfg);
+            when State_In_Game   => Gabyx.Drivers.Raylib.Renderer.Process_Game_Frame (Config, Current_Font_Cfg);
             when State_Quit      => exit;
          end case;
       end loop;

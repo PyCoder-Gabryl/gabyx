@@ -12,20 +12,24 @@
 --  ============================================================================
 
 
+with Interfaces.C;
+with Ada.Characters.Latin_1;
 with Gabyx.Drivers.Raylib.Fonts;
 with Gabyx.Drivers.Raylib.Widgets;
 with Raylib;
 
 package body Gabyx.Drivers.Raylib.Settings.Pane_Input is
 
+   use Interfaces.C;
+
    procedure Render_Pane
-     (Pane_X   : Integer;
-      Pane_Y   : Integer;
-      Pane_W   : Integer;
-      Pane_H   : Integer;
-      Input_Cfg: in out Gabyx.Config.Input.Input_Configuration;
-      Font_Cfg : Gabyx.Config.Fonts.Font_Configuration;
-      Changed  : out Boolean)
+     (Pane_X    : Integer;
+      Pane_Y    : Integer;
+      Pane_W    : Integer;
+      Pane_H    : Integer;
+      Input_Cfg : in out Gabyx.Config.Input.Input_Configuration;
+      Font_Cfg  : Gabyx.Config.Fonts.Font_Configuration;
+      Changed   : out Boolean)
    is
       pragma Unreferenced (Pane_H);
 
@@ -45,21 +49,21 @@ package body Gabyx.Drivers.Raylib.Settings.Pane_Input is
 
       Standard.Raylib.DrawTextEx
         (Cur_Font,
-         "• Ruch bohatera:      [ W / S / A / E ] (Dyskretny krok o 1 pole)" & Ada.Characters.Latin_1.LF &
-         "• Akcja / Czekanie:   [ SPACJA ]" & Ada.Characters.Latin_1.LF &
-         "• Paski HUD:          [ G ] Przepnij Gore   [ D ] Przepnij Dol" & Ada.Characters.Latin_1.LF &
-         "• Typografia:         [ F ] Przelacz kroje Nerd Fonts" & Ada.Characters.Latin_1.LF &
-         "• Siatka swiata:      [ S ] Zmien kolor     [ Option+S ] On/Off" & Ada.Characters.Latin_1.LF &
-         "• Skala HUD-u:        [ Option+1..3 ] Skala [ Option+0 ] Auto" & Ada.Characters.Latin_1.LF &
-         "• Zoom kafelkow:      [ Option+4..9 ] Rozmiary od 24 do 96 px" & Ada.Characters.Latin_1.LF &
-         "• Panel Opcji:        [ O ] Otworz w grze   [ ESC ] Powrot",
-         (x => Float (Pane_X + 18), y => Float (Pane_Y + 40)),
-         F_Size, 1.0, (r => 220, g => 220, b => 220, a => 255));
+         "* Ruch bohatera:      [ W / S / A / E ] (Krok o 1 pole)" & Ada.Characters.Latin_1.LF &
+         "* Akcja / Czekanie:   [ SPACJA ]" & Ada.Characters.Latin_1.LF &
+         "* Paski HUD:          [ G ] Przepnij Gore   [ D ] Przepnij Dol" & Ada.Characters.Latin_1.LF &
+         "* Typografia:         [ F ] Przelacz kroje Nerd Fonts" & Ada.Characters.Latin_1.LF &
+         "* Siatka swiata:      [ S ] Zmien kolor     [ Option+S ] On/Off" & Ada.Characters.Latin_1.LF &
+         "* Skala HUD-u:        [ Option+1..3 ] Skala [ Option+0 ] Auto" & Ada.Characters.Latin_1.LF &
+         "* Zoom kafelkow:      [ Option+4..9 ] Rozmiary od 24 do 96 px" & Ada.Characters.Latin_1.LF &
+         "* Panel Opcji:        [ O ] Otworz w grze   [ ESC ] Powrot",
+         (x => C_float (Pane_X + 18), y => C_float (Pane_Y + 40)),
+         C_float (F_Size), 1.0, (r => 220, g => 220, b => 220, a => 255));
 
       --  2. Przycisk Resetu
       Gabyx.Drivers.Raylib.Widgets.Draw_Button
         (X => Pane_X + Pane_W - 270, Y => Pane_Y + 250, W => 270, H => 40,
-         Label => "[ ↺ ] PRZYWROC DOMYSLNE",
+         Label => "[R] PRZYWROC DOMYSLNE",
          Font => Cur_Font, Font_Size => F_Size,
          Clicked => Reset_Btn);
 

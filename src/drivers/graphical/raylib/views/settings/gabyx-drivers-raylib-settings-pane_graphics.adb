@@ -12,27 +12,30 @@
 --  ============================================================================
 
 
-with Gabyx.Types;
+with Interfaces.C;
+with Ada.Characters.Latin_1;
 with Gabyx.Drivers.Raylib.Fonts;
 with Gabyx.Drivers.Raylib.Widgets;
 with Raylib;
 
 package body Gabyx.Drivers.Raylib.Settings.Pane_Graphics is
 
-   use Gabyx.Types;
-
-   FPS_Labels : constant array (1 .. 8) of String (1 .. 22) :=
-     [1 => "Auto (Sprzetowy V-Sync)",
-      2 => "30 FPS (Oszczedny)     ",
-      3 => "60 FPS (Standardowy)   ",
-      4 => "75 FPS                 ",
-      5 => "100 FPS (Ultra-Wide)   ",
-      6 => "120 FPS (ProMotion)    ",
-      7 => "144 FPS (Gaming)       ",
-      8 => "165 FPS (Maksymalny)   "];
+   use Interfaces.C;
 
    FPS_Values : constant array (1 .. 8) of Target_FPS_Type :=
      [0, 30, 60, 75, 100, 120, 144, 165];
+
+   function Get_FPS_Label (Index : Positive) return String is
+     (case Index is
+         when 1 => "Auto (Sprzetowy V-Sync)",
+         when 2 => "30 FPS (Oszczedny)",
+         when 3 => "60 FPS (Standardowy)",
+         when 4 => "75 FPS",
+         when 5 => "100 FPS (Ultra-Wide)",
+         when 6 => "120 FPS (ProMotion)",
+         when 7 => "144 FPS (Gaming)",
+         when 8 => "165 FPS (Maksymalny)",
+         when others => "Auto");
 
    procedure Render_Pane
      (Pane_X   : Integer;
@@ -65,13 +68,13 @@ package body Gabyx.Drivers.Raylib.Settings.Pane_Graphics is
       --  1. Sekcja Klatkarza (FPS)
       Gabyx.Drivers.Raylib.Widgets.Draw_Section_Box
         (X => Pane_X, Y => Pane_Y, W => Pane_W, H => 150,
-         Title => "KLATKARZ I ODPASEK SYNCHRONIZACJI",
+         Title => "KLATKARZ I SYNCHRONIZACJA (FPS)",
          Font => Cur_Font, Font_Size => F_Size);
 
       Gabyx.Drivers.Raylib.Widgets.Draw_Cycle_Selector
         (X => Pane_X + 15, Y => Pane_Y + 40, W => Pane_W - 30,
          Label => "Limit klatkarza (FPS):",
-         Value_Text => FPS_Labels (Active_Idx),
+         Value_Text => Get_FPS_Label (Active_Idx),
          Font => Cur_Font, Font_Size => F_Size,
          Prev_Clicked => Prev_P, Next_Clicked => Next_P);
 
@@ -101,7 +104,7 @@ package body Gabyx.Drivers.Raylib.Settings.Pane_Graphics is
          Changed => Mod_Switch);
       if Mod_Switch then Changed := True; end if;
 
-      --  2. Informacje o silniku renderowania
+      --  2. Informacje o akceleracji
       Gabyx.Drivers.Raylib.Widgets.Draw_Section_Box
         (X => Pane_X, Y => Pane_Y + 165, W => Pane_W, H => 140,
          Title => "STEROWNIK GRAFICZNY I AKCELERACJA",
@@ -109,11 +112,11 @@ package body Gabyx.Drivers.Raylib.Settings.Pane_Graphics is
 
       Standard.Raylib.DrawTextEx
         (Cur_Font,
-         "Silnik: Raylib 5.0 (Czysta statyczna konsolidacja libraylib.a)" & Ada.Characters.Latin_1.LF &
+         "Silnik: Raylib 5.0 (Statyczna konsolidacja libraylib.a)" & Ada.Characters.Latin_1.LF &
          "Backend: Metal (Apple Silicon GPU / OpenGL Core Profile)" & Ada.Characters.Latin_1.LF &
-         "Format bufora: 32-bit RGBA z podwojnym buforowaniem (Double Buffer)",
-         (x => Float (Pane_X + 18), y => Float (Pane_Y + 205)),
-         F_Size, 1.0, (r => 170, g => 170, b => 170, a => 255));
+         "Format bufora: 32-bit RGBA z podwojnym buforowaniem",
+         (x => C_float (Pane_X + 18), y => C_float (Pane_Y + 205)),
+         C_float (F_Size), 1.0, (r => 170, g => 170, b => 170, a => 255));
    end Render_Pane;
 
 end Gabyx.Drivers.Raylib.Settings.Pane_Graphics;
