@@ -18,22 +18,17 @@
 with Ada.Text_IO;
 with Ada.Integer_Text_IO;
 with Ada.Strings.Unbounded;
+with Gabyx.Logging;
+with Gabyx.Logging.Types;
 with Gabyx.Config.Window;
 with Gabyx.Config.Fonts;
 with Gabyx.Drivers.Raylib;
 
 package body Gabyx.Launcher is
 
-   --  ============================================================================
-   --  IMPLEMENTACJA INTERFEJSU PUBLICZNEGO
-   --  ============================================================================
+   use Gabyx.Logging.Types;
 
    procedure Run is
-      --  -------------------------------------------------------------------------
-      --  FLAGA SZYBKIEGO STARTU (DIRECT LAUNCH BYPASS)
-      --  True  -> Uruchamia natychmiast główny sterownik Raylib z pominięciem menu TUI
-      --  False -> Prezentuje terminalowe menu wyboru sterownika Omni-Engine
-      --  -------------------------------------------------------------------------
       Direct_Launch_Raylib : constant Boolean := True;
 
       App_Config : constant Gabyx.Config.Window.Window_Configuration :=
@@ -45,98 +40,55 @@ package body Gabyx.Launcher is
       Choice         : Integer := 0;
       Exit_Requested : Boolean := False;
    begin
-      --  Rysowanie nagłówka diagnostycznego ASCII
-      Ada.Text_IO.New_Line;
-      Ada.Text_IO.Put_Line ("==================================================");
-      Ada.Text_IO.Put_Line ("           GABYX OMNI-ENGINE STARTER             ");
-      Ada.Text_IO.Put_Line ("==================================================");
-      Ada.Text_IO.New_Line;
+      --  Rejestracja parametrów w loggerze
+      Gabyx.Logging.Log_Info
+        (Domain_Config,
+         "Konfiguracja okna: " & App_Config.Width'Image & "x" & App_Config.Height'Image &
+         " px | Preset: " & App_Config.Active_Preset'Image &
+         " | Tryb: " & App_Config.Display_Mode'Image);
 
-      --  Wypisanie parametrów okna pobranych z konfiguracji TOML
-      Ada.Text_IO.Put_Line
-        ("[CONFIG] Tytul okna : " & Ada.Strings.Unbounded.To_String (App_Config.Title));
-      Ada.Text_IO.Put_Line
-        ("[CONFIG] Szerokosc  : " & App_Config.Width'Image & " px");
-      Ada.Text_IO.Put_Line
-        ("[CONFIG] Wysokosc   : " & App_Config.Height'Image & " px");
-      Ada.Text_IO.Put_Line
-        ("[CONFIG] Preset     : " & App_Config.Active_Preset'Image);
-      Ada.Text_IO.Put_Line
-        ("[CONFIG] Tryb okna  : " & App_Config.Display_Mode'Image);
-      Ada.Text_IO.Put_Line
-        ("[CONFIG] V-Sync     : " & App_Config.VSync'Image);
-      Ada.Text_IO.Put_Line
-        ("[CONFIG] Target FPS : " & App_Config.Target_FPS'Image);
-      Ada.Text_IO.Put_Line
-        ("[CONFIG:FONTS]  Czcionka   : " & Ada.Strings.Unbounded.To_String (Font_Config.Family));
-      Ada.Text_IO.Put_Line
-        ("[CONFIG:FONTS]  Rozmiar UI : " & Font_Config.Size_Regular'Image & " px");
-      Ada.Text_IO.Put_Line
-        ("[CONFIG:FONTS]  Monospace  : " & Font_Config.Is_Monospace'Image);
+      Gabyx.Logging.Log_Info
+        (Domain_Config,
+         "Typografia: " & Ada.Strings.Unbounded.To_String (Font_Config.Family) &
+         " | Rozmiar UI: " & Font_Config.Size_Regular'Image & " px");
 
-      --  -------------------------------------------------------------------------
-      --  BEZPOŚREDNIE URUCHOMIENIE STEROWNIKA RAYLIB
-      --  -------------------------------------------------------------------------
       if Direct_Launch_Raylib then
-         Ada.Text_IO.New_Line;
-         Ada.Text_IO.Put_Line ("[INFO] Szybki start aktywny: Uruchamianie sterownika Raylib...");
+         Gabyx.Logging.Log_Info
+           (Domain_Engine,
+            "Szybki start aktywny: Uruchamianie glownego sterownika Raylib");
          Gabyx.Drivers.Raylib.Run (App_Config, Font_Config);
          return;
       end if;
 
-      --  -------------------------------------------------------------------------
-      --  GŁÓWNA PĘTLA INTERAKTYWNEGO MENU WYBORU (OMNI-ENGINE TUI)
-      --  -------------------------------------------------------------------------
+      --  Terminalowe menu wyboru (gdy Direct_Launch_Raylib = False)
       while not Exit_Requested loop
          Ada.Text_IO.New_Line;
          Ada.Text_IO.Put_Line ("--------------------------------------------------");
-         Ada.Text_IO.Put_Line ("Wybierz sterownik prezentacji:");
-         Ada.Text_IO.Put_Line ("   Tryby tekstowe (TUI):");
+         Ada.Text_IO.Put_Line ("Wybierz sterownik prezentacji (Omni-Engine):");
          Ada.Text_IO.Put_Line ("   1. ANSI Escape Codes (Czysty SPARK)");
          Ada.Text_IO.Put_Line ("   2. Ncurses TUI (Wydajnosc okienkowa)");
          Ada.Text_IO.Put_Line ("   3. Trendy_Terminal TUI (Deklaratywne)");
-         Ada.Text_IO.New_Line;
-         Ada.Text_IO.Put_Line ("   Tryby graficzne (GUI):");
          Ada.Text_IO.Put_Line ("   4. Raylib 2D Engine (Glowny)");
-         Ada.Text_IO.Put_Line ("   5. SDL2 Engine (Atrapa)");
-         Ada.Text_IO.Put_Line ("   6. GtkAda GUI (Atrapa)");
-         Ada.Text_IO.Put_Line ("   7. ASFML Engine (SFML - Atrapa)");
-         Ada.Text_IO.New_Line;
-         Ada.Text_IO.Put_Line ("   Zarzadzanie:");
          Ada.Text_IO.Put_Line ("   8. Wyjscie");
          Ada.Text_IO.Put_Line ("--------------------------------------------------");
          Ada.Text_IO.Put ("Wybor: ");
 
          begin
             Ada.Integer_Text_IO.Get (Choice);
-            Ada.Text_IO.Skip_Line; --  Czyszczenie bufora wejściowego
+            Ada.Text_IO.Skip_Line;
 
             case Choice is
-               when 1 =>
-                  Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika ANSI Escape Codes...");
-               when 2 =>
-                  Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika Ncurses TUI...");
-               when 3 =>
-                  Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika Trendy_Terminal TUI...");
                when 4 =>
-                  Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika Raylib 2D Engine...");
+                  Gabyx.Logging.Log_Info (Domain_Engine, "Wybrano sterownik Raylib 2D");
                   Gabyx.Drivers.Raylib.Run (App_Config, Font_Config);
-               when 5 =>
-                  Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika SDL2 Engine...");
-               when 6 =>
-                  Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika GtkAda GUI...");
-               when 7 =>
-                  Ada.Text_IO.Put_Line ("[INFO] Uruchamianie sterownika ASFML Engine (SFML)...");
                when 8 =>
                   Exit_Requested := True;
-                  Ada.Text_IO.Put_Line ("[INFO] Zamykanie programu. Do zobaczenia!");
                when others =>
-                  Ada.Text_IO.Put_Line ("[BLAD] Niepoprawny wybor! Wprowadz liczbe od 1 do 8.");
+                  Ada.Text_IO.Put_Line ("[BLAD] Wybierz poprawna opcje.");
             end case;
          exception
             when others =>
-               Ada.Text_IO.Put_Line ("[BLAD] Blad wejscia! Wprowadz poprawna liczbe.");
-               Ada.Text_IO.Skip_Line; --  Zapobieganie pętli nieskończonej
+               Ada.Text_IO.Skip_Line;
          end;
       end loop;
    end Run;
