@@ -1,0 +1,35 @@
+# ============================================================================
+# PROJECT:         Gabyx: Ada Roguelike
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:     Konfiguracja podsystemu logowania, poziomów wag oraz rotacji.
+#                  Definiuje formatowanie ANSI dla konsoli, zapis JSON dla plików
+#                  oraz politykę retencji i archiwizacji sesji diagnostycznych.
+# ----------------------------------------------------------------------------
+# PATH:            data/config/logger.toml
+# CREATED:         2026-08-28
+# ============================================================================
+
+# @formatter:off
+
+[console]
+# Minimalny poziom w konsoli: "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"
+min_level             = "INFO"
+colored_output        = true
+
+[file]
+# Minimalny poziom zapisywany do pliku logs/gabyx.json
+min_level             = "DEBUG"
+enabled               = true
+file_path             = "logs/gabyx.json"
+
+[retention]
+# Maksymalna liczba dni historii przed usunięciem (0 = brak limitu)
+max_archive_days      = 90
+# Maksymalny łączny rozmiar folderu logów w MB
+max_total_size_mb     = 50
+
+# @formatter:on
