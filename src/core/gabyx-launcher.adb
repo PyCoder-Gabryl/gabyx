@@ -19,14 +19,13 @@ with Ada.Text_IO;
 with Ada.Integer_Text_IO;
 with Ada.Strings.Unbounded;
 with Gabyx.Logging;
-with Gabyx.Logging.Types;
 with Gabyx.Config.Window;
 with Gabyx.Config.Fonts;
 with Gabyx.Drivers.Raylib;
 
 package body Gabyx.Launcher is
 
-   use Gabyx.Logging.Types;
+   use Gabyx.Logging;
 
    procedure Run is
       Direct_Launch_Raylib : constant Boolean := True;

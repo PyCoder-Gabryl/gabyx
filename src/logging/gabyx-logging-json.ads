@@ -13,14 +13,9 @@
 --  ============================================================================
 
 
-with Gabyx.Logging.Types;
-
 package Gabyx.Logging.JSON with
-   SPARK_Mode => On,
-   Pure
+   SPARK_Mode => On
 is
-
-   use Gabyx.Logging.Types;
 
    --  Formatuje wpis jako jednowierszowy obiekt JSON Lines (NDJSON)
    function Format_NDJSON

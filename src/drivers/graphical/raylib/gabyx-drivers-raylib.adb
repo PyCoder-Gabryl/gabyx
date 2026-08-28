@@ -16,7 +16,6 @@
 with Gabyx.Types;
 with Gabyx.State_Machine;
 with Gabyx.Logging;
-with Gabyx.Logging.Types;
 with Gabyx.Config.HUD;
 with Gabyx.Config.Game;
 with Gabyx.Config.Camera;
@@ -33,8 +32,7 @@ with Raylib;
 package body Gabyx.Drivers.Raylib is
 
    use Gabyx.Types;
-   use Gabyx.State_Machine;
-   use Gabyx.Logging.Types;
+   use Gabyx.Logging;
 
    procedure Run
      (Config   : Gabyx.Config.Window.Window_Configuration;

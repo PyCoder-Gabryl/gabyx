@@ -12,13 +12,8 @@
 --  ============================================================================
 
 
-with Gabyx.Logging.Types;
-
 package Gabyx.Logging.Console is
 
-   use Gabyx.Logging.Types;
-
-   --  Wypisuje sformatowany log do standardowego wyjścia konsoli
    procedure Print
      (Timestamp  : String;
       Level      : Log_Level;

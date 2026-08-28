@@ -13,17 +13,18 @@
 
 
 with Ada.Text_IO;
+with Ada.Characters.Latin_1;
 
 package body Gabyx.Logging.Console is
 
-   --  Kody kolorów ANSI
-   Code_Reset    : constant String := ASCII.ESC & "[0m";
-   Code_Trace    : constant String := ASCII.ESC & "[90m";   -- Szary
-   Code_Debug    : constant String := ASCII.ESC & "[36m";   -- Cyjan
-   Code_Info     : constant String := ASCII.ESC & "[32m";   -- Zielony
-   Code_Warn     : constant String := ASCII.ESC & "[33m";   -- Żółty
-   Code_Error    : constant String := ASCII.ESC & "[31m";   -- Czerwony
-   Code_Critical : constant String := ASCII.ESC & "[1;35m"; -- Jaskrawa magenta
+   --  Kody kolorów ANSI (zgodne z No_Obsolescent_Features)
+   Code_Reset    : constant String := Ada.Characters.Latin_1.ESC & "[0m";
+   Code_Trace    : constant String := Ada.Characters.Latin_1.ESC & "[90m";   -- Szary
+   Code_Debug    : constant String := Ada.Characters.Latin_1.ESC & "[36m";   -- Cyjan
+   Code_Info     : constant String := Ada.Characters.Latin_1.ESC & "[32m";   -- Zielony
+   Code_Warn     : constant String := Ada.Characters.Latin_1.ESC & "[33m";   -- Żółty
+   Code_Error    : constant String := Ada.Characters.Latin_1.ESC & "[31m";   -- Czerwony
+   Code_Critical : constant String := Ada.Characters.Latin_1.ESC & "[1;35m"; -- Jaskrawa magenta
 
    function Get_Color_Code (Level : Log_Level) return String is
      (case Level is
