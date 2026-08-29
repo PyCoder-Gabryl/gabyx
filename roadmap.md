@@ -229,3 +229,66 @@ gabyx/
 • Gabyx.Game.Map (macierz kafelków, generator komnat z filarami, Is_Walkable)
 • Gabyx.Game.Player (logiczny ruch turowy WSAD w SPARK)
 • Renderowanie lochu i postaci @ /  z płynną interpolacją LERP (120 ms)
+
+---
+
+# ROADMAP & SPECYFIKACJA ARCHITEKTONICZNA: PŁASZCZYZNA 2
+## Żyjący Świat Gry: Datalog, Skrypty (Lua/Ink), Pamięć Tagowana i Generator LLM
+
+---
+
+### 1. WIZJA I CELE ARCHITEKTURY NARRACYJNEJ
+Celem Płaszczyzny 2 jest stworzenie w pełni reaktywnego, ewoluującego świata RPG / Roguelike, w którym:
+1. **Każde działanie gracza wywołuje trwałe skutki** w relacjach frakcji, wiedzy NPC i stanie lokacji.
+2. **Lokalny model LLM (np. Ollama / Llama.cpp)** generuje unikalne wydarzenia, potwory, plotki i dialogi w tle (asynchronicznie), bez zatrzymywania pętli renderowania gry (60 FPS).
+3. **Deterministyczny silnik Datalog (w 100% SPARK)** pilnuje twardych reguł przyczynowo-skutkowych i uniemożliwia modelowi LLM naruszenie logiki świata.
+4. **Wzorzec Archetypów Zastępczych (Fallback Archetype Pattern)** gwarantuje, że nawet przy uszkodzonym JSON-ie z modelu LLM silnik gry natychmiast uzupełnia brakujące dane ze sprawdzonych wzorców i kontynuuje działanie bez awarii.
+
+---
+
+### 2. ARCHITEKTURA MODULARNA PŁASZCZYZNY 2
+
+------
+
+# DOKUMENT 2: PŁASZCZYZNA 1 – WARSTWA INTERFEJSU I SYSTEM LOKALIZACJI
+
+```markdown
+# ROADMAP & SPECYFIKACJA IMPLEMENTACJI: PŁASZCZYZNA 1
+## System Lokalizacji (I18N), Format Mozilla Fluent (.ftl) i Procesor Tekstu
+
+---
+
+### 1. WIZJA I ZASADY ARCHITEKTONICZNE INTERFEJSU
+1. **Niezawodność i Bezpieczeństwo SPARK:** Interfejs nie może ulec awarii z powodu brakującego pliku językowego, braku klucza czy błędnego znaku w tłumaczeniu.
+2. **Dwupoziomowy Model Komunikatów:**
+   - **Poziom 1 (Kod Źródłowy Ady):** Każdy komunikat UI posiada zdefiniowany w kodzie identyfikator oraz bazowy tekst w języku polskim w formacie ASCII (bez znaków diakrytycznych, np. `"1. Nowa Gra"`, `"Zapisz stan"`). W komentarzach stosujemy pełny język polski z polskimi znakami.
+   - **Poziom 2 (Pliki Słowników `.ftl` w `data/i18n/`):** Pliki UTF-8 zawierające pełne tłumaczenia, polskie znaki diakrytyczne, symbole Unicode, ikony Nerd Fonts oraz tagi kolorów.
+3. **Niezależność od Bibliotek Zewnętrznych C:** Własny, lekki parser podzbioru formatu Mozilla Fluent napisany w 100% w SPARK.
+
+---
+
+### 2. FORMATY I STRUKTURA PLIKÓW SŁOWNIKÓW (.ftl)
+
+Słowniki spoczywają w katalogu `data/i18n/<kod_jezyka>/gui.ftl`.
+
+```ftl
+# data/i18n/pl/gui.ftl
+# ==============================================================================
+# SŁOWNIK INTERFEJSU UŻYTKOWNIKA (JĘZYK POLSKI)
+# ==============================================================================
+
+# Główne Menu Gry
+ui-menu-new_game    = 1. Nowa Gra ⚔️
+ui-menu-continue    = 2. Kontynuuj 💾
+ui-menu-options     = 3. Ustawienia ⚙️
+ui-menu-exit        = 4. Wyjście z Gry 🚪
+
+# Ekrany Ustawień
+ui-opt-language     = Język interfejsu
+ui-opt-volume       = Głośność efektów: [gold]{$volume}%[/]
+ui-opt-apply        = Zastosuj zmiany
+
+# Komunikaty Systemowe i Dziennik
+ui-sys-saving       = [cyan]Zapisywanie stanu świata...[/]
+ui-sys-save_success = Stan gry został pomyślnie zapisany w profilu [gold]{$profile}[/]. \uE0A0
+ui-sys-err_nofile   = [crimson]BŁĄD:[/] Nie odnaleziono pliku konfiguracyjnego: {$filename}

@@ -102,9 +102,4 @@ $RECYCLE.BIN/
 *.swo
 *.orig
 
-
-# ----------------
-/obj/
-/bin/
-/alire/
-/config/
+logs/

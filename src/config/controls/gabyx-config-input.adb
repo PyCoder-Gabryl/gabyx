@@ -13,15 +13,16 @@
 --  ============================================================================
 
 
-with Ada.Text_IO;
 with TOML;
 with TOML.File_IO;
+with Gabyx.Logging;
 with Gabyx.Config.Helpers;
 
 package body Gabyx.Config.Input is
 
    use type TOML.Any_Value_Kind;
    use Gabyx.Config.Helpers;
+   use Gabyx.Logging;
 
    function Get_Default_Configuration return Input_Configuration is
       Config : Input_Configuration;
@@ -36,7 +37,9 @@ package body Gabyx.Config.Input is
       Result : constant TOML.Read_Result := TOML.File_IO.Load_File (File_Path);
    begin
       if not Result.Success then
-         Ada.Text_IO.Put_Line ("[CONFIG] Brak pliku " & File_Path & " - uzyto konfiguracji wejscia domyslnej.");
+         Gabyx.Logging.Log_Warn
+           (Domain_Config,
+            "Brak lub blad pliku " & File_Path & " - uzyto konfiguracji wejscia domyslnej.");
          return Config;
       end if;
 

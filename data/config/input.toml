@@ -19,18 +19,18 @@
 # ============================================================================
 # SŁOWNIK SYMBOLI I KLAWISZY DLA MACOS / APPLE SILICON:
 # ----------------------------------------------------------------------------
-#  • ⌥ Option / Alt    -> W pliku uzywamy prefiksu: "ALT+"   (np. "ALT+1")
-#  • ⌘ Command / Super -> W pliku uzywamy prefiksu: "CMD+"   (np. "CMD+Q")
-#  • ⌃ Control         -> W pliku uzywamy prefiksu: "CTRL+"  (np. "CTRL+S")
-#  • ⇧ Shift           -> W pliku uzywamy prefiksu: "SHIFT+" (np. "SHIFT+W")
-#  • ⎋ Escape          -> "ESCAPE" lub "ESC"
-#  • ␣ Spacja          -> "SPACE"
-#  • ⇥ Tab             -> "TAB"
-#  • ⏎ Return / Enter  -> "ENTER"
+#  Option / Alt    -> W pliku uzywamy prefiksu: "ALT+"   (np. "ALT+1")
+#  Command / Super -> W pliku uzywamy prefiksu: "CMD+"   (np. "CMD+Q")
+#  Control         -> W pliku uzywamy prefiksu: "CTRL+"  (np. "CTRL+S")
+#  Shift           -> W pliku uzywamy prefiksu: "SHIFT+" (np. "SHIFT+W")
+#  Escape          -> "ESCAPE" lub "ESC"
+#  Spacja          -> "SPACE"
+#  Tab             -> "TAB"
+#  Return / Enter  -> "ENTER"
 # ============================================================================
 
 [system]
-# Wyjscie z gry (⎋ Escape)
+# Wyjscie z gry (Escape)
 quit                  = "ESCAPE"
 # Przelaczanie obramowania okna (Windowed <-> Borderless)
 toggle_borderless     = "B"
@@ -43,7 +43,7 @@ toggle_bottom_view    = "D"
 # Zmiana aktywnego kwartetu czcionek (Intel One Mono <-> JetBrains Mono)
 toggle_font_family    = "F"
 
-# Skalowanie HUD-u z klawiszem Option (⌥ Option + 0..3)
+# Skalowanie HUD-u z klawiszem Option (Option + 0..3)
 tier_auto             = "ALT+0"
 tier_compact          = "ALT+1"
 tier_standard         = "ALT+2"

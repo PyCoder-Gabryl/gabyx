@@ -61,6 +61,10 @@ project Gabyx is
       "src/config/**",
       "src/ui/**",
       "src/logging/**",
+      "src/i18n/**",
+      "src/text/**",
+      "src/logic/**",
+      "src/game/**",
       "src/drivers/abstract/**"
    );
 
