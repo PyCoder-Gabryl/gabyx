@@ -32,6 +32,51 @@ package body Gabyx.Drivers.Raylib.Widgets.Selectors is
        b => unsigned_char (C.B),
        a => unsigned_char (C.A)));
 
+   --  Pojedynczy atomowy przycisk opcji w grupie radiowej (DRY)         -- [NOWE]
+   procedure Draw_Radio_Item
+     (BX, BY, Btn_W, Btn_H : Integer;
+      Index                : Positive;
+      Label                : String;
+      Selected             : in out Positive;
+      Font                 : Standard.Raylib.Font;
+      Font_Size            : Float;
+      Changed              : in out Boolean)
+   is
+      Mouse_X   : constant Integer := Integer (Standard.Raylib.GetMouseX);
+      Mouse_Y   : constant Integer := Integer (Standard.Raylib.GetMouseY);
+      LMB_Press : constant Boolean :=
+        Boolean (Standard.Raylib.IsMouseButtonPressed (Standard.Raylib.MOUSE_BUTTON_LEFT));
+
+      Is_Hov    : constant Boolean :=
+        (Mouse_X >= BX and then Mouse_X <= BX + Btn_W and then
+         Mouse_Y >= BY and then Mouse_Y <= BY + Btn_H);
+      Is_Sel    : constant Boolean := (Selected = Index);
+
+      Gold_Col  : constant Standard.Raylib.Color := To_Raylib_Color (Gabyx.UI.Theme.Color_Gold);
+      Bord_Def  : constant Standard.Raylib.Color := To_Raylib_Color (Gabyx.UI.Theme.Color_Border);
+      Txt_Def   : constant Standard.Raylib.Color := To_Raylib_Color (Gabyx.UI.Theme.Color_Text_White);
+      Bg_Def    : constant Standard.Raylib.Color := To_Raylib_Color (Gabyx.UI.Theme.Color_Pane_Right);
+
+      Bg_Col    : constant Standard.Raylib.Color :=
+        (if Is_Sel then (r => 38, g => 50, b => 65, a => 255)
+         elsif Is_Hov then To_Raylib_Color (Gabyx.UI.Theme.Color_Header_Dark)
+         else Bg_Def);
+      Bord_Col  : constant Standard.Raylib.Color := (if Is_Sel then Gold_Col else Bord_Def);
+      Txt_Col   : constant Standard.Raylib.Color := (if Is_Sel then Gold_Col else Txt_Def);
+      Pref      : constant String := (if Is_Sel then "* " else "  ");
+   begin
+      if Is_Hov and then LMB_Press and then not Is_Sel then
+         Selected := Index;
+         Changed  := True;
+      end if;
+
+      Standard.Raylib.DrawRectangle (int (BX), int (BY), int (Btn_W), int (Btn_H), Bg_Col);
+      Standard.Raylib.DrawRectangleLines (int (BX), int (BY), int (Btn_W), int (Btn_H), Bord_Col);
+      Standard.Raylib.DrawTextEx
+        (Font, Pref & Label, (x => C_float (BX + 8), y => C_float (BY + 7)),
+         C_float (Font_Size), 1.0, Txt_Col);
+   end Draw_Radio_Item;
+
    --  ============================================================================
    --  PUBLICZNY INTERFEJS
    --  ============================================================================
@@ -145,64 +190,6 @@ package body Gabyx.Drivers.Raylib.Widgets.Selectors is
          C_float (Font_Size), 1.0, (if Hov_Next then Gold_Col else Text_Col));
    end Draw_Cycle_Selector;
 
-   procedure Draw_Radio_Group
-     (X, Y, W      : Integer;
-      Labels       : String_Array;
-      Selected     : in out Positive;
-      Font         : Standard.Raylib.Font;
-      Font_Size    : Float;
-      Changed      : out Boolean)
-   is
-      Mouse_X   : constant Integer := Integer (Standard.Raylib.GetMouseX);
-      Mouse_Y   : constant Integer := Integer (Standard.Raylib.GetMouseY);
-      LMB_Press : constant Boolean :=
-        Boolean (Standard.Raylib.IsMouseButtonPressed (Standard.Raylib.MOUSE_BUTTON_LEFT));
-
-      Count     : constant Positive := Labels'Length;
-      Spacing   : constant Integer := 10;
-      Total_Gap : constant Integer := (Count - 1) * Spacing;
-      Btn_W     : constant Integer := (W - Total_Gap) / Count;
-      Btn_H     : constant Integer := 32;
-
-      Gold_Col  : constant Standard.Raylib.Color := To_Raylib_Color (Gabyx.UI.Theme.Color_Gold);
-      Bord_Def  : constant Standard.Raylib.Color := To_Raylib_Color (Gabyx.UI.Theme.Color_Border);
-      Txt_Def   : constant Standard.Raylib.Color := To_Raylib_Color (Gabyx.UI.Theme.Color_Text_White);
-      Bg_Def    : constant Standard.Raylib.Color := To_Raylib_Color (Gabyx.UI.Theme.Color_Pane_Right);
-   begin
-      Changed := False;
-
-      for Idx in Labels'Range loop
-         declare
-            Slot_Num : constant Integer := Idx - Labels'First;
-            BX       : constant Integer := X + (Slot_Num * (Btn_W + Spacing));
-            BY       : constant Integer := Y;
-            Is_Hov   : constant Boolean :=
-              (Mouse_X >= BX and then Mouse_X <= BX + Btn_W and then
-               Mouse_Y >= BY and then Mouse_Y <= BY + Btn_H);
-            Is_Sel   : constant Boolean := (Selected = Slot_Num + 1);
-
-            Bg_Col   : constant Standard.Raylib.Color :=
-              (if Is_Sel then (r => 38, g => 50, b => 65, a => 255)
-               elsif Is_Hov then To_Raylib_Color (Gabyx.UI.Theme.Color_Header_Dark)
-               else Bg_Def);
-            Bord_Col : constant Standard.Raylib.Color := (if Is_Sel then Gold_Col else Bord_Def);
-            Txt_Col  : constant Standard.Raylib.Color := (if Is_Sel then Gold_Col else Txt_Def);
-            Pref     : constant String := (if Is_Sel then "* " else "  ");
-         begin
-            if Is_Hov and then LMB_Press and then not Is_Sel then
-               Selected := Slot_Num + 1;
-               Changed  := True;
-            end if;
-
-            Standard.Raylib.DrawRectangle (int (BX), int (BY), int (Btn_W), int (Btn_H), Bg_Col);
-            Standard.Raylib.DrawRectangleLines (int (BX), int (BY), int (Btn_W), int (Btn_H), Bord_Col);
-            Standard.Raylib.DrawTextEx
-              (Font, Pref & Labels (Idx).all, (x => C_float (BX + 8), y => C_float (BY + 7)),
-               C_float (Font_Size), 1.0, Txt_Col);
-         end;
-      end loop;
-   end Draw_Radio_Group;
-
    procedure Draw_Radio_3
      (X, Y, W          : Integer;
       Opt1, Opt2, Opt3 : String;
@@ -211,12 +198,17 @@ package body Gabyx.Drivers.Raylib.Widgets.Selectors is
       Font_Size        : Float;
       Changed          : out Boolean)
    is
-      L1 : aliased constant String := Opt1;
-      L2 : aliased constant String := Opt2;
-      L3 : aliased constant String := Opt3;
-      Arr : constant String_Array := (1 => L1'Access, 2 => L2'Access, 3 => L3'Access);
+      Btn_W   : constant Integer := (W - 20) / 3;                        -- [NOWE]
+      Btn_H   : constant Integer := 32;                                  -- [NOWE]
+      Spacing : constant Integer := 10;                                  -- [NOWE]
    begin
-      Draw_Radio_Group (X, Y, W, Arr, Selected, Font, Font_Size, Changed);
+      Changed := False;                                                  -- [NOWE]
+      Draw_Radio_Item                                                    -- [NOWE]
+        (X + 0 * (Btn_W + Spacing), Y, Btn_W, Btn_H, 1, Opt1, Selected, Font, Font_Size, Changed);
+      Draw_Radio_Item                                                    -- [NOWE]
+        (X + 1 * (Btn_W + Spacing), Y, Btn_W, Btn_H, 2, Opt2, Selected, Font, Font_Size, Changed);
+      Draw_Radio_Item                                                    -- [NOWE]
+        (X + 2 * (Btn_W + Spacing), Y, Btn_W, Btn_H, 3, Opt3, Selected, Font, Font_Size, Changed);
    end Draw_Radio_3;
 
    procedure Draw_Radio_4
@@ -227,13 +219,19 @@ package body Gabyx.Drivers.Raylib.Widgets.Selectors is
       Font_Size              : Float;
       Changed                : out Boolean)
    is
-      L1 : aliased constant String := Opt1;
-      L2 : aliased constant String := Opt2;
-      L3 : aliased constant String := Opt3;
-      L4 : aliased constant String := Opt4;
-      Arr : constant String_Array := (1 => L1'Access, 2 => L2'Access, 3 => L3'Access, 4 => L4'Access);
+      Btn_W   : constant Integer := (W - 30) / 4;                        -- [NOWE]
+      Btn_H   : constant Integer := 32;                                  -- [NOWE]
+      Spacing : constant Integer := 10;                                  -- [NOWE]
    begin
-      Draw_Radio_Group (X, Y, W, Arr, Selected, Font, Font_Size, Changed);
+      Changed := False;                                                  -- [NOWE]
+      Draw_Radio_Item                                                    -- [NOWE]
+        (X + 0 * (Btn_W + Spacing), Y, Btn_W, Btn_H, 1, Opt1, Selected, Font, Font_Size, Changed);
+      Draw_Radio_Item                                                    -- [NOWE]
+        (X + 1 * (Btn_W + Spacing), Y, Btn_W, Btn_H, 2, Opt2, Selected, Font, Font_Size, Changed);
+      Draw_Radio_Item                                                    -- [NOWE]
+        (X + 2 * (Btn_W + Spacing), Y, Btn_W, Btn_H, 3, Opt3, Selected, Font, Font_Size, Changed);
+      Draw_Radio_Item                                                    -- [NOWE]
+        (X + 3 * (Btn_W + Spacing), Y, Btn_W, Btn_H, 4, Opt4, Selected, Font, Font_Size, Changed);
    end Draw_Radio_4;
 
 end Gabyx.Drivers.Raylib.Widgets.Selectors;

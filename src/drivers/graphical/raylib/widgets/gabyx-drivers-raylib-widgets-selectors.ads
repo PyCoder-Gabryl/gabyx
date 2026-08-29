@@ -19,12 +19,6 @@ with Raylib;
 package Gabyx.Drivers.Raylib.Widgets.Selectors is
 
    --  ============================================================================
-   --  TYPY POMOCNICZE
-   --  ============================================================================
-
-   type String_Array is array (Positive range <>) of access constant String;
-
-   --  ============================================================================
    --  PUBLICZNY INTERFEJS KONTROLEK WYBORU
    --  ============================================================================
 
@@ -47,16 +41,7 @@ package Gabyx.Drivers.Raylib.Widgets.Selectors is
       Prev_Clicked  : out Boolean;
       Next_Clicked  : out Boolean);
 
-   --  Zunifikowany, generyczny renderer dowolnej grupy przycisków radiowych
-   procedure Draw_Radio_Group
-     (X, Y, W      : Integer;
-      Labels       : String_Array;
-      Selected     : in out Positive;
-      Font         : Standard.Raylib.Font;
-      Font_Size    : Float;
-      Changed      : out Boolean);
-
-   --  Wygodne wrappery zachowujące kompatybilność wsteczną
+   --  Rysuje grupę 3 przycisków radiowych w jednym rzędzie
    procedure Draw_Radio_3
      (X, Y, W          : Integer;
       Opt1, Opt2, Opt3 : String;
@@ -65,6 +50,7 @@ package Gabyx.Drivers.Raylib.Widgets.Selectors is
       Font_Size        : Float;
       Changed          : out Boolean);
 
+   --  Rysuje grupę 4 przycisków radiowych w jednym rzędzie
    procedure Draw_Radio_4
      (X, Y, W                : Integer;
       Opt1, Opt2, Opt3, Opt4 : String;

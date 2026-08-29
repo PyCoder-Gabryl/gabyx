@@ -103,3 +103,4 @@ $RECYCLE.BIN/
 *.orig
 
 logs/
+context.txt
